@@ -5,6 +5,9 @@ import java.util.Hashtable;
 import org.opencv.videoio.VideoCapture;
 
 public class VideoInput extends VideoCapture{
+	
+	// feeds from:
+	// http://chart.maryland.gov/trafficcameras/index.php#
 
 	private static String[] videoUrls = {
 		"http://170.93.143.139:1935/rtplive/cf013c5801f700d700437a45351f0214/playlist.m3u8",
