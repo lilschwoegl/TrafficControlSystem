@@ -33,6 +33,8 @@
             <Slider fx:id="blurSlide" blockIncrement="1.0" minorTickCount="1" value="21.0" />
             <Label text="Dilation" />
             <Slider fx:id="dilationSlide" blockIncrement="1.0" minorTickCount="1" value="12.0" />
+            <Label text="Erode" />
+            <Slider fx:id="erodeSlide" blockIncrement="1.0" minorTickCount="1" value="12.0" />
             <Label text="Diff Thresh" />
             <Slider fx:id="threshSlide" blockIncrement="1.0" minorTickCount="1" value="25.0" />
             <Label text="Min Contour Area" />

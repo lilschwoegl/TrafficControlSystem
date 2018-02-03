@@ -39,12 +39,12 @@ public class SystemUIController {
 	@FXML
 	private ComboBox<String> feedListCbx;
 	@FXML
-	private Slider blurSlide, dilationSlide, threshSlide, minCSlide;
+	private Slider blurSlide, dilationSlide, erodeSlide, threshSlide, minCSlide;
 	@FXML
 	private Label slideProp;
 	private ObjectProperty<String> slideValuesProp;
 	
-	private double blurValue, dilationValue, threshValue, minCValue;
+	private double blurValue, dilationValue, erodeValue, threshValue, minCValue;
 	
 	private VideoInput videoFeed = new VideoInput();
 	
@@ -73,6 +73,7 @@ public class SystemUIController {
 		blurValue = this.blurSlide.getValue();
 		threshValue = this.threshSlide.getValue();
 		dilationValue = this.dilationSlide.getValue();
+		erodeValue = this.erodeSlide.getValue();
 		minCValue = this.minCSlide.getValue();
 		
 		// show the current selected HSV range
@@ -176,13 +177,17 @@ public class SystemUIController {
 		Mat grayFrame = new Mat();
 		Mat curFrame = new Mat();
 		
+		// used this https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
+		
 		frame.copyTo(curFrame);
 		
 		// get slider values
-		blurValue = this.blurSlide.getValue();
-		threshValue = this.threshSlide.getValue();
-		dilationValue = this.dilationSlide.getValue();
-		minCValue = this.minCSlide.getValue();
+		blurValue = this.blurSlide.getValue();			// 21
+		threshValue = this.threshSlide.getValue();		// 25.88
+		dilationValue = this.dilationSlide.getValue();	// 14.65
+		erodeValue = this.erodeSlide.getValue();
+		minCValue = this.minCSlide.getValue();			// 301.5
+		
 		
 		// show the current selected HSV range
 		String valuesToPrint = 
@@ -216,8 +221,17 @@ public class SystemUIController {
 		
 		Imgproc.threshold(output, output, threshValue, 255, Imgproc.THRESH_BINARY);
 		
+		
 		Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(dilationValue, dilationValue));
+		Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(erodeValue, erodeValue));
+		
+		
+		Imgproc.erode(output, output, erodeElement);
+		Imgproc.erode(output, output, erodeElement);
 		Imgproc.dilate(output, output, dilateElement);
+		Imgproc.dilate(output, output, dilateElement);
+		
+		
 		
 		updateImageView(imgv2, Utils.mat2Image(output));
 		
@@ -260,6 +274,11 @@ public class SystemUIController {
 		
 		return curFrame;
 			
+	}
+	
+	private void recognizeVehicle()
+	{
+		
 	}
 	
 	/**
