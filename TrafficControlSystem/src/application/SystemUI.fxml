@@ -23,6 +23,7 @@
          <children>
             <ImageView fx:id="imgv1" fitHeight="150.0" fitWidth="262.0" pickOnBounds="true" preserveRatio="true" />
             <ImageView fx:id="imgv2" fitHeight="150.0" fitWidth="263.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="subMatImg" fitHeight="150.0" fitWidth="263.0" pickOnBounds="true" preserveRatio="true" />
          </children>
       </VBox>
    </right>

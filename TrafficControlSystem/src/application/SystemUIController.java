@@ -14,6 +14,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.video.BackgroundSubtractor;
 import org.opencv.video.Video;
 import org.opencv.videoio.VideoCapture;
@@ -35,7 +36,7 @@ public class SystemUIController {
 	@FXML
 	private ImageView imageOutputImgvw;
 	@FXML
-	private ImageView imgv1, imgv2;
+	private ImageView imgv1, imgv2, subMatImg;
 	@FXML
 	private ComboBox<String> feedListCbx;
 	@FXML
@@ -49,6 +50,8 @@ public class SystemUIController {
 	private VideoInput videoFeed = new VideoInput();
 	
 	private ScheduledExecutorService timer;
+	
+	CascadeClassifier detector = new CascadeClassifier();
 	
 	// this will initialize and update every 500 msec
 	private Mat backgroundFrame;
@@ -64,25 +67,14 @@ public class SystemUIController {
 		// load the feed names
 		feedListCbx.getItems().addAll(VideoInput.feedNames);
 		
+		
+		
 		//backSub = Video.createBackgroundSubtractorMOG2(300, 200, false);
 		
 		slideValuesProp = new SimpleObjectProperty<>();
 		this.slideProp.textProperty().bind(slideValuesProp);
 		
-		// get slider values
-		blurValue = this.blurSlide.getValue();
-		threshValue = this.threshSlide.getValue();
-		dilationValue = this.dilationSlide.getValue();
-		erodeValue = this.erodeSlide.getValue();
-		minCValue = this.minCSlide.getValue();
-		
-		// show the current selected HSV range
-		String valuesToPrint = 
-				"Blur:     " + blurValue + "\n" + 
-				"Thresh:   " + threshValue + "\n" + 
-				"Dilation: " + dilationValue + "\n" + 
-				"C Value:  " + minCValue;
-		Utils.onFXThread(this.slideValuesProp, valuesToPrint);
+		Utils.onFXThread(this.slideValuesProp, readUIControls());
 	}
 	
 	@FXML
@@ -181,21 +173,8 @@ public class SystemUIController {
 		
 		frame.copyTo(curFrame);
 		
-		// get slider values
-		blurValue = this.blurSlide.getValue();			// 21
-		threshValue = this.threshSlide.getValue();		// 25.88
-		dilationValue = this.dilationSlide.getValue();	// 14.65
-		erodeValue = this.erodeSlide.getValue();
-		minCValue = this.minCSlide.getValue();			// 301.5
 		
-		
-		// show the current selected HSV range
-		String valuesToPrint = 
-				"Blur:     " + blurValue + "\n" + 
-				"Thresh:   " + threshValue + "\n" + 
-				"Dilation: " + dilationValue + "\n" + 
-				"C Value:  " + minCValue;
-		Utils.onFXThread(this.slideValuesProp, valuesToPrint);
+		Utils.onFXThread(this.slideValuesProp, readUIControls());
 
 		// convert colors and remove blur
 		//Imgproc.resize(frame, frame, new Size(500,500));
@@ -251,9 +230,6 @@ public class SystemUIController {
 			for (int idx = 0; idx >= 0; idx = (int) hierarchy.get(0, idx)[0])
 			{
 
-				//if (Imgproc.contourArea(hierarchy) < 2)
-				//	continue;
-				
 				if (Imgproc.contourArea(contours.get(idx)) < minCValue)
 				{
 					System.out.println("Skipping one...");
@@ -267,8 +243,13 @@ public class SystemUIController {
 						new Point(r.x + r.width, r.y + r.height),
 						new Scalar(0, 250, 0));
 				
-				//Imgproc.drawContours(curFrame, contours, idx, new Scalar(0, 250, 0), 
-				//		2, 8, hierarchy, 0, new Point());
+				if (idx == 0)
+				{
+					Mat subMat = curFrame.submat(r);
+					Imgproc.resize(subMat, subMat, new Size(100,100));
+					
+					recognizeVehicle(subMat);
+				}
 			}
 		}
 		
@@ -276,10 +257,35 @@ public class SystemUIController {
 			
 	}
 	
-	private void recognizeVehicle()
+	private void recognizeVehicle(Mat frame)
 	{
-		
+		// cascade classification
+		// https://docs.opencv.org/3.3.0/dc/d88/tutorial_traincascade.html
+		// http://coding-robin.de/2013/07/22/train-your-own-opencv-haar-classifier.html
+		Mat newMat = new Mat();
+		Imgproc.resize(frame, newMat, new Size(100,100));
+		updateImageView(subMatImg, Utils.mat2Image(frame));
 	}
+	
+	private String readUIControls()
+	{
+		// get slider values
+		blurValue = this.blurSlide.getValue();
+		threshValue = this.threshSlide.getValue();
+		dilationValue = this.dilationSlide.getValue();
+		erodeValue = this.erodeSlide.getValue();
+		minCValue = this.minCSlide.getValue();
+		
+		// show the current selected HSV range
+		String valuesToPrint = 
+				"Blur:     " + blurValue + "\n" + 
+				"Thresh:   " + threshValue + "\n" + 
+				"Dilation: " + dilationValue + "\n" + 
+				"C Value:  " + minCValue;
+		
+		return valuesToPrint;
+	}
+	
 	
 	/**
 	 * Set typical {@link ImageView} properties: a fixed width and the
