@@ -1,20 +1,26 @@
 package application;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.imageio.ImageIO;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.objdetect.Objdetect;
 import org.opencv.video.BackgroundSubtractor;
 import org.opencv.video.Video;
 import org.opencv.videoio.VideoCapture;
@@ -23,6 +29,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -43,6 +50,14 @@ public class SystemUIController {
 	private Slider blurSlide, dilationSlide, erodeSlide, threshSlide, minCSlide;
 	@FXML
 	private Label slideProp;
+	@FXML
+	private CheckBox saveImagesCbx;
+	
+	private String savedImagesPath = "images/";
+	private int imgCounter = 0;
+	
+	private String carsCascadeName = "haar/cars.xml";
+	
 	private ObjectProperty<String> slideValuesProp;
 	
 	private double blurValue, dilationValue, erodeValue, threshValue, minCValue;
@@ -67,7 +82,7 @@ public class SystemUIController {
 		// load the feed names
 		feedListCbx.getItems().addAll(VideoInput.feedNames);
 		
-		
+		detector.load(carsCascadeName);
 		
 		//backSub = Video.createBackgroundSubtractorMOG2(300, 200, false);
 		
@@ -193,6 +208,8 @@ public class SystemUIController {
 		}
 		
 		Mat output = new Mat();
+
+
 		Core.absdiff(backgroundFrame, grayFrame, output);
 		
 		//Mat output = new Mat();
@@ -238,9 +255,29 @@ public class SystemUIController {
 				
 				Rect r = Imgproc.boundingRect(contours.get(idx));
 				
+				try
+				{
+					// check cars classifier
+					MatOfRect cars = new MatOfRect();
+					
+					detector.detectMultiScale(
+							curFrame.submat(new Rect(r.x - 50, r.y - 50, r.width + 50, r.height + 50))
+							, cars, 1.1, 2, 0 | Objdetect.CASCADE_SCALE_IMAGE,
+							new Size(20, 20), new Size());
+					
+					Rect[] carsArray = cars.toArray();
+	
+					//if (carsArray.length <= 0)
+						//continue;
+				}
+				catch (Exception e)
+				{
+					//continue;
+				}
+				
 				Imgproc.rectangle(curFrame, 
-						new Point(r.x, r.y),
-						new Point(r.x + r.width, r.y + r.height),
+						new Point(r.x-2, r.y-2),
+						new Point(r.x + r.width + 2, r.y + r.height + 2),
 						new Scalar(0, 250, 0));
 				
 				if (idx == 0)
@@ -252,6 +289,7 @@ public class SystemUIController {
 				}
 			}
 		}
+		
 		
 		return curFrame;
 			
@@ -265,22 +303,35 @@ public class SystemUIController {
 		Mat newMat = new Mat();
 		Imgproc.resize(frame, newMat, new Size(100,100));
 		updateImageView(subMatImg, Utils.mat2Image(frame));
+		
+		if (saveImagesCbx.isSelected())
+		{
+			try {
+				ImageIO.write(Utils.matToBufferedImage(frame), "png", 
+						 new File(savedImagesPath + "cars_" + imgCounter + ".png"));
+				imgCounter++;
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	private String readUIControls()
 	{
 		// get slider values
-		blurValue = this.blurSlide.getValue();
-		threshValue = this.threshSlide.getValue();
-		dilationValue = this.dilationSlide.getValue();
-		erodeValue = this.erodeSlide.getValue();
-		minCValue = this.minCSlide.getValue();
+		blurValue = this.blurSlide.getValue(); 			// 21
+		threshValue = this.threshSlide.getValue(); 		// 25
+		dilationValue = this.dilationSlide.getValue(); 	// 16.42
+		erodeValue = this.erodeSlide.getValue(); 		// 3.15
+		minCValue = this.minCSlide.getValue(); 			// 460.97
 		
 		// show the current selected HSV range
 		String valuesToPrint = 
 				"Blur:     " + blurValue + "\n" + 
 				"Thresh:   " + threshValue + "\n" + 
 				"Dilation: " + dilationValue + "\n" + 
+				"Erode:    " + erodeValue + "\n" + 
 				"C Value:  " + minCValue;
 		
 		return valuesToPrint;

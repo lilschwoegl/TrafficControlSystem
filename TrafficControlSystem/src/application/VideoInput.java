@@ -2,6 +2,8 @@ package application;
 
 import java.util.Hashtable;
 
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.videoio.VideoCapture;
 
 public class VideoInput extends VideoCapture{
@@ -57,6 +59,30 @@ public class VideoInput extends VideoCapture{
 	public String getCurrentFeed()
 	{
 		return currentFeed;
+	}
+	
+	public Mat grabFrame() throws Exception
+	{
+		return this.grabFrame(new Size(500,500));
+	}
+	
+	public Mat grabFrame(Size size) throws Exception
+	{
+		Mat frame = new Mat();
+		
+		try {
+			// read the current frame
+			this.read(frame);
+			
+			return frame;
+		} catch (Exception e) {
+			// log the (full) error
+			System.err.print("Exception during the image elaboration...");
+			e.printStackTrace();
+			
+			// bubble the error up
+			throw e;
+		}
 	}
 	
 }
