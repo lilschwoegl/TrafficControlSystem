@@ -10,19 +10,24 @@ public class VideoInput extends VideoCapture{
 	
 	// feeds from:
 	// http://chart.maryland.gov/trafficcameras/index.php#
+	
+	// book
+	// https://books.google.com/books?id=dMEyDwAAQBAJ&pg=PA58&lpg=PA58&dq=opencv+format+mat+for+processing&source=bl&ots=qvXcPpXOGC&sig=5pFEk9cYilEpidUXzYFJN0ltfK4&hl=en&sa=X&ved=0ahUKEwilr6Sa_o_ZAhXNVt8KHb6uDRUQ6AEISjAF#v=onepage&q=opencv%20format%20mat%20for%20processing&f=false
 
 	private static String[] videoUrls = {
 		"http://170.93.143.139:1935/rtplive/cf013c5801f700d700437a45351f0214/playlist.m3u8",
 		"http://170.93.143.139:1935/rtplive/d6009a3500e50039004606363d235daa/playlist.m3u8",
 		"http://170.93.143.139:1935/rtplive/dbff12ba0057008d004be2369e235daa/playlist.m3u8",
-		"http://170.93.143.139:1935/rtplive/6001ce5800f700d700437a45351f0214/playlist.m3u8"
+		"http://170.93.143.139:1935/rtplive/6001ce5800f700d700437a45351f0214/playlist.m3u8",
+		"video/traffic.mp4"
 	};
 	
 	public static String[] feedNames = {
 		"I-695 AT PULASKI HWY",
 		"I-695 E of I-95",
 		"I-695 AT PUTTY HILL AVE",
-		"I-695 AT HARFORD RD"
+		"I-695 AT HARFORD RD",
+		"RAW VIDEO"
 	};
 	
 	private static Hashtable<String, String> videoFeeds;
