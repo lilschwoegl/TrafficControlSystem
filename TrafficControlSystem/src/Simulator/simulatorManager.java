@@ -1,6 +1,5 @@
 package Simulator;
 
-import java.awt.Color;
 import java.awt.Graphics;
 
 public class simulatorManager {
@@ -16,6 +15,7 @@ public class simulatorManager {
 	public void init(){
 		motor = new objectMotor();
 		motor.init();
+		loadImage.init();
 	}
 	
 	//method tick to move object across screen
@@ -25,6 +25,8 @@ public class simulatorManager {
 	
 	//method render to set graphic location and size
 	public void render(Graphics g){
+		g.drawImage(loadImage.fullImage,0,0,600,600,null);
+		//g.drawImage(loadImage.subImage1, 150, 150, 100, 100, null);
 		motor.render(g);
 	}
 }

@@ -1,6 +1,5 @@
 package Simulator;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 
@@ -46,9 +45,9 @@ public class simulatorSetUp implements Runnable {
 		manager.tick();
 	}
 	public void render(){
-		buffer = display.canvas.getBufferStrategy();
+		buffer = Display.canvas.getBufferStrategy();
 		if(buffer == null){
-			display.canvas.createBufferStrategy(3);
+			Display.canvas.createBufferStrategy(3);
 			return;
 		}
 		g = buffer.getDrawGraphics();

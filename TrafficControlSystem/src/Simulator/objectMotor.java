@@ -5,7 +5,7 @@ import java.awt.Graphics;
 
 public class objectMotor{
 	private int x,y;
-	private boolean left,right,up,down;
+	//private boolean left,right,up,down;
 	
 	//constructor
 	public objectMotor(){
@@ -14,7 +14,9 @@ public class objectMotor{
 	
 	//methods
 	public void init(){
-		x = 0;
+		//position the object in a lane
+		x = 320;
+		//x = 0;
 		y = 0;
 	}
 	
