@@ -7,10 +7,14 @@ import javax.imageio.ImageIO;
 
 public class loadImage {
 
-	public static BufferedImage fullImage, subImage1, subImage2;
+	public static BufferedImage fullImage, upCarImage, downCarImage, rightCarImage, leftCarImage;
 	
 	public static void init(){
-		fullImage = imageLoader("Intersection-4_way-5_lanes.png");
+		fullImage = imageLoader("/Intersection-4_way-5_lanes.png");
+		upCarImage = imageLoader("/upCar.png");
+		downCarImage = imageLoader("/downCar.png");
+		rightCarImage = imageLoader("/rightCar.png");
+		leftCarImage = imageLoader("/leftCar.png");
 		//crop();
 	}
 	

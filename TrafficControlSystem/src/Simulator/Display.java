@@ -8,7 +8,7 @@ import javax.swing.JFrame;
 public class Display {
 	private String title;
 	private int width;
-	private int height;
+	static int height;
 	public static JFrame frame;
 	public static Canvas canvas;
 	

@@ -44,6 +44,7 @@ public class simulatorSetUp implements Runnable {
 	public void tick(){
 		manager.tick();
 	}
+	
 	public void render(){
 		buffer = Display.canvas.getBufferStrategy();
 		if(buffer == null){
