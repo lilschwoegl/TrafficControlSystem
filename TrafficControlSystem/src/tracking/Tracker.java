@@ -81,7 +81,7 @@ public class Tracker extends JTracker {
 
 		// HungarianAlg2 APS = new HungarianAlg2();
 		// APS.Solve(Cost,assignment);
-
+		
 		AssignmentOptimal APS = new AssignmentOptimal();
 		APS.Solve(Cost, assignment);
 		// -----------------------------------

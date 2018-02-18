@@ -70,6 +70,9 @@ public class SystemUIController {
 	@FXML
 	private Label slideProp;
 	@FXML
+	private Label trackLbl;
+	public static ObjectProperty<String> trackLblProp;
+	@FXML
 	private CheckBox saveImagesCbx;
 
 	private String savedImagesPath = "D:\\Car Images\\";
@@ -109,6 +112,8 @@ public class SystemUIController {
 	static Mat outbox = new Mat();
 	static Mat diffFrame = null;
 
+	UITrafficObserver trafficObserver = new UITrafficObserver();
+	
 	// a flag to change the button behavior
 	private boolean cameraActive;
 
@@ -125,6 +130,9 @@ public class SystemUIController {
 		slideValuesProp = new SimpleObjectProperty<>();
 		this.slideProp.textProperty().bind(slideValuesProp);
 		
+		trackLblProp = new SimpleObjectProperty<>();
+		this.trackLbl.textProperty().bind(trackLblProp);
+		
 		backSub = Video.createBackgroundSubtractorMOG2();
 		tracker = new Tracker((float)CONFIG._dt,
 				(float)CONFIG._Accel_noise_mag,
@@ -135,6 +143,7 @@ public class SystemUIController {
 		DetectedObject.loadClassNames("yolo/classes/voc.names");
 //		DetectedObject.loadClassNames("D:\\darknet\\darknet\\data\\coco.names");
 		
+		TrafficUpdateObserver.getInstance().addObserver(trafficObserver);
 
 		Utils.onFXThread(this.slideValuesProp, readUIControls());
 	}
@@ -212,7 +221,7 @@ public class SystemUIController {
 
 		// used this https://www.pyimagesearch.com/2015/05/25/basic-motion-detection-and-tracking-with-python-and-opencv/
 		// http://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_objdetect/py_table_of_contents_objdetect/py_table_of_contents_objdetect.html
-// https://github.com/sgjava/install-opencv/blob/master/opencv-java/src/com/codeferm/opencv/PeopleDetect.java
+		// https://github.com/sgjava/install-opencv/blob/master/opencv-java/src/com/codeferm/opencv/PeopleDetect.java
 		
 		frame.copyTo(curFrame);
 
@@ -618,7 +627,7 @@ public class SystemUIController {
 					
 					Point lb, rt;
 					
-					if (tracker.tracks.get(i).skipped_frames > 1)
+					if (tracker.tracks.get(i).skipped_frames < 1)
 					{
 
 						lb = detect.getLeftBot();
@@ -664,6 +673,8 @@ public class SystemUIController {
 				}
 			}
 			
+			TrafficUpdateObserver.getInstance().updateTracks(tracker.tracks);
+			
 			return imag;
 			
 		}
@@ -691,10 +702,7 @@ public class SystemUIController {
 		yolo.setInput(inputBlob);
 		
 		// http://junkiyoshi.com/tag/dnn/
-		Mat detMat = yolo.forward("detection_out");
-		
-		List<String> layers = yolo.getLayerNames();
-		
+		Mat detMat = yolo.forward("detection_out");		
 		
 		float confidenceThreshold = (float)0.1;		
 		for (int i = 0; i < detMat.rows(); i++)
@@ -792,23 +800,6 @@ public class SystemUIController {
 		return valuesToPrint;
 	}
 
-
-	/**
-	 * Set typical {@link ImageView} properties: a fixed width and the
-	 * information to preserve the original image ration
-	 * 
-	 * @param image
-	 *            the {@link ImageView} to use
-	 * @param dimension
-	 *            the width of the image to set
-	 */
-	private void imageViewProperties(ImageView image, int dimension)
-	{
-		// set a fixed width for the given ImageView
-		image.setFitWidth(dimension);
-		// preserve the image ratio
-		image.setPreserveRatio(true);
-	}
 
 	/**
 	 * Stop the acquisition from the camera and release all the resources
