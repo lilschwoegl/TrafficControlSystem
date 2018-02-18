@@ -89,8 +89,8 @@ public class SystemUIController {
 	HOGDescriptor hog;
 	
 	static Net yolo = Dnn.readNetFromDarknet(
-			"D:\\darknet\\darknet\\cfg\\tiny-yolo-voc.cfg",
-			"D:\\darknet\\weights\\tiny-yolo-voc.weights");
+			"yolo/cfg/tiny-yolo-voc.cfg",
+			"yolo/weights/tiny-yolo-voc.weights");
 //	static Net yolo = Dnn.readNetFromDarknet(
 //		"D:\\darknet\\darknet\\cfg\\tiny-yolo.cfg",
 //		"D:\\darknet\\weights\\tiny-yolo.weights");
@@ -132,7 +132,7 @@ public class SystemUIController {
 				CONFIG._maximum_allowed_skipped_frames,
 				CONFIG._max_trace_length);
 		
-		DetectedObject.loadClassNames("D:\\darknet\\darknet\\data\\voc.names");
+		DetectedObject.loadClassNames("yolo/classes/voc.names");
 //		DetectedObject.loadClassNames("D:\\darknet\\darknet\\data\\coco.names");
 		
 
