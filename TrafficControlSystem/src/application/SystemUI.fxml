@@ -1,50 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
 <?import java.lang.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="536.0" prefWidth="701.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.SystemUIController">
-   <center>
-      <ImageView fx:id="imageOutputImgvw" fitHeight="280.0" fitWidth="454.0" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
-   </center>
-   <bottom>
-      <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0" BorderPane.alignment="CENTER">
-         <children>
-            <ComboBox fx:id="feedListCbx" prefHeight="27.0" prefWidth="328.0" promptText="Select A Video Feed" />
-            <Button fx:id="selFeedBtn" mnemonicParsing="false" onAction="#startFeed" text="Select Feed" />
-         </children>
-      </VBox>
-   </bottom>
-   <right>
-      <VBox prefHeight="282.0" prefWidth="247.0" BorderPane.alignment="CENTER">
-         <children>
-            <ImageView fx:id="imgv1" fitHeight="150.0" fitWidth="262.0" pickOnBounds="true" preserveRatio="true" />
-            <ImageView fx:id="imgv2" fitHeight="150.0" fitWidth="263.0" pickOnBounds="true" preserveRatio="true" />
-            <ImageView fx:id="subMatImg" fitHeight="150.0" fitWidth="263.0" pickOnBounds="true" preserveRatio="true" />
-         </children>
-      </VBox>
-   </right>
-   <left>
-      <VBox prefHeight="442.0" prefWidth="129.0" BorderPane.alignment="CENTER">
-         <children>
-            <Label text="Blur" />
-            <Slider fx:id="blurSlide" blockIncrement="1.0" minorTickCount="1" value="21.0" />
-            <Label text="Dilation" />
-            <Slider fx:id="dilationSlide" blockIncrement="1.0" minorTickCount="1" value="12.0" />
-            <Label text="Erode" />
-            <Slider fx:id="erodeSlide" blockIncrement="1.0" minorTickCount="1" value="12.0" />
-            <Label text="Diff Thresh" />
-            <Slider fx:id="threshSlide" blockIncrement="1.0" minorTickCount="1" value="25.0" />
-            <Label text="Min Contour Area" />
-            <Slider fx:id="minCSlide" blockIncrement="5.0" majorTickUnit="250.0" max="5000.0" min="10.0" minorTickCount="200" showTickLabels="true" showTickMarks="true" value="50.0" />
-            <Separator prefWidth="200.0" />
-            <CheckBox fx:id="saveImagesCbx" mnemonicParsing="false" text="Save Images" />
-            <Separator prefWidth="200.0" />
-            <Label fx:id="slideProp" text="Label" />
-         </children>
-      </VBox>
-   </left>
+<BorderPane prefHeight="536.0" prefWidth="583.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.SystemUIController">
+  <bottom>
+    <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0" BorderPane.alignment="CENTER">
+      <children>
+        <ComboBox fx:id="feedListCbx" prefHeight="27.0" prefWidth="328.0" promptText="Select A Video Feed" />
+        <Button fx:id="selFeedBtn" mnemonicParsing="false" onAction="#startFeed" text="Select Feed" />
+      </children>
+    </VBox>
+  </bottom>
+  <center>
+    <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+      <children>
+        <ImageView fx:id="imageOutputImgvw" fitHeight="359.5594713656388" fitWidth="583.0" pickOnBounds="true" preserveRatio="true" />
+        <Label fx:id="trackLbl" alignment="CENTER" text="Label" textAlignment="LEFT" />
+      </children>
+    </VBox>
+  </center>
 </BorderPane>
