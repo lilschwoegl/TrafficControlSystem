@@ -25,6 +25,8 @@ public abstract class JTracker {
 	public int maximum_allowed_skipped_frames;
 
 	public int max_trace_length;
+	
+	public int max_sec_before_stale;
 
 	public Vector<Track> tracks;
 	

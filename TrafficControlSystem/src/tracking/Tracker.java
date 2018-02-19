@@ -1,5 +1,7 @@
 package tracking;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Vector;
 
 import org.opencv.core.Core;
@@ -23,13 +25,15 @@ public class Tracker extends JTracker {
 	Vector<Integer> assignment = new Vector<>();
 
 	public Tracker(float _dt, float _Accel_noise_mag, double _dist_thres,
-			int _maximum_allowed_skipped_frames, int _max_trace_length) {
+			int _maximum_allowed_skipped_frames, int _max_trace_length, 
+			int _max_sec_before_stale) {
 		tracks = new Vector<>();
 		dt = _dt;
 		Accel_noise_mag = _Accel_noise_mag;
 		dist_thres = _dist_thres;
 		maximum_allowed_skipped_frames = _maximum_allowed_skipped_frames;
 		max_trace_length = _max_trace_length;
+		max_sec_before_stale = _max_sec_before_stale;
 		track_removed = 0;
 	}
 
@@ -112,14 +116,7 @@ public class Tracker extends JTracker {
 		// If track didn't get detects long time, remove it.
 		// -----------------------------------
 
-		for (int i = 0; i < tracks.size(); i++) {
-			if (tracks.get(i).skipped_frames > maximum_allowed_skipped_frames) {				
-				tracks.remove(i);
-				assignment.remove(i);
-				track_removed++;
-				i--;
-			}
-		}
+		checkForStaleTracks();
 
 		// -----------------------------------
 		// Search for unassigned detects
@@ -173,6 +170,24 @@ public class Tracker extends JTracker {
 			}
 		}
 	}
+	
+	public void checkForStaleTracks()
+	{
+		// -----------------------------------
+		// If track didn't get detects long time, remove it.
+		// -----------------------------------
+
+		for (int i = 0; i < tracks.size(); i++) {
+			long timeDiffSec = Duration.between(tracks.get(i).lastUpdateTime, LocalDateTime.now()).getSeconds();
+			if (tracks.get(i).skipped_frames > maximum_allowed_skipped_frames ||
+					timeDiffSec > max_sec_before_stale) {				
+				tracks.remove(i);
+				assignment.remove(i);
+				track_removed++;
+				i--;
+			}
+		}
+	}
 
 	public void updateKalman(Mat imag, Vector<DetectedObject> detections) {
 		// Update Kalman Filters state
@@ -193,13 +208,16 @@ public class Tracker extends JTracker {
 						detections.get(assignment.get(i)).getObjectCenter(), true);
 
 				tracks.get(i).lastDetect = detections.get(assignment.get(i));
+				tracks.get(i).lastUpdateTime = LocalDateTime.now();
 
 			} else // if not continue using predictions
 			{
 				tracks.get(i).prediction = tracks.get(i).KF.update(new Point(0,
 						0), false);
-
+				
 			}
+			
+			
 
 			if (tracks.get(i).trace.size() > max_trace_length) {
 				for (int j = 0; j < tracks.get(i).trace.size() - max_trace_length; j++)

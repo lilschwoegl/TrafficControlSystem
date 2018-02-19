@@ -1,4 +1,7 @@
-package application;
+package observer;
+
+import application.SystemUIController;
+import application.Utils;
 
 public class UITrafficObserver implements Observer{
 

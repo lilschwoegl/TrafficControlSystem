@@ -1,4 +1,4 @@
-package application;
+package observer;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -6,39 +6,61 @@ import java.util.Vector;
 import tracking.Track;
 import tracking.Track.DIRECTION;
 
-public class TrafficUpdateObserver implements Observable {
+public class TrafficUpdateObservable implements Observable {
 
 	private ArrayList<Observer> observers;
 	private Vector<Track> tracks;
 	
 	// Singleton
-	private static TrafficUpdateObserver instance;
+	private static TrafficUpdateObservable instance;
 	
-	private TrafficUpdateObserver()
+	/**
+	 * Constructor
+	 */
+	private TrafficUpdateObservable()
 	{
 		observers = new ArrayList<Observer>();
 		tracks = new Vector<Track>();
 	}
 	
-	public static TrafficUpdateObserver getInstance()
+	/**
+	 * Gets singleton instance
+	 * @return Singleton instance
+	 */
+	public static TrafficUpdateObservable getInstance()
 	{
 		if (instance == null)
-			instance = new TrafficUpdateObserver();
+			instance = new TrafficUpdateObservable();
 		
 		return instance;
 	}
 	
 	@Override
+	/**
+	 * Subscribes an observer
+	 * @param o Observer to subscribe
+	 */
 	public void addObserver(Observer o) {
 		observers.add(o);
 	}
 
 	@Override
+	/**
+	 * Unsubscribes an observer
+	 * @param o Observer to unsubscribe
+	 */
 	public void removeObserver(Observer o) {
 		observers.remove(o);
 	}
 	
 	@Override
+	/**
+	 * Notifies all subscribers of a change
+	 * @param numTracks Number of tracks currently detected
+	 * @param numOncoming Number of oncoming tracks
+	 * @param numOutgoing Number of outgoing tracks
+	 * @param numUncertain Number of uncertain tracks
+	 */
 	public void notifyObserver(int numTracks, int numOncoming, int numOutgoing, int numUncertain) {
 		for (Observer observer : observers)
 		{
@@ -46,6 +68,10 @@ public class TrafficUpdateObserver implements Observable {
 		}
 	}
 	
+	/**
+	 * Updates tracks maintained by the observable
+	 * @param updatedTracks
+	 */
 	public void updateTracks(Vector<Track> updatedTracks)
 	{
 		if (updatedTracks.size() != tracks.size() ||
@@ -73,6 +99,11 @@ public class TrafficUpdateObserver implements Observable {
 		}		
 	}
 	
+	/**
+	 * Determines if any tracks have changed directions
+	 * @param updatedTracks
+	 * @return
+	 */
 	private boolean tracksChangedDirection(Vector<Track> updatedTracks)
 	{
 		int numOncoming = 0;
@@ -86,20 +117,22 @@ public class TrafficUpdateObserver implements Observable {
 				numOncoming++;
 			else if (t.direction == DIRECTION.OUTGOING)
 				numOutgoing++;
+			else
+				numUncertain++;
 		}
 		
 		// subtract from updatedTracks
 		for (Track t : updatedTracks)
 		{
 			if (t.direction == DIRECTION.ONCOMING)
-				numOncoming++;
+				numOncoming--;
 			else if (t.direction == DIRECTION.OUTGOING)
-				numOutgoing++;
+				numOutgoing--;
 			else
-				numUncertain++;
+				numUncertain--;
 		}
 		
-		return (numOncoming != 0 || numOutgoing != 0);
+		return (numOncoming != 0 || numOutgoing != 0 || numUncertain != 0);
 	}
 	
 }

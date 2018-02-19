@@ -1,5 +1,8 @@
 package tracking;
 
+import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Vector;
 
 import org.opencv.core.Point;
@@ -28,6 +31,7 @@ public class Track {
 	public int crossBorder;
 	public Point prediction;
 	public Kalman KF;
+	public LocalDateTime lastUpdateTime;
 	
 	public DIRECTION direction;
 
@@ -56,6 +60,8 @@ public class Track {
 		lastDetect = lastUpdate;
 		
 		direction = DIRECTION.UNCERTAIN;
+		
+		lastUpdateTime = LocalDateTime.now();
 	}
 	
 	public String getDirectionToString()

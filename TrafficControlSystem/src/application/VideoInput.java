@@ -18,6 +18,9 @@ public class VideoInput extends VideoCapture{
 	// https://stackoverflow.com/questions/23199886/opencv-java-binds-videocapture-from-file-failing-silently
 	// http://kronoskoders.logdown.com/posts/256664-installing-opencv-and-ffmpeg-on-windows
 	
+	/**
+	 * URLs that will be referenced when a feedName below is selected
+	 */
 	private static String[] videoUrls = {
 		"http://170.93.143.139:1935/rtplive/cf013c5801f700d700437a45351f0214/playlist.m3u8",
 		"http://170.93.143.139:1935/rtplive/d6009a3500e50039004606363d235daa/playlist.m3u8",
@@ -29,6 +32,10 @@ public class VideoInput extends VideoCapture{
 		"video/crashes.mp4"
 	};
 	
+	/**
+	 * Names of the feeds that can be selected. These will be populated
+	 * in the combobox on the mani form
+	 */
 	public static String[] feedNames = {
 		"I-695 AT PULASKI HWY",
 		"I-695 E of I-95",
@@ -44,6 +51,9 @@ public class VideoInput extends VideoCapture{
 	
 	private String currentFeed = "";
 	
+	/**
+	 * Constructor
+	 */
 	public VideoInput()
 	{
 		// make sure the video links are in the hash table
@@ -59,28 +69,51 @@ public class VideoInput extends VideoCapture{
 		}
 	}
 	
+	/**
+	 * Constructor
+	 * @param feedName Name of the feed to read from
+	 */
 	public VideoInput(String feedName)
 	{
 		this();
 		this.open(videoFeeds.get(currentFeed));
 	}
 	
+	/**
+	 * Selects a camera feed based on the feed name
+	 * @param feedName Name of the feed to read from
+	 */
 	public void selectCameraFeed(String feedName)
 	{
 		currentFeed = feedName;
 		this.open(videoFeeds.get(currentFeed));
 	}
 	
+	/**
+	 * Gets the current feed that is being read from
+	 * @return Name of the feed that is being read from
+	 */
 	public String getCurrentFeed()
 	{
 		return currentFeed;
 	}
 	
+	/**
+	 * Grabs a frame from the current video feed
+	 * @return The next read frame
+	 * @throws Exception Exception when next frame cannot be read
+	 */
 	public Mat grabFrame() throws Exception
 	{
 		return this.grabFrame(new Size(500,500));
 	}
 	
+	/**
+	 * Grabs a frame from the current video feed
+	 * @param size Size to resize frame to
+	 * @return The next read frame with the given size
+	 * @throws Exception Exception when the next frame cannot be read
+	 */
 	public Mat grabFrame(Size size) throws Exception
 	{
 		Mat frame = new Mat();
