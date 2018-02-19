@@ -54,6 +54,7 @@ public class SystemUIController {
 	static Mat imag;
 	static Mat orgin;
 	static Mat kalman;
+	
 
 	UITrafficObserver trafficObserver;
 	
