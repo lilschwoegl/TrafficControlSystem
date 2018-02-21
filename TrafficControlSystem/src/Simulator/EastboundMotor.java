@@ -12,8 +12,16 @@ public class EastboundMotor {
 	//constructor
 	public EastboundMotor(int lane){
 		this.lane = lane;
-		x = 0;
-		y = 0;
+		if(lane == 1){
+			x = 0;
+			y = 320;
+		}
+		if(lane == 2){
+			x = 0;
+			y = 355;
+		}
+		//x = 0;
+		//y = 0;
 		speed = 0.5f;
 	}
 	

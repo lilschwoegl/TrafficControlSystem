@@ -5,54 +5,69 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class simulatorManager {
-	private objectMotor motor;
-	private NorthboundMotor nMotor;
-	private EastboundMotor eMotor;
-	private WestboundMotor wMotor;
+	private ArrayList<objectMotor> motor;
+	private ArrayList<NorthboundMotor> nMotor;
+	private ArrayList<EastboundMotor> eMotor;
+	private ArrayList<WestboundMotor> wMotor;
+	private traffic traffic;
 	private long time = System.nanoTime();
 	private long delay;
 	
 	//constructor
 	public simulatorManager(){
-		//motor = new objectMotor();		
+		//motor = new objectMotor();
+		motor = new ArrayList<objectMotor>();
+		nMotor = new ArrayList<NorthboundMotor>();
+		eMotor = new ArrayList<EastboundMotor>();
+		wMotor = new ArrayList<WestboundMotor>();
+		
+		// delay = to 2secs
 		delay = 2000;
 	}
 	
 	//methods
 	//method init to initialize 
 	public void init(){
-		motor = new objectMotor();
-		motor.init();
-		nMotor = new NorthboundMotor(1);
-		nMotor.init(nMotor.getLane());
-		eMotor = new EastboundMotor(1);
-		eMotor.init(eMotor.getLane());
-		wMotor = new WestboundMotor(1);
-		wMotor.init(wMotor.getLane());
-		loadImage.init();
+		loadImage.init();	
 	}
 	
 	//method tick to move object across screen
 	public void tick(){
-		/*long elapsed = (System.nanoTime() - time)/1000000;
+		long elapsed = (System.nanoTime() - time)/1000000;
 		if(elapsed > delay){
-			nMotor.add(new NorthboundMotor());
+				nMotor.add(new NorthboundMotor(1));
+				nMotor.add(new NorthboundMotor(2));
+				motor.add(new objectMotor(1));
+				motor.add(new objectMotor(2));
+				eMotor.add(new EastboundMotor(1));
+				eMotor.add(new EastboundMotor(2));
+				wMotor.add(new WestboundMotor(1));
+				wMotor.add(new WestboundMotor(2));
+			
 			time = System.nanoTime();
-		}*/
+		}
 		
 		
-		/*for (int i = 0; i < 20; i++){
-		nMotor.get(i).tick();
-		}*/
+		
+		
 		
 		//Soutbound Motor
-		motor.tick();
+		for (int j = 0; j < motor.size(); j++) {
+			motor.get(j).tick();
+		}
 		//Northbound Motor
-		nMotor.tick();
+		//nMotor.tick();
+		for (int i = 0; i < nMotor.size(); i++){
+		nMotor.get(i).tick();
+		}
 		//Eastbound Motor
-		eMotor.tick();
+		for (int k = 0; k < eMotor.size(); k++){
+			eMotor.get(k).tick();
+		}
 		//Westbound Motor
-		wMotor.tick();
+		for (int l = 0; l < wMotor.size(); l++){
+			wMotor.get(l).tick();
+		}
 		
 	}
 	
@@ -62,14 +77,23 @@ public class simulatorManager {
 		g.drawImage(loadImage.fullImage,0,0,600,600,null);
 		
 		//render southbound vehicles
-		motor.render(g);
+		for (int j = 0; j < motor.size(); j++) {
+			motor.get(j).render(g);
+		}
 		
 		//render northbound vehicles
-		nMotor.render(g);
-		/*for(int i = 0; i < nMotor.size(); i++){
+		//nMotor.render(g);
+		for(int i = 0; i < nMotor.size(); i++){
 			nMotor.get(i).render(g);
-		}*/
-		eMotor.render(g);
-		wMotor.render(g);
+		}
+		
+		for (int k = 0; k < eMotor.size(); k++){
+			eMotor.get(k).render(g);
+		}
+		
+		for (int l = 0; l < wMotor.size(); l++){
+			wMotor.get(l).render(g);
+		}
+		
 	}
 }

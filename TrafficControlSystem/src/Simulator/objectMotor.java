@@ -7,12 +7,23 @@ import java.awt.Graphics2D;
 public class objectMotor{
 	private int x,y,r;
 	private double speed;
+	private int lane;	
+	private enum Route {STRAIGHT, LEFT, RIGHT};
 	//private boolean left,right,up,down;
 	
 	//constructor
-	public objectMotor(){
-		x = 0;
-		y = 0;
+	public objectMotor(int lane){
+		this.lane = lane;
+		if(lane == 1){
+			x = 250;
+			y = 0;
+		}
+		if(lane == 2){
+			x = 210;
+			y = 0;
+		}
+		//x = 0;
+		//y = 0;
 		speed = 0.3f;
 	}
 	
@@ -24,6 +35,8 @@ public class objectMotor{
 	}
 	
 	public void tick(){
+		
+		
 		y += 1;
 		
 		
@@ -49,17 +62,10 @@ public class objectMotor{
 		*/
 	}
 	
-	public void northStraightTick(){
-		y -= 1;
-	}
-	
-	public void northRightTurnTick(){
+	public void getRoute(){
 		
 	}
 	
-	public void northLeftTurnTick(){
-		
-	}
 	
 	public void southStraightTick(){
 		y += 1;

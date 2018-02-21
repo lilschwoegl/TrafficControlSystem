@@ -12,8 +12,16 @@ public class NorthboundMotor {
 	//constructor
 	public NorthboundMotor(int lane){
 		this.lane = lane;
-		x = 0;
-		y = 0;
+		if(lane == 1){
+			x = 320;
+			y = 600;
+		}
+		if(lane == 2){
+			x = 355;
+			y = 600;
+		}
+		//x = 0;
+		//y = 0;
 		speed = 0.5f;
 	}
 	
@@ -54,6 +62,14 @@ public class NorthboundMotor {
 			}
 		}
 		*/
+	}
+	
+	public void leftTurn(){
+		
+	}
+	
+	public void rightTurn(){
+		
 	}
 	
 	public void render(Graphics g){
