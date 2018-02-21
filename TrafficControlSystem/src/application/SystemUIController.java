@@ -1,6 +1,8 @@
 package application;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,9 +10,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.opencv.core.Core;
 import org.opencv.core.Core.MinMaxLocResult;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Range;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
@@ -32,6 +37,7 @@ import tracking.Tracker;
 
 public class SystemUIController {
 
+	// setup the FXML control accessors
 	@FXML
 	private Button selFeedBtn;
 	@FXML
@@ -41,6 +47,8 @@ public class SystemUIController {
 	@FXML
 	private Label trackLbl;
 	public static ObjectProperty<String> trackLblProp;
+	@FXML
+	private ImageView img1vb, img2vb, img3vb;
 
 	private VideoInput videoFeed = new VideoInput();
 
@@ -197,6 +205,8 @@ public class SystemUIController {
 		orgin = curFrame.clone();
 		kalman = curFrame.clone();
 		
+		detectLanes(imag);
+		
 
 		// update the tracker if there are detected objects,
 		// otherwise update the kalman filter
@@ -309,6 +319,8 @@ public class SystemUIController {
 		// update the tracks in the traffic observer
 		TrafficUpdateObservable.getInstance().updateTracks(tracker.tracks);
 
+		
+		
 		return imag;
 
 	}
@@ -397,6 +409,105 @@ public class SystemUIController {
 		}
 
 		return rects;
+	}
+	
+	private void detectLanes(Mat frame)
+	{
+		Mat grayFrame = new Mat();
+		
+		
+		frame.copyTo(grayFrame);
+		
+		
+		// apply blur
+		Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(3,3), 0);
+		
+		// convert to grayscale image
+		//Imgproc.cvtColor(grayFrame, grayFrame, Imgproc.COLOR_RGB2GRAY);
+		
+		grayFrame = colorSelection(grayFrame);
+		
+		//Imgproc.threshold(grayFrame, grayFrame, 220, 255, Imgproc.THRESH_BINARY);
+		//Imgproc.adaptiveThreshold(grayFrame, grayFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 10);
+		
+		MatOfPoint mop = new MatOfPoint();
+		int c = grayFrame.cols();
+		int r = grayFrame.rows();
+		mop.fromArray(new Point[] {
+				new Point(0,r), 
+				new Point(0,r - (r/2)), 
+				new Point(c,r - (r/2)), 
+				new Point(c,r)
+				});
+		
+		Mat mask = Mat.zeros(grayFrame.size(), grayFrame.type());
+		Imgproc.fillConvexPoly(mask, mop, new Scalar(255,0,0));
+		
+		Core.bitwise_and(grayFrame, mask, grayFrame);
+		
+		Imgproc.Canny(grayFrame, grayFrame, 50, 200);
+		
+		Mat lines = new Mat();
+		// do hough lines
+				
+		Imgproc.HoughLinesP(
+				grayFrame, 
+				lines, 
+				1, 
+				Math.PI / 60, 
+				100, 
+				100, 
+				50);
+//				
+		drawLines(imag, lines);
+		
+		// show the canny image
+		updateImageView(img1vb, Utils.mat2Image(grayFrame));
+	}
+	
+	// http://jeffwen.com/2017/02/23/lane_finding
+	private Mat colorSelection(Mat frame)
+	{
+		Mat hlsImg = new Mat();
+		frame.copyTo(hlsImg);
+		
+		Imgproc.cvtColor(hlsImg, hlsImg, Imgproc.COLOR_RGB2HLS);
+		
+		Mat whiteColor = new Mat();
+		Core.inRange(hlsImg, new Scalar(20,200,0), new Scalar(255,255,255), whiteColor);
+		Mat yellowColor = new Mat();
+		Core.inRange(hlsImg, new Scalar(10,50,100), new Scalar(100,255,255), yellowColor);
+		
+		Mat combined = new Mat();
+		Core.bitwise_or(whiteColor, yellowColor, combined);
+		
+		Mat ret = new Mat();
+		Core.bitwise_and(frame, frame, ret, combined);
+		
+		return ret;
+	}
+	
+	private Mat getRoi(Mat frame, int x, int y, int w, int h)
+	{
+		return frame.adjustROI(x, y, w, h);
+	}
+	
+	private void drawLines(Mat frame, Mat lines)
+	{
+		Mat original = new Mat();
+		frame.copyTo(original);
+		
+		Mat lineImg = Mat.zeros(original.size(), original.type());
+		
+		double data[];
+		for (int i = 0; i < lines.cols(); i++)
+		{
+			data = lines.get(0, i);
+			Imgproc.line(frame, new Point(data[0], data[1]), new Point(data[2], data[3]), new Scalar(255,0,0), 20);
+		}
+		
+		//Core.addWeighted(original, 0.8, lineImg, 1.0, 0.0, frame);
+		
 	}
 
 
