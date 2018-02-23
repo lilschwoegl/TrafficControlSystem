@@ -28,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import observer.TrafficUpdateObservable;
@@ -48,7 +49,13 @@ public class SystemUIController {
 	private Label trackLbl;
 	public static ObjectProperty<String> trackLblProp;
 	@FXML
-	private ImageView img1vb, img2vb, img3vb;
+	private ImageView img1vb, img2vb, img3vb, img4vb;
+	
+	@FXML 
+	Slider rho_s, threshold_s, minLineLength_s, maxLineGap_s;
+	@FXML
+	private Label houghLbl;
+	public static ObjectProperty<String> houghLblProp;
 
 	private VideoInput videoFeed = new VideoInput();
 
@@ -79,6 +86,9 @@ public class SystemUIController {
 		// bind labels from the UI
 		trackLblProp = new SimpleObjectProperty<>();
 		this.trackLbl.textProperty().bind(trackLblProp);
+		
+		houghLblProp = new SimpleObjectProperty<>();
+		this.houghLbl.textProperty().bind(houghLblProp);
 
 		// create a new tracker for the detected objects
 		tracker = new Tracker((float)CONFIG._dt,
@@ -207,7 +217,10 @@ public class SystemUIController {
 		
 		detectLanes(imag);
 		
-
+		
+		
+if (true)
+{
 		// update the tracker if there are detected objects,
 		// otherwise update the kalman filter
 		if (rects.size() > 0)
@@ -282,11 +295,13 @@ public class SystemUIController {
 						CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
 						5);
 				
+				// draw the box to put info in
 				Imgproc.rectangle(
 						imag,
 						lb,
-						new Point(lb.x + 200, lb.y - 50),
-						CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
+						new Point(lb.x + 200, lb.y - 80),
+						//CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
+						new Scalar(0,0,0),
 						Core.FILLED
 						);
 				
@@ -294,7 +309,7 @@ public class SystemUIController {
 				Imgproc.putText(
 						imag, 
 						String.format("%s - %.0f%%", detect.getClassName(), detect.classProb * 100), 
-						new Point(lb.x, lb.y - 30), 
+						new Point(lb.x, lb.y - 60), 
 						Core.FONT_HERSHEY_SIMPLEX, 
 						1, 
 						new Scalar(255,255,255),
@@ -304,6 +319,16 @@ public class SystemUIController {
 				Imgproc.putText(
 						imag, 
 						String.format("%s", tracker.tracks.get(i).getDirectionToString()), 
+						new Point(lb.x, lb.y-30), 
+						Core.FONT_HERSHEY_SIMPLEX, 
+						1, 
+						new Scalar(255,255,255),
+						3);
+				
+				// draw the lane the car is in
+				Imgproc.putText(
+						imag, 
+						String.format("Lane: %d", rlc.isInLane(tracker.tracks.get(i).lastDetect.getObjectCenter())), 
 						new Point(lb.x, lb.y), 
 						Core.FONT_HERSHEY_SIMPLEX, 
 						1, 
@@ -319,7 +344,7 @@ public class SystemUIController {
 		// update the tracks in the traffic observer
 		TrafficUpdateObservable.getInstance().updateTracks(tracker.tracks);
 
-		
+	}
 		
 		return imag;
 
@@ -419,16 +444,19 @@ public class SystemUIController {
 		frame.copyTo(grayFrame);
 		
 		
-		// apply blur
-		Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(3,3), 0);
 		
-		// convert to grayscale image
-		//Imgproc.cvtColor(grayFrame, grayFrame, Imgproc.COLOR_RGB2GRAY);
 		
 		grayFrame = colorSelection(grayFrame);
 		
-		//Imgproc.threshold(grayFrame, grayFrame, 220, 255, Imgproc.THRESH_BINARY);
-		//Imgproc.adaptiveThreshold(grayFrame, grayFrame, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 15, 10);
+		
+		// convert to grayscale image
+		Imgproc.cvtColor(grayFrame, grayFrame, Imgproc.COLOR_BGR2GRAY);
+		
+		
+		
+		
+		// apply blur
+		Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(3,3), 0);
 		
 		MatOfPoint mop = new MatOfPoint();
 		int c = grayFrame.cols();
@@ -445,19 +473,47 @@ public class SystemUIController {
 		
 		Core.bitwise_and(grayFrame, mask, grayFrame);
 		
-		Imgproc.Canny(grayFrame, grayFrame, 50, 200);
+		Imgproc.Canny(grayFrame, grayFrame, 50, 150);
 		
 		Mat lines = new Mat();
 		// do hough lines
+		
+//		Imgproc.HoughLinesP(
+//				grayFrame, 
+//				lines, 
+//				Math.ceil(rho_s.getValue()), 
+//				Math.PI / 180, 
+//				(int)threshold_s.getValue(), 
+//				Math.ceil(minLineLength_s.getValue()), 
+//				Math.ceil(maxLineGap_s.getValue()));
+		
+		String str = String.format(
+				"rho: %f\nthreshold: %f\nminLineLength: %f\nmaxLineGap: %f",
+				Math.ceil(rho_s.getValue()),
+				Math.ceil(threshold_s.getValue()),
+				Math.ceil(minLineLength_s.getValue()),
+				Math.ceil(maxLineGap_s.getValue()));
+		
+		Utils.onFXThread(SystemUIController.houghLblProp, str);
 				
 		Imgproc.HoughLinesP(
 				grayFrame, 
 				lines, 
-				1, 
-				Math.PI / 60, 
-				100, 
-				100, 
-				50);
+				2, 
+				Math.PI / 180, 
+				30, 
+				88, 
+				49);
+		
+		
+//		Imgproc.HoughLinesP(
+//				grayFrame, 
+//				lines, 
+//				1, 
+//				Math.PI / 60, 
+//				100, 
+//				100, 
+//				50);
 //				
 		drawLines(imag, lines);
 		
@@ -474,24 +530,36 @@ public class SystemUIController {
 		Imgproc.cvtColor(hlsImg, hlsImg, Imgproc.COLOR_RGB2HLS);
 		
 		Mat whiteColor = new Mat();
-		Core.inRange(hlsImg, new Scalar(20,200,0), new Scalar(255,255,255), whiteColor);
-		Mat yellowColor = new Mat();
-		Core.inRange(hlsImg, new Scalar(10,50,100), new Scalar(100,255,255), yellowColor);
+		Core.inRange(frame, new Scalar(220,220,220), new Scalar(255,255,255), whiteColor);
 		
-		Mat combined = new Mat();
-		Core.bitwise_or(whiteColor, yellowColor, combined);
+		updateImageView(img2vb, Utils.mat2Image(whiteColor));
+		
+		Mat yellowColorRgb = new Mat();
+		Core.inRange(frame, new Scalar(225,180,0), new Scalar(255,255,170), yellowColorRgb);
+		
+		updateImageView(img3vb, Utils.mat2Image(yellowColorRgb));
+		
+		Mat yellowColorHls = new Mat();
+		Core.inRange(hlsImg, new Scalar(20,120,80), new Scalar(45,200,255), yellowColorHls);
+		
+		updateImageView(img4vb, Utils.mat2Image(yellowColorHls));
+		
+		//Mat combined = new Mat();
+		//Core.bitwise_or(whiteColor, yellowColor, combined);
+		
+		
 		
 		Mat ret = new Mat();
-		Core.bitwise_and(frame, frame, ret, combined);
+		//Core.bitwise_and(frame, frame, ret, ret);
+		
+		Core.bitwise_and(frame, frame, ret, whiteColor);
+		Core.bitwise_and(frame, frame, ret, yellowColorRgb);
+		Core.bitwise_and(frame, frame, ret, yellowColorHls);
 		
 		return ret;
 	}
 	
-	private Mat getRoi(Mat frame, int x, int y, int w, int h)
-	{
-		return frame.adjustROI(x, y, w, h);
-	}
-	
+	RoadLinesCollection rlc = new RoadLinesCollection();
 	private void drawLines(Mat frame, Mat lines)
 	{
 		Mat original = new Mat();
@@ -500,13 +568,38 @@ public class SystemUIController {
 		Mat lineImg = Mat.zeros(original.size(), original.type());
 		
 		double data[];
-		for (int i = 0; i < lines.cols(); i++)
+		double slopeThreshold = .5;
+		double slope;
+		int cols = lines.cols();
+		int rows = lines.rows();
+		
+		Line line;
+		for (int i = 0; i < lines.rows(); i+=4)
 		{
-			data = lines.get(0, i);
-			Imgproc.line(frame, new Point(data[0], data[1]), new Point(data[2], data[3]), new Scalar(255,0,0), 20);
+			data = lines.get(i, 0);
+			
+			line = new Line(data[0], data[1], data[2], data[3]);
+			
+			if (Math.abs(line.getSlope()) < slopeThreshold)
+			{
+				continue;
+			}
+			
+//			Imgproc.putText(
+//					frame, 
+//					String.format("%.2f", line.getSlope()), 
+//					new Point(data[0], data[1]),
+//					Core.FONT_HERSHEY_SIMPLEX, 
+//					1, 
+//					new Scalar(0,255,0),
+//					3);
+			//Imgproc.line(frame, new Point(data[0], data[1]), new Point(data[2], data[3]), new Scalar(255,0,0), 20);
+		
+			rlc.coorelateLine(line);
+		
 		}
 		
-		//Core.addWeighted(original, 0.8, lineImg, 1.0, 0.0, frame);
+		rlc.drawLanes(frame);
 		
 	}
 
