@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import simulator.simulatorSetUp;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.fxml.FXMLLoader;
@@ -29,6 +30,20 @@ public class Main extends Application {
 			primaryStage.setScene(scene);
 			// show the GUI
 			primaryStage.show();
+			
+			// create a new thread for the simulator
+			Thread simulator = new Thread()
+			{
+				public void run()
+				{
+					simulatorSetUp simulator = new simulatorSetUp("Traffic Controller Simulator", 600, 600);
+					simulator.start();
+				}
+			};
+			
+			// start the simulator
+			simulator.start();
+			
 			
 			// set the proper behavior on closing the application
 			SystemUIController controller = loader.getController();

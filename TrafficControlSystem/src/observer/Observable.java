@@ -1,7 +1,10 @@
 package observer;
 
-public interface Observable {
+import observer.TrafficUpdateObservable.TrackUpdate;
+import tracking.Track;
 
+public interface Observable {
+	
 	/**
 	 * Subscribes an observer
 	 * @param o Observer to subscribe
@@ -22,5 +25,7 @@ public interface Observable {
 	 * @param numUncertain Number of uncertain tracks
 	 */
 	public void notifyObserver(int numTracks, int numOncoming, int numOutgoing, int numUncertain);
+	
+	public void notifyObserver(Track track, TrackUpdate updateType);
 	
 }

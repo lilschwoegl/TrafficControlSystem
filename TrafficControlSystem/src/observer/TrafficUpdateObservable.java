@@ -1,6 +1,7 @@
 package observer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Vector;
 
 import tracking.Track;
@@ -8,11 +9,18 @@ import tracking.Track.DIRECTION;
 
 public class TrafficUpdateObservable implements Observable {
 
+	public enum TrackUpdate
+	{
+		ADDED,
+		REMOVED,
+		UPDATED
+	};
+	
 	private ArrayList<Observer> observers;
-	private Vector<Track> tracks;
+	private HashMap<Integer,Track> tracks;
 	
 	// Singleton
-	private static TrafficUpdateObservable instance;
+	private volatile static TrafficUpdateObservable instance;
 	
 	/**
 	 * Constructor
@@ -20,7 +28,7 @@ public class TrafficUpdateObservable implements Observable {
 	private TrafficUpdateObservable()
 	{
 		observers = new ArrayList<Observer>();
-		tracks = new Vector<Track>();
+		tracks = new HashMap<Integer,Track>();
 	}
 	
 	/**
@@ -42,6 +50,7 @@ public class TrafficUpdateObservable implements Observable {
 	 */
 	public void addObserver(Observer o) {
 		observers.add(o);
+		System.out.println("Added observer " + o.getClass().toString() + ", total " + observers.size());
 	}
 
 	@Override
@@ -68,71 +77,113 @@ public class TrafficUpdateObservable implements Observable {
 		}
 	}
 	
+	public void notifyObserver(Track track, TrackUpdate updateType)
+	{
+		for (Observer observer : observers)
+		{
+			observer.update(track, updateType);
+		}
+	}
+	
+	public void trackAdded(Track track)
+	{
+		tracks.put(track.track_id, track);
+		notifyObserver(track, TrackUpdate.ADDED);
+	}
+	
+	public void trackRemoved(Track track)
+	{
+		tracks.remove(track.track_id);
+		notifyObserver(track, TrackUpdate.REMOVED);
+	}
+	
+	public void trackUpdated(Track track)
+	{
+		tracks.remove(track.track_id);
+		tracks.put(track.track_id, track);
+		notifyObserver(track, TrackUpdate.UPDATED);
+	}
+	
+	public static String getUpdateToString(TrackUpdate type)
+	{
+		switch (type)
+		{
+		case ADDED:
+			return "ADDED";
+		case REMOVED:
+			return "REMOVED";
+		case UPDATED:
+			return "UPDATED";
+		}
+		
+		return "UNKNOWN";
+	}
+	
 	/**
 	 * Updates tracks maintained by the observable
 	 * @param updatedTracks
 	 */
-	public void updateTracks(Vector<Track> updatedTracks)
-	{
-		if (updatedTracks.size() != tracks.size() ||
-				tracksChangedDirection(updatedTracks))
-		{
-			tracks.clear();
-			tracks.addAll(0, updatedTracks);
-			
-			int numOncoming = 0;
-			int numOutgoing = 0;
-			int numUncertain = 0;
-			
-			// count oncoming and outgoing in current list
-			for (Track t : tracks)
-			{
-				if (t.direction == DIRECTION.ONCOMING)
-					numOncoming++;
-				else if (t.direction == DIRECTION.OUTGOING)
-					numOutgoing++;
-				else
-					numUncertain++;
-			}
-			
-			notifyObserver(updatedTracks.size(), numOncoming, numOutgoing, numUncertain);
-		}		
-	}
+//	public void updateTracks(Vector<Track> updatedTracks)
+//	{
+//		if (updatedTracks.size() != tracks.size() ||
+//				tracksChangedDirection(updatedTracks))
+//		{
+//			tracks.clear();
+//			tracks.addAll(0, updatedTracks);
+//			
+//			int numOncoming = 0;
+//			int numOutgoing = 0;
+//			int numUncertain = 0;
+//			
+//			// count oncoming and outgoing in current list
+//			for (Track t : tracks)
+//			{
+//				if (t.direction == DIRECTION.ONCOMING)
+//					numOncoming++;
+//				else if (t.direction == DIRECTION.OUTGOING)
+//					numOutgoing++;
+//				else
+//					numUncertain++;
+//			}
+//			
+//			notifyObserver(updatedTracks.size(), numOncoming, numOutgoing, numUncertain);
+//		}		
+//	}
 	
 	/**
 	 * Determines if any tracks have changed directions
 	 * @param updatedTracks
 	 * @return
 	 */
-	private boolean tracksChangedDirection(Vector<Track> updatedTracks)
-	{
-		int numOncoming = 0;
-		int numOutgoing = 0;
-		int numUncertain = 0;
-		
-		// count oncoming and outgoing in current list
-		for (Track t : tracks)
-		{
-			if (t.direction == DIRECTION.ONCOMING)
-				numOncoming++;
-			else if (t.direction == DIRECTION.OUTGOING)
-				numOutgoing++;
-			else
-				numUncertain++;
-		}
-		
-		// subtract from updatedTracks
-		for (Track t : updatedTracks)
-		{
-			if (t.direction == DIRECTION.ONCOMING)
-				numOncoming--;
-			else if (t.direction == DIRECTION.OUTGOING)
-				numOutgoing--;
-			else
-				numUncertain--;
-		}
-		
-		return (numOncoming != 0 || numOutgoing != 0 || numUncertain != 0);
-	}
+//	private boolean tracksChangedDirection(Vector<Track> updatedTracks)
+//	{
+//		int numOncoming = 0;
+//		int numOutgoing = 0;
+//		int numUncertain = 0;
+//		
+//		// count oncoming and outgoing in current list
+//		for (Track t : tracks)
+//		{
+//			if (t.direction == DIRECTION.ONCOMING)
+//				numOncoming++;
+//			else if (t.direction == DIRECTION.OUTGOING)
+//				numOutgoing++;
+//			else
+//				numUncertain++;
+//		}
+//		
+//		// subtract from updatedTracks
+//		for (Track t : updatedTracks)
+//		{
+//			if (t.direction == DIRECTION.ONCOMING)
+//				numOncoming--;
+//			else if (t.direction == DIRECTION.OUTGOING)
+//				numOutgoing--;
+//			else
+//				numUncertain--;
+//		}
+//		
+//		return (numOncoming != 0 || numOutgoing != 0 || numUncertain != 0);
+//	}
 	
 }

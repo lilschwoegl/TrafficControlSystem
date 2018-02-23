@@ -2,6 +2,8 @@ package observer;
 
 import application.SystemUIController;
 import application.Utils;
+import observer.TrafficUpdateObservable.TrackUpdate;
+import tracking.Track;
 
 public class UITrafficObserver implements Observer{
 
@@ -15,6 +17,12 @@ public class UITrafficObserver implements Observer{
 				numUncertain);
 		
 		Utils.onFXThread(SystemUIController.trackLblProp, str);
+	}
+
+	@Override
+	public void update(Track track, TrackUpdate updateType) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

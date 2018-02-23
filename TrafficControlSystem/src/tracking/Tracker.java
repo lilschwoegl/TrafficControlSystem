@@ -12,6 +12,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
+import observer.TrafficUpdateObservable;
 import tracking.Track.DIRECTION;
 
 /**
@@ -55,6 +56,8 @@ public class Tracker extends JTracker {
 				Track tr = new Track(rectArray.get(i).getObjectCenter(), dt,
 						Accel_noise_mag, nextTractID++, rectArray.get(i));		
 				tracks.add(tr);
+				
+				TrafficUpdateObservable.getInstance().trackAdded(tr);
 			}
 		}
 
@@ -136,6 +139,8 @@ public class Tracker extends JTracker {
 				Track tr = new Track(rectArray.get(not_assigned_detections.get(i)).getObjectCenter(), dt,
 						Accel_noise_mag, nextTractID++, rectArray.get(i));
 				tracks.add(tr);
+				
+				TrafficUpdateObservable.getInstance().trackAdded(tr);
 			}
 		}
 
@@ -180,11 +185,15 @@ public class Tracker extends JTracker {
 		for (int i = 0; i < tracks.size(); i++) {
 			long timeDiffSec = Duration.between(tracks.get(i).lastUpdateTime, LocalDateTime.now()).getSeconds();
 			if (tracks.get(i).skipped_frames > maximum_allowed_skipped_frames ||
-					timeDiffSec > max_sec_before_stale) {				
+					timeDiffSec > max_sec_before_stale) {	
+				
+				TrafficUpdateObservable.getInstance().trackRemoved(tracks.get(i));
+				
 				tracks.remove(i);
 				assignment.remove(i);
 				track_removed++;
 				i--;
+				
 			}
 		}
 	}
@@ -244,6 +253,8 @@ public class Tracker extends JTracker {
 			{
 				tracks.get(i).direction = DIRECTION.UNCERTAIN;
 			}
+			
+			TrafficUpdateObservable.getInstance().trackUpdated(tracks.get(i));
 		}
 	}
 }

@@ -1,4 +1,4 @@
-package Simulator;
+package simulator;
 
 import java.awt.Canvas;
 import java.awt.Dimension;

@@ -1,8 +1,6 @@
 package application;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,12 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.opencv.core.Core;
 import org.opencv.core.Core.MinMaxLocResult;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Range;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
@@ -325,10 +321,13 @@ if (true)
 						new Scalar(255,255,255),
 						3);
 				
+				// determine teh lane that the car is in
+				tracker.tracks.get(i).lane = rlc.isInLane(tracker.tracks.get(i).lastDetect.getObjectCenter());
+				
 				// draw the lane the car is in
 				Imgproc.putText(
 						imag, 
-						String.format("Lane: %d", rlc.isInLane(tracker.tracks.get(i).lastDetect.getObjectCenter())), 
+						String.format("Lane: %d", tracker.tracks.get(i).lane), 
 						new Point(lb.x, lb.y), 
 						Core.FONT_HERSHEY_SIMPLEX, 
 						1, 
@@ -342,7 +341,7 @@ if (true)
 		}
 
 		// update the tracks in the traffic observer
-		TrafficUpdateObservable.getInstance().updateTracks(tracker.tracks);
+		//TrafficUpdateObservable.getInstance().updateTracks(tracker.tracks);
 
 	}
 		

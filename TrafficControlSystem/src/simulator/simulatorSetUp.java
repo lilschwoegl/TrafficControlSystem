@@ -1,4 +1,4 @@
-package Simulator;
+package simulator;
 
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
@@ -11,7 +11,7 @@ public class simulatorSetUp implements Runnable {
 	private int width, height;
 	private BufferStrategy buffer;
 	private Graphics g;
-	private simulatorManager manager;
+	private SimulatorManager manager;
 	
 	public simulatorSetUp(String title, int width, int height) {
 		this.title = title;
@@ -21,7 +21,7 @@ public class simulatorSetUp implements Runnable {
 	
 	public void init(){
 		display = new Display(title,width,height);
-		manager = new simulatorManager();
+		manager = new SimulatorManager();
 		manager.init();
 	}
 	
@@ -41,9 +41,9 @@ public class simulatorSetUp implements Runnable {
 		}
 	}
 	
-	public void tick(){
-		manager.tick();
-	}
+	//public void tick(){
+		//manager.tick();
+	//}
 	
 	public void render(){
 		buffer = Display.canvas.getBufferStrategy();
@@ -75,7 +75,7 @@ public class simulatorSetUp implements Runnable {
 			delta = delta + (System.nanoTime()-current)/timePerTick;
 			current = System.nanoTime();
 			if(delta>=1){
-				tick();
+				//tick();
 				render();
 				delta--;
 			}

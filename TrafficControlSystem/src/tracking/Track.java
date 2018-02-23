@@ -36,6 +36,8 @@ public class Track {
 	public DIRECTION direction;
 
 	public DetectedObject lastDetect;
+	
+	public int lane = 0;
 
 	/**
 	 * @param pt
@@ -78,6 +80,17 @@ public class Track {
 			
 		}
 		
+	}
+	
+	public Point getDistChange()
+	{
+		if (trace.size() == 0 || trace.size() == 1)
+			return new Point(0,0);
+		
+		Point p1 = trace.get(trace.size()-1);
+		Point p2 = trace.get(trace.size()-2);
+		
+		return new Point(p2.x - p1.x, p2.y - p1.y);
 	}
 
 	public Point getLastCenter()
