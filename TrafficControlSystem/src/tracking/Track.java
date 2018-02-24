@@ -1,6 +1,7 @@
 package tracking;
 
 import java.text.DateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Vector;
@@ -18,7 +19,7 @@ import application.DetectedObject;
 
 public class Track {
 
-	public enum DIRECTION
+	public enum Aspect
 	{
 		ONCOMING,
 		OUTGOING,
@@ -34,7 +35,7 @@ public class Track {
 	public Kalman KF;
 	public LocalDateTime lastUpdateTime;
 	
-	public DIRECTION direction;
+	public Aspect direction;
 
 	public DetectedObject lastDetect;
 	
@@ -62,7 +63,7 @@ public class Track {
 
 		lastDetect = lastUpdate;
 		
-		direction = DIRECTION.UNCERTAIN;
+		direction = Aspect.UNCERTAIN;
 		
 		lastUpdateTime = LocalDateTime.now();
 	}
@@ -125,5 +126,16 @@ public class Track {
 		Rect rect = getBestPositionRect();
 		
 		return new Point(rect.x + (rect.width) / 2, rect.y + (rect.height) / 2);
+	}
+	
+	public long getSecSinceUpdate()
+	{
+		return Duration.between(lastUpdateTime, LocalDateTime.now()).getSeconds();
+	}
+	
+	public boolean isTrackStale()
+	{
+		return (skipped_frames > CONFIG._maximum_allowed_skipped_frames || 
+				getSecSinceUpdate() > CONFIG._max_sec_before_stale);
 	}
 }

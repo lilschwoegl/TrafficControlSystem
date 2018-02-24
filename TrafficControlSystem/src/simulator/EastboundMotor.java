@@ -14,9 +14,7 @@ public class EastboundMotor extends MotorVehicle{
 	
 	@Override
 	public void tick() {
-		// x += track.getDistChange().x;
 		
-		x = (track.getBestPositionCenter().x * Config.roadStripRatio);
 	}
 
 	@Override
@@ -42,6 +40,12 @@ public class EastboundMotor extends MotorVehicle{
 		if(lane == 2){
 			y = 355;
 		}
+	}
+
+	@Override
+	public void updateTrackPosition() {
+		// TODO Auto-generated method stub
+		x = (track.getBestPositionCenter().x * Config.roadStripRatio);
 	}
 	
 	//methods

@@ -34,7 +34,7 @@ public class SimulatorObserver implements Observer{
 		switch (updateType)
 		{
 			case ADDED:
-				simulator.addCar(track.lane, Direction.SOUTH, track);
+				simulator.addCar(track.lane, Direction.SOUTH, track, false);
 				break;
 			case REMOVED:
 				simulator.removeCar(track);

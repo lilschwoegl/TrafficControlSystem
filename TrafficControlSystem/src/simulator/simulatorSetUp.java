@@ -41,9 +41,9 @@ public class simulatorSetUp implements Runnable {
 		}
 	}
 	
-	//public void tick(){
-		//manager.tick();
-	//}
+	public void tick(){
+		manager.tick();
+	}
 	
 	public void render(){
 		buffer = Display.canvas.getBufferStrategy();
@@ -75,7 +75,7 @@ public class simulatorSetUp implements Runnable {
 			delta = delta + (System.nanoTime()-current)/timePerTick;
 			current = System.nanoTime();
 			if(delta>=1){
-				//tick();
+				tick();
 				render();
 				delta--;
 			}

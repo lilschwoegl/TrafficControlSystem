@@ -13,7 +13,7 @@ import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
 import observer.TrafficUpdateObservable;
-import tracking.Track.DIRECTION;
+import tracking.Track.Aspect;
 
 /**
  * Tracker.java TODO:
@@ -183,9 +183,7 @@ public class Tracker extends JTracker {
 		// -----------------------------------
 
 		for (int i = 0; i < tracks.size(); i++) {
-			long timeDiffSec = Duration.between(tracks.get(i).lastUpdateTime, LocalDateTime.now()).getSeconds();
-			if (tracks.get(i).skipped_frames > maximum_allowed_skipped_frames ||
-					timeDiffSec > max_sec_before_stale) {	
+			if (tracks.get(i).isTrackStale()) {	
 				
 				TrafficUpdateObservable.getInstance().trackRemoved(tracks.get(i));
 				
@@ -242,16 +240,16 @@ public class Tracker extends JTracker {
 				if (tracks.get(i).trace.get(tracks.get(i).trace.size() - 1).y > 
 					tracks.get(i).trace.get(0).y)
 				{
-					tracks.get(i).direction = DIRECTION.ONCOMING;
+					tracks.get(i).direction = Aspect.ONCOMING;
 				}
 				else
 				{
-					tracks.get(i).direction = DIRECTION.OUTGOING;
+					tracks.get(i).direction = Aspect.OUTGOING;
 				}
 			}
 			else
 			{
-				tracks.get(i).direction = DIRECTION.UNCERTAIN;
+				tracks.get(i).direction = Aspect.UNCERTAIN;
 			}
 			
 			TrafficUpdateObservable.getInstance().trackUpdated(tracks.get(i));

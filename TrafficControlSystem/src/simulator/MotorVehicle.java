@@ -2,6 +2,8 @@ package simulator;
 
 import java.awt.Graphics;
 
+import org.opencv.core.Point;
+
 import tracking.Track;
 
 public abstract class MotorVehicle {
@@ -31,14 +33,15 @@ public abstract class MotorVehicle {
 		
 		updateLane(track.lane);
 		
-		tick();
+		updateTrackPosition();
 	}
+	
+	public abstract void updateTrackPosition();
 	
 	public int getLane(){
 		//return lane;	
 		return lane;
 	}
-	
 	
 	
 	public abstract void initLane(int lane);
@@ -62,5 +65,10 @@ public abstract class MotorVehicle {
 	
 	public void render(Graphics g){
 		g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);
+	}
+	
+	protected Point getLaneStartPoint()
+	{
+		return Config.laneStartPoints[direction.ordinal()][lane];
 	}
 }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import tracking.Track;
-import tracking.Track.DIRECTION;
+import tracking.Track.Aspect;
 
 public class TrafficUpdateObservable implements Observable {
 

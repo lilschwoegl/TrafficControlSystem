@@ -33,4 +33,11 @@ public class Config {
 	static Point northBoundLane1 = new Point(320, 600);
 	static Point northBoundLane2 = new Point(355, 600);
 	
+	static Point[][] laneStartPoints = new Point[][] {
+		{northBoundLane1, northBoundLane2},
+		{southBoundLane1, southBoundLane2},
+		{eastBoundLane1, eastBoundLane2},
+		{westBoundLane1, westBoundLane2}
+	};
+	
 }

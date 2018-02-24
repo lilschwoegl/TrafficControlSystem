@@ -13,11 +13,7 @@ public class SouthboundMotor extends MotorVehicle{
 	
 	@Override
 	public void tick() {
-		//y += track.getDistChange().y;
-		
-		y = (track.getBestPositionCenter().y * Config.roadStripRatio);
-				
-		// on frame, 500 is at the bottom, on image, 210 is at bottom
+
 	}
 
 	@Override
@@ -43,6 +39,13 @@ public class SouthboundMotor extends MotorVehicle{
 		if(lane == 1){
 			x = 210;
 		}
+	}
+
+	@Override
+	public void updateTrackPosition() {
+		// TODO Auto-generated method stub
+		
+		y = (track.getBestPositionCenter().y * Config.roadStripRatio);
 	}
 	
 }

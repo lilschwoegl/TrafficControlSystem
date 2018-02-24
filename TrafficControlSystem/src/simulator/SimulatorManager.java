@@ -4,11 +4,15 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
+
+import org.opencv.core.Point;
 
 import observer.SimulatorObserver;
 import observer.TrafficUpdateObservable;
 import simulator.MotorVehicle.Direction;
+import tracking.SimulatedTrack;
 import tracking.Track;
 
 public class SimulatorManager {
@@ -17,6 +21,8 @@ public class SimulatorManager {
 	private long delay;
 	private SimulatorObserver observer;
 	Graphics g;
+	
+	int simulatedCarsCounter = 5000;
 	
 	private HashMap<Integer,MotorVehicle> motors;
 	
@@ -36,6 +42,26 @@ public class SimulatorManager {
 	//method init to initialize 
 	public void init(){
 		loadImage.init();	
+		
+		addCar(
+				1-1, 
+				Direction.WEST, 
+				new SimulatedTrack(
+						new Point(Config.simDisplayWidth,0), 
+						simulatedCarsCounter++, 
+						Direction.WEST,
+						.01),
+				true);
+		
+		addCar(
+				2-1, 
+				Direction.WEST, 
+				new SimulatedTrack(
+						new Point(Config.simDisplayWidth,0), 
+						simulatedCarsCounter++, 
+						Direction.WEST,
+						.05),
+				true);
 	}
 	
 	public void setGraphics(Graphics g)
@@ -45,11 +71,18 @@ public class SimulatorManager {
 	
 	public void tick()
 	{
-		
+		for (MotorVehicle m : motors.values())
+			m.tick();
 	}
 	
-	public void addCar(int lane, Direction dir, Track track)
+	public void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
+		if (simulated)
+		{
+			motors.put(track.track_id, new SimulatedMotor(lane, dir, (SimulatedTrack)track));
+			return;
+		}
+		
 		switch (dir)
 		{
 			case NORTH:

@@ -16,9 +16,7 @@ public class WestboundMotor extends MotorVehicle{
 	
 	@Override
 	public void tick() {
-		// x -= track.getDistChange().x;
 		
-		x = Config.simDisplayWidth - (track.getBestPositionCenter().x * Config.roadStripRatio);
 	}
 
 	@Override
@@ -44,6 +42,12 @@ public class WestboundMotor extends MotorVehicle{
 		if(lane == 2){
 			y = 210;
 		}
+	}
+
+	@Override
+	public void updateTrackPosition() {
+		// TODO Auto-generated method stub
+		x = Config.simDisplayWidth - (track.getBestPositionCenter().x * Config.roadStripRatio);
 	}
 	
 	//methods
