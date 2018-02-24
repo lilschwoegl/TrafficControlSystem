@@ -15,12 +15,6 @@ public class SouthboundMotor extends MotorVehicle{
 	public void tick() {
 		//y += track.getDistChange().y;
 		
-		System.out.printf("CurY=%f, CenterY=%f, Ratio=%f, NewPos=%f\n",
-				y,
-				track.getBestPositionCenter().y,
-				Config.roadStripRatio,
-				(track.getBestPositionCenter().y * Config.roadStripRatio));
-		
 		y = (track.getBestPositionCenter().y * Config.roadStripRatio);
 				
 		// on frame, 500 is at the bottom, on image, 210 is at bottom

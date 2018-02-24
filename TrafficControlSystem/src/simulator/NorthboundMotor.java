@@ -15,7 +15,9 @@ public class NorthboundMotor extends MotorVehicle{
 
 	@Override
 	public void tick() {
-		y -= track.getDistChange().y;
+		// y -= track.getDistChange().y;
+		
+		y = Config.simDisplayHeight - (track.getBestPositionCenter().y * Config.roadStripRatio);
 	}
 
 	@Override
