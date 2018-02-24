@@ -23,12 +23,12 @@ public class NorthboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 
 		if(lane == 1){
-			x = 320;
-			y = 600;
+			x = Config.northBoundLane1.x;
+			y = Config.northBoundLane1.y;
 		}
 		if(lane == 2){
-			x = 355;
-			y = 600;
+			x = Config.northBoundLane2.x;
+			y = Config.northBoundLane2.y;
 		}
 	}
 

@@ -24,12 +24,12 @@ public class WestboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 
 		if(lane == 1){
-			x = 600;
-			y = 245;
+			x = Config.westBoundLane1.x;
+			y = Config.westBoundLane1.y;
 		}
 		if(lane == 2){
-			x = 600;
-			y = 210;
+			x = Config.westBoundLane2.x;
+			y = Config.westBoundLane2.y;
 		}
 	}
 

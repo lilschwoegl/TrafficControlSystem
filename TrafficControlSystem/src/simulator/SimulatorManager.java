@@ -1,10 +1,12 @@
 package simulator;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
+import observer.SimulatorObserver;
 import observer.TrafficUpdateObservable;
 import simulator.MotorVehicle.Direction;
 import tracking.Track;

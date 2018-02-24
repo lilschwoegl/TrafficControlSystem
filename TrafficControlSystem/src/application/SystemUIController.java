@@ -159,6 +159,9 @@ public class SystemUIController {
 
 					try {
 						frame = videoFeed.grabFrame();
+						
+						System.out.println(frame.size().height);
+						System.out.println(frame.size().width);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -322,7 +325,7 @@ if (true)
 						3);
 				
 				// determine teh lane that the car is in
-				tracker.tracks.get(i).lane = rlc.isInLane(tracker.tracks.get(i).lastDetect.getObjectCenter());
+				tracker.tracks.get(i).lane = rlc.isInLane(tracker.tracks.get(i).getBestPositionCenter());
 				
 				// draw the lane the car is in
 				Imgproc.putText(

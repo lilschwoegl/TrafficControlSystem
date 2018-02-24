@@ -1,7 +1,5 @@
 package tracking;
 
-import java.awt.Toolkit;
-
 import org.opencv.core.Scalar;
 
 /**
@@ -24,8 +22,8 @@ public class CONFIG {
 	
 	public static double _dt = 0.2;
 	public static double _Accel_noise_mag = 0.5;
-	public static double _dist_thres = 360;
+	public static double _dist_thres = 100;
 	public static int _maximum_allowed_skipped_frames = 10;
 	public static int _max_trace_length = 10;
-	public static int _max_sec_before_stale = 2;
+	public static int _max_sec_before_stale = 5; // 2 sec for better computer but my mac sucks
 }

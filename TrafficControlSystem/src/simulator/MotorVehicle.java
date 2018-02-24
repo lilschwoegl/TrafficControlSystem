@@ -5,8 +5,8 @@ import java.awt.Graphics;
 import tracking.Track;
 
 public abstract class MotorVehicle {
-	protected int x;
-	protected int y;
+	protected double x;
+	protected double y;
 	protected int lane;
 	protected double speed;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
@@ -61,6 +61,6 @@ public abstract class MotorVehicle {
 	}
 	
 	public void render(Graphics g){
-		g.drawImage(loadImage.upCarImage, x, y, 30, 45, null);
+		g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);
 	}
 }

@@ -22,12 +22,12 @@ public class EastboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 
 		if(lane == 1){
-			x = 0;
-			y = 320;
+			x = Config.eastBoundLane1.x;
+			y = Config.eastBoundLane1.y;
 		}
 		if(lane == 2){
-			x = 0;
-			y = 355;
+			x = Config.eastBoundLane2.x;
+			y = Config.eastBoundLane2.y;
 		}
 	}
 

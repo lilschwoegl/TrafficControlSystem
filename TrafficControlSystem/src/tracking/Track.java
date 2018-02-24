@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Vector;
 
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import application.DetectedObject;
 
@@ -96,5 +97,33 @@ public class Track {
 	public Point getLastCenter()
 	{
 		return KF.getLastResult();
+	}
+	
+	public Rect getBestPositionRect()
+	{
+		Point lb, rt;
+
+		// if there was a recent detect, use it to draw the bounding box
+		// otherwise use the predicted position of the detect
+		if (skipped_frames < 1)
+		{
+
+			lb = lastDetect.getLeftBot();
+			rt = lastDetect.getRightTop();
+		}
+		else
+		{
+			lb = new Point(getLastCenter().x - lastDetect.getWidth() / 2, getLastCenter().y - lastDetect.getHeight() / 2);
+			rt = new Point(getLastCenter().x + lastDetect.getWidth() / 2, getLastCenter().y + lastDetect.getHeight() / 2);
+		}
+		
+		return new Rect(lb, rt);
+	}
+	
+	public Point getBestPositionCenter()
+	{
+		Rect rect = getBestPositionRect();
+		
+		return new Point(rect.x + (rect.width) / 2, rect.y + (rect.height) / 2);
 	}
 }
