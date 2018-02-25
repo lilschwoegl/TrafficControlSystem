@@ -1,11 +1,13 @@
 package tracking;
 
 import java.text.DateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Vector;
 
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 
 import application.DetectedObject;
 
@@ -17,7 +19,7 @@ import application.DetectedObject;
 
 public class Track {
 
-	public enum DIRECTION
+	public enum Aspect
 	{
 		ONCOMING,
 		OUTGOING,
@@ -33,9 +35,14 @@ public class Track {
 	public Kalman KF;
 	public LocalDateTime lastUpdateTime;
 	
-	public DIRECTION direction;
+	// aspect to the viewer
+	public Aspect direction;
 
+	// last successful detection
 	public DetectedObject lastDetect;
+	
+	// lane that the track is in
+	public int lane = 0;
 
 	/**
 	 * @param pt
@@ -59,7 +66,7 @@ public class Track {
 
 		lastDetect = lastUpdate;
 		
-		direction = DIRECTION.UNCERTAIN;
+		direction = Aspect.UNCERTAIN;
 		
 		lastUpdateTime = LocalDateTime.now();
 	}
@@ -75,13 +82,61 @@ public class Track {
 			case UNCERTAIN:
 			default:
 				return "UNCERTAIN";
-			
 		}
+	}
+	
+	public Point getDistChange()
+	{
+		if (trace.size() == 0 || trace.size() == 1)
+			return new Point(0,0);
 		
+		Point p1 = trace.get(trace.size()-1);
+		Point p2 = trace.get(trace.size()-2);
+		
+		return new Point(p2.x - p1.x, p2.y - p1.y);
 	}
 
 	public Point getLastCenter()
 	{
 		return KF.getLastResult();
+	}
+	
+	public Rect getBestPositionRect()
+	{
+		Point lb, rt;
+
+		// if there was a recent detect, use it to draw the bounding box
+		// otherwise use the predicted position of the detect
+		if (skipped_frames < 1)
+		{
+
+			lb = lastDetect.getLeftBot();
+			rt = lastDetect.getRightTop();
+		}
+		else
+		{
+			lb = new Point(getLastCenter().x - lastDetect.getWidth() / 2, getLastCenter().y - lastDetect.getHeight() / 2);
+			rt = new Point(getLastCenter().x + lastDetect.getWidth() / 2, getLastCenter().y + lastDetect.getHeight() / 2);
+		}
+		
+		return new Rect(lb, rt);
+	}
+	
+	public Point getBestPositionCenter()
+	{
+		Rect rect = getBestPositionRect();
+		
+		return new Point(rect.x + (rect.width) / 2, rect.y + (rect.height) / 2);
+	}
+	
+	public long getSecSinceUpdate()
+	{
+		return Duration.between(lastUpdateTime, LocalDateTime.now()).getSeconds();
+	}
+	
+	public boolean isTrackStale()
+	{
+		return (skipped_frames > TrackerConfig._maximum_allowed_skipped_frames || 
+				getSecSinceUpdate() > TrackerConfig._max_sec_before_stale);
 	}
 }

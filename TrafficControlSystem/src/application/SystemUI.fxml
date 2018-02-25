@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="536.0" prefWidth="583.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.SystemUIController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="703.0" prefWidth="980.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.SystemUIController">
   <bottom>
     <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0" BorderPane.alignment="CENTER">
       <children>
@@ -18,9 +18,34 @@
   <center>
     <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
       <children>
-        <ImageView fx:id="imageOutputImgvw" fitHeight="359.5594713656388" fitWidth="583.0" pickOnBounds="true" preserveRatio="true" />
+        <ImageView fx:id="imageOutputImgvw" fitHeight="350.92511734872494" fitWidth="569.0" pickOnBounds="true" preserveRatio="true" />
         <Label fx:id="trackLbl" alignment="CENTER" text="Label" textAlignment="LEFT" />
       </children>
     </VBox>
   </center>
+  <left>
+    <VBox prefHeight="450.0" prefWidth="189.0" BorderPane.alignment="CENTER">
+      <children>
+        <Label text="rho" />
+        <Slider fx:id="rho_s" value="2.0" />
+        <Label text="threshold" />
+        <Slider fx:id="threshold_s" value="5.0" />
+        <Label text="min line length" />
+        <Slider fx:id="minLineLength_s" value="10.0" />
+        <Label text="max line gap" />
+        <Slider fx:id="maxLineGap_s" value="20.0" />
+        <Label fx:id="houghLbl" text="Label" />
+      </children>
+    </VBox>
+  </left>
+  <right>
+    <VBox prefHeight="442.0" prefWidth="166.0">
+      <children>
+        <ImageView fx:id="img1vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+        <ImageView fx:id="img2vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+        <ImageView fx:id="img3vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+        <ImageView fx:id="img4vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
+      </children>
+    </VBox>
+  </right>
 </BorderPane>

@@ -4,7 +4,10 @@ import java.lang.String;
 import java.lang.Double;
 import java.util.*;
 
-public class TrafficController {
+import observer.TrafficObserver;
+import observer.TrafficUpdateObservable;
+
+public class TrafficController implements TrafficObserver{
 	public enum TravelDirection { North, South, East, West }
 	
 	// system settings. TODO: move to config file
@@ -47,5 +50,11 @@ public class TrafficController {
 		return trafficLights.containsKey(forDirection)
 			? trafficLights.get(forDirection)
 			: null;
+	}
+
+	@Override
+	public void update(int trackId, double distToIntersection) {
+		// TODO Auto-generated method stub
+		System.out.printf("Track %d is %f pixels from intersection\n", trackId, distToIntersection);
 	}
 }

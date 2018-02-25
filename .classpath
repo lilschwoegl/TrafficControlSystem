@@ -4,7 +4,6 @@
 	<classpathentry kind="lib" path="TrafficControlSystem/lib/opencv-340.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="/Users/Christine/git/TrafficControlSystem/TrafficControlSystem/lib/opencv-340.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCv 3.4.0"/>
 	<classpathentry kind="lib" path="res"/>
 	<classpathentry kind="lib" path="TrafficControlSystem/res"/>
