@@ -67,9 +67,6 @@ public class Lane {
 			double xStartDiff = line.getStartPoint().x - this.line.getStartPoint().x;
 			double xEndDiff = line.getEndPoint().x - this.line.getEndPoint().x;
 			
-			//System.out.printf("X Start Diff: %f, X End Diff: %f, Takeaway Start: %f, Takeaway End: %f\n", 
-			//		xStartDiff, xEndDiff, xStartDiff * xTake, xEndDiff * xTake);
-			
 			this.line.setStartX(this.line.getStartPoint().x + (xStartDiff * xTake));
 			this.line.setEndX(this.line.getEndPoint().x + (xEndDiff * xTake));
 		}

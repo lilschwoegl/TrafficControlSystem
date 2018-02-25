@@ -10,7 +10,7 @@ import org.opencv.core.Scalar;
  * Email:sonkdbk@gmail.com
  */
 
-public class CONFIG {
+public class TrackerConfig {
 
 	public static Scalar Colors[] = { 
 		new Scalar(255, 0, 0), 

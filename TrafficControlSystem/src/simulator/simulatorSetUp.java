@@ -9,18 +9,26 @@ public class simulatorSetUp implements Runnable {
 	private Display display;
 	private String title;
 	private int width, height;
+	private int posX, posY;
 	private BufferStrategy buffer;
 	private Graphics g;
 	private SimulatorManager manager;
 	
 	public simulatorSetUp(String title, int width, int height) {
+		this(title, width, height, 0, 0);
+	}
+	
+	public simulatorSetUp(String title, int width, int height, int posX, int posY)
+	{
 		this.title = title;
 		this.width = width;
 		this.height = height;
+		this.posX = posX;
+		this.posY = posY;
 	}
 	
 	public void init(){
-		display = new Display(title,width,height);
+		display = new Display(title,width,height,posX,posY);
 		manager = new SimulatorManager();
 		manager.init();
 	}

@@ -35,10 +35,13 @@ public class Track {
 	public Kalman KF;
 	public LocalDateTime lastUpdateTime;
 	
+	// aspect to the viewer
 	public Aspect direction;
 
+	// last successful detection
 	public DetectedObject lastDetect;
 	
+	// lane that the track is in
 	public int lane = 0;
 
 	/**
@@ -79,9 +82,7 @@ public class Track {
 			case UNCERTAIN:
 			default:
 				return "UNCERTAIN";
-			
 		}
-		
 	}
 	
 	public Point getDistChange()
@@ -135,7 +136,7 @@ public class Track {
 	
 	public boolean isTrackStale()
 	{
-		return (skipped_frames > CONFIG._maximum_allowed_skipped_frames || 
-				getSecSinceUpdate() > CONFIG._max_sec_before_stale);
+		return (skipped_frames > TrackerConfig._maximum_allowed_skipped_frames || 
+				getSecSinceUpdate() > TrackerConfig._max_sec_before_stale);
 	}
 }

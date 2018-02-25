@@ -4,36 +4,39 @@ import org.opencv.core.Point;
 
 public class Config {
 
-	static double simDisplayWidth = 600;
-	static double simDisplayHeight = 600;
+	public static double simDisplayWidth = 600;
+	public static double simDisplayHeight = 600;
 	
-	static double frameHeight = 1080;
-	static double frameWidth = 1920;
+	public static double videoDisplayWidth = 950;
+	public static double videoDisplayHeight = 700;
 	
-	static double widthRatio = frameWidth / simDisplayWidth;
-	static double heightRatio = frameHeight / simDisplayHeight;
+	public static double frameHeight = 1080;
+	public static double frameWidth = 1920;
+	
+	public static double widthRatio = frameWidth / simDisplayWidth;
+	public static double heightRatio = frameHeight / simDisplayHeight;
 	
 	// length of road before intersection
-	static double roadStripLength = 210;
-	static double roadStripFudgeFactor = 50;
-	static double roadStripFudged = roadStripLength - roadStripFudgeFactor;
+	public static double roadStripLength = 210;
+	public static double roadStripFudgeFactor = 50;
+	public static double roadStripFudged = roadStripLength - roadStripFudgeFactor;
 	
-	static double roadStripRatio = roadStripFudged / frameHeight;
+	public static double roadStripRatio = roadStripFudged / frameHeight;
 	
 	// lane information on intersection image
-	static Point eastBoundLane1 = new Point(0, 320);
-	static Point eastBoundLane2 = new Point(0, 355);
+	public static Point eastBoundLane1 = new Point(0, 320);
+	public static Point eastBoundLane2 = new Point(0, 355);
 	
-	static Point westBoundLane1 = new Point(600, 245);
-	static Point westBoundLane2 = new Point(600, 210);
+	public static Point westBoundLane1 = new Point(600, 245);
+	public static Point westBoundLane2 = new Point(600, 210);
 	
-	static Point southBoundLane1 = new Point(250, 0);
-	static Point southBoundLane2 = new Point(210, 0);
+	public static Point southBoundLane1 = new Point(250, 0);
+	public static Point southBoundLane2 = new Point(210, 0);
 	
-	static Point northBoundLane1 = new Point(320, 600);
-	static Point northBoundLane2 = new Point(355, 600);
+	public static Point northBoundLane1 = new Point(320, 600);
+	public static Point northBoundLane2 = new Point(355, 600);
 	
-	static Point[][] laneStartPoints = new Point[][] {
+	public static Point[][] laneStartPoints = new Point[][] {
 		{northBoundLane1, northBoundLane2},
 		{southBoundLane1, southBoundLane2},
 		{eastBoundLane1, eastBoundLane2},

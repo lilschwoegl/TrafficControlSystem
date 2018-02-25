@@ -29,7 +29,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import observer.TrackUpdateObservable;
 import observer.UITrackObserver;
-import tracking.CONFIG;
+import tracking.TrackerConfig;
 import tracking.Tracker;
 
 public class SystemUIController {
@@ -87,12 +87,12 @@ public class SystemUIController {
 		this.houghLbl.textProperty().bind(houghLblProp);
 
 		// create a new tracker for the detected objects
-		tracker = new Tracker((float)CONFIG._dt,
-				(float)CONFIG._Accel_noise_mag,
-				CONFIG._dist_thres,
-				CONFIG._maximum_allowed_skipped_frames,
-				CONFIG._max_trace_length,
-				CONFIG._max_sec_before_stale);
+		tracker = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale);
 
 		// load the darknet yolo network
 		if (useVocYolo)
@@ -246,7 +246,7 @@ if (true)
 								imag, 
 								tracker.tracks.get(i).trace.get(jt - 1), 
 								tracker.tracks.get(i).trace.get(jt), 
-								CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
+								TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
 								5, 4, 0);
 	
 					}
@@ -291,7 +291,7 @@ if (true)
 						imag,
 						lb,
 						rt, 
-						CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
+						TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
 						5);
 				
 				// draw the box to put info in

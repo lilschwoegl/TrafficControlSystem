@@ -1,11 +1,15 @@
 package application;
 	
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
 import org.opencv.core.Core;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import simulator.Config;
 import simulator.simulatorSetUp;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -22,12 +26,20 @@ public class Main extends Application {
 			// store the root element so that the controllers can use it
 			BorderPane rootElement = (BorderPane) loader.load();
 			// create and style a scene
-			Scene scene = new Scene(rootElement, 980, 700);
+			Scene scene = new Scene(rootElement, Config.videoDisplayWidth, Config.videoDisplayHeight);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			// create the stage with the given title and the previously created
 			// scene
-			primaryStage.setTitle("JavaFX meets OpenCV");
+			primaryStage.setTitle("Video Processing");
 			primaryStage.setScene(scene);
+			
+			// get screen size
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			
+			// set window position
+			primaryStage.setX(screenSize.getWidth() / 2);
+			primaryStage.setY(screenSize.getHeight() / 2 - scene.getHeight() / 2);
+			
 			// show the GUI
 			primaryStage.show();
 			
@@ -36,7 +48,11 @@ public class Main extends Application {
 			{
 				public void run()
 				{
-					simulatorSetUp simulator = new simulatorSetUp("Traffic Controller Simulator", 600, 600);
+					int width = (int)Config.simDisplayWidth;
+					int height = (int)Config.simDisplayHeight;
+					int posX = (int) (screenSize.getWidth() / 2 - width);
+					int posY = (int) (screenSize.getHeight() / 2 - height / 2);
+					simulatorSetUp simulator = new simulatorSetUp("Traffic Controller Simulator", width, height, posX, posY);
 					simulator.start();
 				}
 			};
