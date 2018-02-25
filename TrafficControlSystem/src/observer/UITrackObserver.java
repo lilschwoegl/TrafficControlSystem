@@ -2,10 +2,10 @@ package observer;
 
 import application.SystemUIController;
 import application.Utils;
-import observer.TrafficUpdateObservable.TrackUpdate;
+import observer.TrackUpdateObservable.TrackUpdate;
 import tracking.Track;
 
-public class UITrafficObserver implements Observer{
+public class UITrackObserver implements TrackObserver{
 
 	@Override
 	public void update(int numTracks, int numOncoming, int numOutgoing, int numUncertain) {

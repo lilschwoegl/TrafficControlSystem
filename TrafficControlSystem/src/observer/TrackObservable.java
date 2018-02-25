@@ -1,21 +1,21 @@
 package observer;
 
-import observer.TrafficUpdateObservable.TrackUpdate;
+import observer.TrackUpdateObservable.TrackUpdate;
 import tracking.Track;
 
-public interface Observable {
+public interface TrackObservable {
 	
 	/**
 	 * Subscribes an observer
 	 * @param o Observer to subscribe
 	 */
-	public void addObserver(Observer o);
+	public void addObserver(TrackObserver o);
 	
 	/**
 	 * Unsubscribes an observer
 	 * @param o Observer to unsubscribe
 	 */
-	public void removeObserver(Observer o);
+	public void removeObserver(TrackObserver o);
 	
 	/**
 	 * Notifies all subscribers of a change

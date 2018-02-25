@@ -12,7 +12,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
-import observer.TrafficUpdateObservable;
+import observer.TrackUpdateObservable;
 import tracking.Track.Aspect;
 
 /**
@@ -57,7 +57,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));		
 				tracks.add(tr);
 				
-				TrafficUpdateObservable.getInstance().trackAdded(tr);
+				TrackUpdateObservable.getInstance().trackAdded(tr);
 			}
 		}
 
@@ -140,7 +140,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));
 				tracks.add(tr);
 				
-				TrafficUpdateObservable.getInstance().trackAdded(tr);
+				TrackUpdateObservable.getInstance().trackAdded(tr);
 			}
 		}
 
@@ -185,7 +185,7 @@ public class Tracker extends JTracker {
 		for (int i = 0; i < tracks.size(); i++) {
 			if (tracks.get(i).isTrackStale()) {	
 				
-				TrafficUpdateObservable.getInstance().trackRemoved(tracks.get(i));
+				TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i));
 				
 				tracks.remove(i);
 				assignment.remove(i);
@@ -252,7 +252,7 @@ public class Tracker extends JTracker {
 				tracks.get(i).direction = Aspect.UNCERTAIN;
 			}
 			
-			TrafficUpdateObservable.getInstance().trackUpdated(tracks.get(i));
+			TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i));
 		}
 	}
 }

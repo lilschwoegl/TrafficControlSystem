@@ -9,7 +9,9 @@ import java.util.Random;
 
 import org.opencv.core.Point;
 
+import application.TrafficController;
 import observer.SimulatorObserver;
+import observer.TrackUpdateObservable;
 import observer.TrafficUpdateObservable;
 import simulator.MotorVehicle.Direction;
 import tracking.SimulatedTrack;
@@ -26,6 +28,8 @@ public class SimulatorManager {
 	
 	private HashMap<Integer,MotorVehicle> motors;
 	
+	TrafficController trafficController;
+	
 	//constructor
 	public SimulatorManager(){
 		//motor = new objectMotor();
@@ -35,7 +39,10 @@ public class SimulatorManager {
 		delay = 2000;
 		
 		observer = new SimulatorObserver(this);
-		TrafficUpdateObservable.getInstance().addObserver(observer);
+		TrackUpdateObservable.getInstance().addObserver(observer);
+		
+		trafficController = new TrafficController();
+		TrafficUpdateObservable.getInstance().addObserver(trafficController);
 	}
 	
 	//methods
@@ -72,7 +79,9 @@ public class SimulatorManager {
 	public void tick()
 	{
 		for (MotorVehicle m : motors.values())
+		{
 			m.tick();
+		}
 	}
 	
 	public void addCar(int lane, Direction dir, Track track, boolean simulated)
@@ -110,6 +119,9 @@ public class SimulatorManager {
 	public void updateCar(Track track)
 	{
 		motors.get(track.track_id).updateTrack(track);
+		
+		// notify observers of update
+		motors.get(track.track_id).notifyObservers();
 	}
 	
 	

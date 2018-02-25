@@ -1,9 +1,9 @@
 package observer;
 
-import observer.TrafficUpdateObservable.TrackUpdate;
+import observer.TrackUpdateObservable.TrackUpdate;
 import tracking.Track;
 
-public interface Observer {
+public interface TrackObserver {
 	
 	public void update(int numTracks, int numOncoming, int numOutgoing, int numUncertain);
 	

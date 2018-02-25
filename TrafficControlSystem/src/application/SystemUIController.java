@@ -27,8 +27,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import observer.TrafficUpdateObservable;
-import observer.UITrafficObserver;
+import observer.TrackUpdateObservable;
+import observer.UITrackObserver;
 import tracking.CONFIG;
 import tracking.Tracker;
 
@@ -67,7 +67,7 @@ public class SystemUIController {
 	static Mat kalman;
 	
 
-	UITrafficObserver trafficObserver;
+	UITrackObserver trafficObserver;
 	
 	float confidenceThreshold  = (float)0.1;	
 	float probabilityThreshold = (float)0.2;
@@ -124,8 +124,8 @@ public class SystemUIController {
 		}
 
 		// subscribe observers to listen for traffic updates 
-		trafficObserver = new UITrafficObserver();
-		TrafficUpdateObservable.getInstance().addObserver(trafficObserver);
+		trafficObserver = new UITrackObserver();
+		TrackUpdateObservable.getInstance().addObserver(trafficObserver);
 	}
 
 	@FXML
@@ -160,8 +160,8 @@ public class SystemUIController {
 					try {
 						frame = videoFeed.grabFrame();
 						
-						System.out.println(frame.size().height);
-						System.out.println(frame.size().width);
+						//System.out.println(frame.size().height);
+						//System.out.println(frame.size().width);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}

@@ -1,11 +1,11 @@
 package observer;
 
 import simulator.SimulatorManager;
-import observer.TrafficUpdateObservable.TrackUpdate;
+import observer.TrackUpdateObservable.TrackUpdate;
 import simulator.MotorVehicle.Direction;
 import tracking.Track;
 
-public class SimulatorObserver implements Observer{
+public class SimulatorObserver implements TrackObserver{
 
 	SimulatorManager simulator;
 	

@@ -39,6 +39,8 @@ public class SimulatedMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 		((SimulatedTrack)track).updateTrackPosition();
 		updateTrackPosition();
+
+		notifyObservers();
 	}
 
 }

@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import org.opencv.core.Point;
 
+import observer.TrafficUpdateObservable;
 import tracking.Track;
 
 public abstract class MotorVehicle {
@@ -43,10 +44,32 @@ public abstract class MotorVehicle {
 		return lane;
 	}
 	
+	public void notifyObservers()
+	{
+		TrafficUpdateObservable.getInstance().updateTraffic(track.track_id, distToIntersection());
+	}
+	
 	
 	public abstract void initLane(int lane);
 	
 	public abstract void updateLane(int lane);
+	
+	public double distToIntersection()
+	{
+		switch (direction)
+		{
+			case NORTH:
+				return y - (Config.simDisplayHeight - Config.roadStripLength);
+			case SOUTH:
+				return Config.roadStripLength - y;
+			case EAST:
+				return Config.roadStripLength - x;
+			case WEST:
+				return x - (Config.simDisplayWidth - Config.roadStripLength);
+		}
+		
+		return -99999;
+	}
 	
 	public Direction getDirection()
 	{
