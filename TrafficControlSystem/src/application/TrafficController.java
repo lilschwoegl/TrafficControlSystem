@@ -55,6 +55,7 @@ public class TrafficController implements TrafficObserver{
 	@Override
 	public void update(int trackId, double distToIntersection) {
 		// TODO Auto-generated method stub
-		System.out.printf("Track %d is %f pixels from intersection\n", trackId, distToIntersection);
+		if (distToIntersection > -50)
+			System.out.printf("TrafficController: Track %d is %f pixels from intersection\n", trackId, distToIntersection);
 	}
 }

@@ -1,15 +1,17 @@
 package simulator;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 import org.opencv.core.Point;
 
+import javafx.scene.text.Font;
 import observer.TrafficUpdateObservable;
 import tracking.Track;
 
 public abstract class MotorVehicle {
-	protected double x;
-	protected double y;
+	protected double x = -100;
+	protected double y = -100;
 	protected int lane;
 	protected double speed;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
@@ -87,7 +89,11 @@ public abstract class MotorVehicle {
 	}
 	
 	public void render(Graphics g){
+		
 		g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);
+		
+		g.setColor(Color.WHITE);
+		g.drawString(String.format("%.0f", distToIntersection()), (int)x+5, (int)y+30);
 	}
 	
 	protected Point getLaneStartPoint()

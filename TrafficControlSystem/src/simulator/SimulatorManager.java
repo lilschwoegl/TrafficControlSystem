@@ -50,6 +50,7 @@ public class SimulatorManager {
 	public void init(){
 		loadImage.init();	
 		
+		// TODO: Clean this up...
 		addCar(
 				1-1, 
 				Direction.WEST, 
@@ -67,6 +68,16 @@ public class SimulatorManager {
 						new Point(Config.simDisplayWidth,0), 
 						simulatedCarsCounter++, 
 						Direction.WEST,
+						.05),
+				true);
+		
+		addCar(
+				2-1, 
+				Direction.EAST, 
+				new SimulatedTrack(
+						new Point(0,0), 
+						simulatedCarsCounter++, 
+						Direction.EAST,
 						.05),
 				true);
 	}
@@ -135,7 +146,6 @@ public class SimulatorManager {
 		{
 			mv.render(g);
 		}
-		
 		
 	}
 }

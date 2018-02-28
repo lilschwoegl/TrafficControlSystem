@@ -13,12 +13,6 @@ public class SimulatorObserver implements TrackObserver{
 	{
 		simulator = sim;
 	}
-	
-	@Override
-	public void update(int numTracks, int numOncoming, int numOutgoing, int numUncertain) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void update(Track track, TrackUpdate updateType) {
