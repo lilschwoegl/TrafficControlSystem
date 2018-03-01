@@ -6,6 +6,8 @@ import java.util.*;
 
 import observer.TrafficObserver;
 import observer.TrafficUpdateObservable;
+import simulator.MotorVehicle;
+import tracking.Track;
 
 public class TrafficController implements TrafficObserver{
 	public enum TravelDirection { North, South, East, West }
@@ -53,9 +55,9 @@ public class TrafficController implements TrafficObserver{
 	}
 
 	@Override
-	public void update(int trackId, double distToIntersection) {
+	public void update(MotorVehicle motor) {
 		// TODO Auto-generated method stub
-		if (distToIntersection > -50)
-			System.out.printf("TrafficController: Track %d is %f pixels from intersection\n", trackId, distToIntersection);
+		if (motor.distToIntersection() > -50)
+			System.out.printf("TrafficController: Track %d is %f pixels from intersection\n", motor.getTrack().track_id, motor.distToIntersection());
 	}
 }

@@ -1,6 +1,10 @@
 package observer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import simulator.MotorVehicle;
+import tracking.Track;
 
 public class TrafficUpdateObservable implements TrafficObservable {
 	
@@ -39,17 +43,17 @@ public class TrafficUpdateObservable implements TrafficObservable {
 	}
 
 	@Override
-	public void notifyObserver(int trackId, double distToIntersection) {
+	public void notifyObserver(MotorVehicle motor) {
 		// TODO Auto-generated method stub
 		for (TrafficObserver observer : observers)
 		{
-			observer.update(trackId, distToIntersection);
+			observer.update(motor);
 		}
 	}
 	
-	public void updateTraffic(int trackId, double distToIntersection)
+	public void updateTraffic(MotorVehicle motor)
 	{
-		notifyObserver(trackId, distToIntersection);
+		notifyObserver(motor);
 	}
 	
 }

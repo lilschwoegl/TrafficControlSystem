@@ -17,7 +17,7 @@ public class VideoInput extends VideoCapture{
 	// getting to work on windows:
 	// https://stackoverflow.com/questions/23199886/opencv-java-binds-videocapture-from-file-failing-silently
 	// http://kronoskoders.logdown.com/posts/256664-installing-opencv-and-ffmpeg-on-windows
-	
+	// https://transportation.arlingtonva.us/live-traffic-cameras/
 	/**
 	 * URLs that will be referenced when a feedName below is selected
 	 */
@@ -29,7 +29,7 @@ public class VideoInput extends VideoCapture{
 		"video/cars.mp4",
 		"video/dog_people.mp4",
 		"video/Autonomous Intersection in Action.mp4",
-		"video/crashes.mp4"
+		"https://itsvideo.arlingtonva.us:8011/live/cam74.stream/playlist.m3u8"
 	};
 	
 	/**

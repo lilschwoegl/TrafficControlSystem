@@ -73,6 +73,9 @@ public class SystemUIController {
 	float probabilityThreshold = (float)0.2;
 	boolean drawTrace = true;
 	boolean extrapDetects = true;
+	
+	boolean testCaffe = false;
+	static Net caffe;
 
 	public void initialize()
 	{
@@ -126,6 +129,22 @@ public class SystemUIController {
 		// subscribe observers to listen for traffic updates 
 		trafficObserver = new UITrackObserver();
 		TrackUpdateObservable.getInstance().addObserver(trafficObserver);
+		
+		
+		// try the caffe
+		if (testCaffe)
+		{
+			try {
+				DetectedObject.loadClassNames("caffe/synset_words.txt");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			caffe = Dnn.readNetFromCaffe(
+					"caffe/bvlc_googlenet.prototxt.txt", 
+					"caffe/bvlc_googlenet.caffemodel");
+		}
 	}
 
 	@FXML
@@ -206,9 +225,7 @@ public class SystemUIController {
 
 		Mat output = new Mat();
 
-		// Tracker code
-		// https://github.com/Franciscodesign/Moving-Target-Tracking-with-OpenCV/blob/master/src/sonkd/Main.java
-		Vector<DetectedObject> rects = detectObjectYolo(curFrame);
+		
 
 		imag = curFrame.clone();
 		orgin = curFrame.clone();
@@ -216,10 +233,41 @@ public class SystemUIController {
 		
 		detectLanes(imag);
 		
+		// try caffe
+		if (testCaffe)
+		{
+			// get blobs
+			Mat inputBlob = Dnn.blobFromImage(imag, 1.0, new Size(224,224), new Scalar(104,117,123), true, true);
+			caffe.setInput(inputBlob, "data");
+			Mat prob = caffe.forward("prob");
+			
+			updateImageView(img1vb, Utils.mat2Image(inputBlob));
+			
+			for (int i = 0; i < 5; i++)
+			{
+				caffe.setInput(inputBlob, "data");
+				prob = caffe.forward("prob");
+			}
+			
+			Mat probMat = prob.reshape(1, 1);
+			MinMaxLocResult res = Core.minMaxLoc(prob);
+			
+			double classProb = res.maxVal;
+			double classId = res.maxLoc.x;
+			
+			System.out.printf("Prob %.0f: %s\n",
+					classProb * 100,
+					DetectedObject.classes.get((int)classId));
+		}
 		
 		
-if (true)
+if (!testCaffe)
 {
+	
+	// Tracker code
+			// https://github.com/Franciscodesign/Moving-Target-Tracking-with-OpenCV/blob/master/src/sonkd/Main.java
+			Vector<DetectedObject> rects = detectObjectYolo(curFrame);
+			
 		// update the tracker if there are detected objects,
 		// otherwise update the kalman filter
 		if (rects.size() > 0)

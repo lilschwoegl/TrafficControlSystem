@@ -32,6 +32,8 @@ public class DetectedObject {
 		BufferedReader br = new BufferedReader(new FileReader(path));
 		String line;
 		
+		classes.clear();
+		
 		// read all lines in the file
 		while ((line = br.readLine()) != null)
 		{

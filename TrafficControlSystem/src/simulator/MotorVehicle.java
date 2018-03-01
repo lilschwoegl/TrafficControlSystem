@@ -39,6 +39,11 @@ public abstract class MotorVehicle {
 		updateTrackPosition();
 	}
 	
+	public Track getTrack()
+	{
+		return track;
+	}
+	
 	public abstract void updateTrackPosition();
 	
 	public int getLane(){
@@ -48,7 +53,7 @@ public abstract class MotorVehicle {
 	
 	public void notifyObservers()
 	{
-		TrafficUpdateObservable.getInstance().updateTraffic(track.track_id, distToIntersection());
+		TrafficUpdateObservable.getInstance().updateTraffic(this);
 	}
 	
 	

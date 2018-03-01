@@ -43,22 +43,25 @@ public class Main extends Application {
 			// show the GUI
 			primaryStage.show();
 			
-			// create a new thread for the simulator
-			Thread simulator = new Thread()
+			if (Config.runSimulator)
 			{
-				public void run()
+				// create a new thread for the simulator
+				Thread simulator = new Thread()
 				{
-					int width = (int)Config.simDisplayWidth;
-					int height = (int)Config.simDisplayHeight;
-					int posX = (int) (screenSize.getWidth() / 2 - width);
-					int posY = (int) (screenSize.getHeight() / 2 - height / 2);
-					simulatorSetUp simulator = new simulatorSetUp("Traffic Controller Simulator", width, height, posX, posY);
-					simulator.start();
-				}
-			};
-			
-			// start the simulator
-			simulator.start();
+					public void run()
+					{
+						int width = (int)Config.simDisplayWidth;
+						int height = (int)Config.simDisplayHeight;
+						int posX = (int) (screenSize.getWidth() / 2 - width);
+						int posY = (int) (screenSize.getHeight() / 2 - height / 2);
+						simulatorSetUp simulator = new simulatorSetUp("Traffic Controller Simulator", width, height, posX, posY);
+						simulator.start();
+					}
+				};
+				
+				// start the simulator
+				simulator.start();
+			}
 			
 			
 			// set the proper behavior on closing the application
