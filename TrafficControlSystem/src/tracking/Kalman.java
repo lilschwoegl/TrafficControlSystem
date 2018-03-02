@@ -1,5 +1,6 @@
 package tracking;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -16,6 +17,7 @@ public class Kalman extends KalmanFilter {
 	private KalmanFilter kalman;
 	private Point LastResult;
 	private double deltatime;
+	static{ System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
 	public void init() {
 
