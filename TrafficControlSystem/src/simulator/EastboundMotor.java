@@ -1,5 +1,8 @@
 package simulator;
 
+import java.awt.Color;
+import java.awt.Graphics;
+
 import tracking.Track;
 
 public class EastboundMotor extends MotorVehicle{
@@ -47,6 +50,10 @@ public class EastboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 		x = (track.getBestPositionCenter().x * Config.roadStripRatio);
 	}
+	
+	/*public void render(Graphics g){
+		g.drawImage(loadImage.rightCarImage, (int)x, (int)y, 30, 45, null);
+	}*/
 	
 	//methods
 }

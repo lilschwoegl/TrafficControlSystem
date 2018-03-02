@@ -94,9 +94,17 @@ public abstract class MotorVehicle {
 	}
 	
 	public void render(Graphics g){
-		
-		g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);
-		
+		//if else statement to render the appropriate car per direction driving
+		if (direction == Direction.NORTH) {
+			g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);
+		} else if (direction == Direction.SOUTH) {
+			g.drawImage(loadImage.downCarImage, (int)x, (int)y, 30, 45, null);
+		} else if (direction == Direction.EAST) {
+			g.drawImage(loadImage.rightCarImage, (int)x, (int)y, 45, 30, null);
+		} else if (direction == Direction.WEST) {
+			g.drawImage(loadImage.leftCarImage, (int)x, (int)y, 45, 30, null);
+		}
+
 		g.setColor(Color.WHITE);
 		g.drawString(String.format("%.0f", distToIntersection()), (int)x+5, (int)y+30);
 	}

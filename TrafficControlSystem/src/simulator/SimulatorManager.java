@@ -51,6 +51,7 @@ public class SimulatorManager {
 		loadImage.init();	
 		
 		// TODO: Clean this up...
+		//below the addCar functions will created simulated vehicles
 		addCar(
 				1-1, 
 				Direction.WEST, 
@@ -138,7 +139,7 @@ public class SimulatorManager {
 	
 	//method render to set graphic location and size
 	public void render(Graphics g){
-		//render backgournd image
+		//render background image
 		g.drawImage(loadImage.fullImage,0,0,600,600,null);
 		
 		//render  vehicles

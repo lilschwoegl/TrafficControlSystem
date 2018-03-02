@@ -1,5 +1,6 @@
 package simulator;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 import tracking.Track;
@@ -49,6 +50,10 @@ public class WestboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 		x = Config.simDisplayWidth - (track.getBestPositionCenter().x * Config.roadStripRatio);
 	}
+	
+	/*public void render(Graphics g){
+		g.drawImage(loadImage.leftCarImage, (int)x, (int)y, 30, 45, null);
+	}*/
 	
 	//methods
 }

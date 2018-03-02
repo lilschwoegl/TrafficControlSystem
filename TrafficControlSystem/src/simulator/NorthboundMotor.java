@@ -1,5 +1,8 @@
 package simulator;
 
+import java.awt.Color;
+import java.awt.Graphics;
+
 import tracking.Track;
 
 public class NorthboundMotor extends MotorVehicle{
@@ -48,6 +51,10 @@ public class NorthboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 		y = Config.simDisplayHeight - (track.getBestPositionCenter().y * Config.roadStripRatio);
 	}
+	
+	/*public void render(Graphics g){
+		g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);	
+	}*/
 	
 	//methods
 }

@@ -1,5 +1,8 @@
 package simulator;
 
+import java.awt.Color;
+import java.awt.Graphics;
+
 import tracking.Track;
 
 public class SouthboundMotor extends MotorVehicle{
@@ -47,5 +50,9 @@ public class SouthboundMotor extends MotorVehicle{
 		
 		y = (track.getBestPositionCenter().y * Config.roadStripRatio);
 	}
+	
+	/*public void render(Graphics g){
+		g.drawImage(loadImage.downCarImage, (int)x, (int)y, 30, 45, null);
+	}*/
 	
 }
