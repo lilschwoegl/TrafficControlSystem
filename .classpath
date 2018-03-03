@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="TrafficControlSystem/src"/>
-	<classpathentry kind="lib" path="TrafficControlSystem/lib/opencv-340.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCv 3.4.0"/>
-	<classpathentry kind="lib" path="res"/>
-	<classpathentry kind="lib" path="TrafficControlSystem/res"/>
+	<classpathentry kind="src" path="res"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="video"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.USER_LIBRARY/OpenCv 3.4.0"/>
+	<classpathentry kind="lib" path="lib/opencv-340.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="TrafficControlSystem/lib"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
