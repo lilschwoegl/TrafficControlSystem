@@ -51,6 +51,8 @@ public class SimulatorManager {
 		loadImage.init();	
 		
 		// TODO: Clean this up...
+		//------------------------------------------------------------
+		//START SIMULATED CARS
 		//below the addCar functions will created simulated vehicles
 		addCar(
 				1-1, 
@@ -81,6 +83,38 @@ public class SimulatorManager {
 						Direction.EAST,
 						.05),
 				true);
+		
+		addCar(
+				2-1, 
+				Direction.NORTH, 
+				new SimulatedTrack(
+						new Point(0,Config.simDisplayHeight), 
+						simulatedCarsCounter++, 
+						Direction.NORTH,
+						.05),
+				true);
+		
+		addCar(
+				1-1, 
+				Direction.NORTH, 
+				new SimulatedTrack(
+						new Point(0,Config.simDisplayHeight), 
+						simulatedCarsCounter++, 
+						Direction.NORTH,
+						.05),
+				true);
+		
+		addCar(
+				2-1, 
+				Direction.SOUTH, 
+				new SimulatedTrack(
+						new Point(0,0), 
+						simulatedCarsCounter++, 
+						Direction.SOUTH,
+						.05),
+				true);
+		//END SIMULATED CARS
+		//-----------------------------------------------------------------
 	}
 	
 	public void setGraphics(Graphics g)
