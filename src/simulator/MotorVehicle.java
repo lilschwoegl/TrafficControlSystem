@@ -56,6 +56,11 @@ public abstract class MotorVehicle {
 		TrafficUpdateObservable.getInstance().updateTraffic(this);
 	}
 	
+	// return (x,y) position of the vehicle
+	public Point getPosition()
+	{
+		return new Point(x, y);
+	}
 	
 	public abstract void initLane(int lane);
 	
@@ -81,6 +86,11 @@ public abstract class MotorVehicle {
 	public Direction getDirection()
 	{
 		return direction;
+	}
+	
+	public double getSpeed()
+	{
+		return speed;
 	}
 	
 	public abstract void tick();

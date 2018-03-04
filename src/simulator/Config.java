@@ -45,4 +45,7 @@ public class Config {
 		{westBoundLane1, westBoundLane2}
 	};
 	
+	// TrafficController settings
+	public static boolean doTrafficControllerLogging = true;	// if true, runtime metrics are logged to console
+	public static boolean doMetricsLogging = false;				// set to true to record runtime metrics to persistent storage
 }
