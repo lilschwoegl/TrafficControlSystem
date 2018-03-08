@@ -194,6 +194,15 @@ public class TrafficController implements TrafficObserver {
 		return SignalColor.Red;
 	}
 	
+	// returns all TrafficLight objects
+	public ArrayList<TrafficLight> GetTrafficLights() {
+		ArrayList<TrafficLight> list = new ArrayList<TrafficLight>();
+		for (TrafficLight light : trafficLights) {
+			list.add(light);
+		}
+		return list;
+	}
+	
 	// returns 1st TrafficLight for the requested travel direction, uses MotorVehicle.Direction enum
 	public TrafficLight GetTrafficLight(simulator.MotorVehicle.Direction forDirection) {
 		for (TrafficLight light : trafficLights) {
