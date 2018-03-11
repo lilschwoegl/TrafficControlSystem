@@ -4,6 +4,10 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import application.Direction;
+import application.Color;
+import application.TrafficLight;
+
 public class Initial_Main_Test {
 	
 	@Test
@@ -17,31 +21,41 @@ public class Initial_Main_Test {
 	}
 	
 	@Test
-	public void getlightStateTest () {
-		fail("Not yet implemented");
+	public void getLightCreationTest () {
+	    TrafficLight light = new TrafficLight(Direction.North);
+	    assertEquals(light.getTravelDirection(), Direction.North);
+	    assertEquals(light.getFacingDirection(), Direction.South);
+	    assertEquals(light.GetColor(), Color.Red);
 	}
 	
 	@Test
-	  public void testNextState() {
-		fail("Not yet implemented");
-	    /*TrafficLight light = new TrafficLight();
-	    assertEquals(SignalColor.RED, light.state);
-	    light.nextState();
-	    assertEquals(SignalColor.GREEN, light.state);
-	    light.nextState();
-	    assertEquals(SignalColor.YELLOW, light.state);
-	    light.nextState();
-	    assertEquals(SignalColor.RED, light.state);*/
-	  }
+	public void getLightUniqueIDTest () {
+	    TrafficLight light = new TrafficLight(Direction.North);
+	    TrafficLight light2 = new TrafficLight(Direction.North);
+	    assertNotEquals(light.getID(), light2.getID());
+	}
+	
+	@Test
+	  public void testLightChangeToGreen() {
+	    TrafficLight light = new TrafficLight(Direction.North);
+	    assertEquals(light.GetColor(), Color.Red);
+	    light.TurnGreen();
+//	    try { Thread.sleep(1000); }
+//    	catch (InterruptedException e) { e.printStackTrace(); }
+	    assertEquals(light.GetColor(), Color.Green);
+	}
 	 
 	@Test
-	  public void testChange() {
-		fail("Not yet implemented");
-	    /*TrafficLight light = new TrafficLight();
-	    light.change(5);  
-	    assertEquals(SignalColor.YELLOW, light.state);*/
-	  }
-	
-	
-	
+	  public void testLightChangeToRed() {
+	    TrafficLight light = new TrafficLight(Direction.North);
+	    assertEquals(light.GetColor(), Color.Red);
+	    light.TurnGreen();
+//	    try { Thread.sleep(1000); }
+//	    catch (InterruptedException e) { e.printStackTrace(); }
+	    assertEquals(light.GetColor(), Color.Green);
+	    light.TurnRed();
+//	    try { Thread.sleep(6000); }
+//    	catch (InterruptedException e) { e.printStackTrace(); }
+	    assertEquals(light.GetColor(), Color.Red);
+	}
 }

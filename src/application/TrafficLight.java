@@ -9,11 +9,12 @@ import java.util.concurrent.locks.ReentrantLock;
 //import java.lang.Runnable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import application.TrafficController.TravelDirection;
+import application.Direction;
+import application.Color;
 import simulator.Config;
 
 public class TrafficLight {
-	public enum SignalColor { Green, Yellow, Red }
+	//public enum SignalColor { Green, Yellow, Red }
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -22,36 +23,36 @@ public class TrafficLight {
 	private int id = 0;
 	public int getID() { return this.id; }
 	
-	private TravelDirection forTravelDirection = TravelDirection.North;
-	public TravelDirection getTravelDirection() { return forTravelDirection; }
+	private Direction forTravelDirection = Direction.North;
+	public Direction getTravelDirection() { return forTravelDirection; }
 	
-	private TravelDirection facingDirection = TravelDirection.North;
-	public TravelDirection getFacingDirection() { return facingDirection; }
+	private Direction facingDirection = Direction.North;
+	public Direction getFacingDirection() { return facingDirection; }
 	
-	private SignalColor color = SignalColor.Red;
-	public SignalColor GetColor() { return this.color; }
+	private Color color = Color.Red;
+	public Color GetColor() { return this.color; }
 	
 	private Instant lastChanged = Instant.now();
 	public Instant getLastChanged() { return lastChanged; }
 	
-	public TrafficLight(TravelDirection forTravelDirection) {
+	public TrafficLight(Direction forTravelDirection) {
 		this.id = ++lightCounter;
-		this.color = SignalColor.Red;
+		this.color = Color.Red;
 		this.forTravelDirection = forTravelDirection;
 		this.facingDirection = 
-			  this.forTravelDirection == TravelDirection.North	? TravelDirection.South
-			: this.forTravelDirection == TravelDirection.South	? TravelDirection.North
-			: this.forTravelDirection == TravelDirection.East	? TravelDirection.West
-			: TravelDirection.East;
+			  this.forTravelDirection == Direction.North	? Direction.South
+			: this.forTravelDirection == Direction.South	? Direction.North
+			: this.forTravelDirection == Direction.East	? Direction.West
+			: Direction.East;
 		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
 	}
 	
 	// change the light to green only if it's red
 	public void TurnGreen() {
-		if (this.color == SignalColor.Red) {
+		if (this.color == Color.Red) {
 			try {
 				rwLock.writeLock().lock();
-				this.color = SignalColor.Green;
+				this.color = Color.Green;
 				logColorState();
 				this.lastChanged = Instant.now();
 			}
@@ -64,14 +65,14 @@ public class TrafficLight {
 	
 	// cycle the light from green to yellow, pause, then change to red
 	public void TurnRed() {
-		if (this.color == SignalColor.Green) {
+		if (this.color == Color.Green) {
 			try {
 				rwLock.writeLock().lock();
-				this.color = SignalColor.Yellow;
+				this.color = Color.Yellow;
 				logColorState();
 				this.lastChanged = Instant.now();
 				TimeUnit.SECONDS.sleep((long)TrafficController.GetSecondsYellowLightDuration());
-				this.color = SignalColor.Red;
+				this.color = Color.Red;
 				logColorState();
 				this.lastChanged = Instant.now();
 			}
