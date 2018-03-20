@@ -122,7 +122,7 @@ public class SimulatorManager {
 		this.g = g;
 	}
 	
-	public void tick()
+	public synchronized void tick()
 	{
 		for (MotorVehicle m : motors.values())
 		{
@@ -130,7 +130,7 @@ public class SimulatorManager {
 		}
 	}
 	
-	public void addCar(int lane, Direction dir, Track track, boolean simulated)
+	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
 		if (simulated)
 		{
@@ -157,30 +157,39 @@ public class SimulatorManager {
 		}
 	}
 	
-	public void removeCar(Track track)
+	//comment out if you do not want to remove cars from video feed
+	public synchronized void removeCar(Track track)
 	{
 		motors.remove(track.track_id);
 	}
 	
-	public void updateCar(Track track)
+	//comment out if you do not want to updatecar location from video feed
+	public synchronized void updateCar(Track track)
 	{
+		
 		motors.get(track.track_id).updateTrack(track);
 		
 		// notify observers of update
 		motors.get(track.track_id).notifyObservers();
+		
 	}
 	
 	
 	//method render to set graphic location and size
 	public void render(Graphics g){
+		
 		//render background image
 		g.drawImage(loadImage.fullImage,0,0,600,600,null);
+		//g.drawImage(loadImage.redLight,410,167,40,40,null);
 		
 		//render  vehicles
-		for (MotorVehicle mv : motors.values())
-		{
-			mv.render(g);
+		synchronized(this){
+			for (MotorVehicle mv : motors.values())
+			{
+				mv.render(g);
+			}
 		}
+		
 		
 	}
 }
