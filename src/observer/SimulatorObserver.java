@@ -1,13 +1,19 @@
 package observer;
 
 import simulator.SimulatorManager;
+
+import org.opencv.core.Point;
+
 import observer.TrackUpdateObservable.TrackUpdate;
 import simulator.MotorVehicle.Direction;
+import tracking.SimulatedTrack;
 import tracking.Track;
+
 
 public class SimulatorObserver implements TrackObserver{
 
 	SimulatorManager simulator;
+	int simulatedCarsCounter = 6000;
 	
 	public SimulatorObserver(SimulatorManager sim)
 	{
@@ -24,17 +30,29 @@ public class SimulatorObserver implements TrackObserver{
 //				track.lane,
 //				track.getDistChange().x,
 //				track.getDistChange().y);
+		SimulatedTrack strack;
+		
 		
 		switch (updateType)
 		{
 			case ADDED:
-				simulator.addCar(track.lane, Direction.SOUTH, track, false);
+				strack = new SimulatedTrack(  
+						new Point(0,0),
+						simulatedCarsCounter++,
+						Direction.SOUTH,
+						.05);
+				//simulator.addCar(track.lane, Direction.SOUTH, track, false);
+				simulator.addCar(
+						track.lane, 
+						Direction.SOUTH, 
+						strack, 
+						true);
 				break;
 			case REMOVED:
-				simulator.removeCar(track);
+				//simulator.removeCar(strack);
 				break;
 			case UPDATED:
-				simulator.updateCar(track);
+				//simulator.updateCar(strack);
 				break;
 			default:
 				break;

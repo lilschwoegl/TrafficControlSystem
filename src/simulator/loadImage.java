@@ -1,5 +1,7 @@
 package simulator;
 
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -7,14 +9,26 @@ import javax.imageio.ImageIO;
 
 public class loadImage {
 
-	public static BufferedImage fullImage, upCarImage, downCarImage, rightCarImage, leftCarImage;
+	public static BufferedImage 
+		fullImage, 
+		upCarImage, 
+		downCarImage, 
+		rightCarImage, 
+		leftCarImage,
+		greenLight,
+		yellowLight,
+		redLight;
 	
 	public static void init(){
-		fullImage = imageLoader("/Intersection-4_way-5_lanes.png");
+		//fullImage = imageLoader("/Intersection-4_way-5_lanes.png");
+		fullImage = imageLoader("/Intersection2.png");
 		upCarImage = imageLoader("/upCar.png");
 		downCarImage = imageLoader("/downCar.png");
 		rightCarImage = imageLoader("/rightCar.png");
 		leftCarImage = imageLoader("/leftCar.png");
+		greenLight = imageLoader("/green.png");
+		yellowLight = imageLoader("/yellow.png");
+		redLight = imageLoader("/red.png");
 		//crop();
 	}
 	
@@ -28,6 +42,7 @@ public class loadImage {
 		}
 		return null;	
 	}
+	
 	
 	/*
 	 * Use this method to crop images

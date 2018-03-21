@@ -59,6 +59,7 @@ public class Main extends Application {
 					}
 				};
 				
+				
 				// start the simulator
 				simulator.start();
 			}

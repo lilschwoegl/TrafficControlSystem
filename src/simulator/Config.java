@@ -45,6 +45,26 @@ public class Config {
 		{westBoundLane1, westBoundLane2}
 	};
 	
+	// Traffic Light Bulb locations & parameters
+	public static double bulbHeight = 40;
+	public static double bulbWidth = 40;
+	public static double bulbDistance = 30;
+	//red light bulb points
+	public static Point northRLight = new Point (382, 380);
+	public static Point northYLight = new Point (382, 410);
+	public static Point northGLight = new Point (382, 440);
+	public static Point southRLight = new Point (165, 170);
+	public static Point southYLight = new Point (165, 140);
+	public static Point southGLight = new Point (165, 110);
+	public static Point eastRLight = new Point (170, 385);
+	public static Point eastYLight = new Point (140, 385);
+	public static Point eastGLight = new Point (110, 385);
+	public static Point westRLight = new Point (380, 167);
+	public static Point westYLight = new Point (410, 167);
+	public static Point westGLight = new Point (440, 167);
+	
+	
+	
 	// TrafficController settings
 	public static boolean doTrafficControllerLogging = true;			// if true, runtime metrics are logged to console
 	public static boolean doTrafficControllerTrackEventLogging = false;	// if true, observer events are logged to console
