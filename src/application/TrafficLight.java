@@ -10,6 +10,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import application.Direction;
+import observer.SimulatorObserver;
+import observer.TrackUpdateObservable;
+import observer.TrafficLightObservable;
+import observer.TrafficLightObserver;
+import observer.TrafficUpdateObservable;
 import application.Color;
 import simulator.Config;
 
@@ -35,6 +40,8 @@ public class TrafficLight {
 	private Instant lastChanged = Instant.now();
 	public Instant getLastChanged() { return lastChanged; }
 	
+
+	
 	public TrafficLight(Direction forTravelDirection) {
 		this.id = ++lightCounter;
 		this.color = Color.Red;
@@ -45,6 +52,8 @@ public class TrafficLight {
 			: this.forTravelDirection == Direction.East	? Direction.West
 			: Direction.East;
 		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
+		
+
 	}
 	
 	// change the light to green only if it's red

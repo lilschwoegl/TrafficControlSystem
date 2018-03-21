@@ -182,13 +182,17 @@ public class SimulatorManager {
 		g.drawImage(loadImage.fullImage,0,0,600,600,null);
 		//g.drawImage(loadImage.redLight,410,167,40,40,null);
 		
+		
 		//render  vehicles
 		synchronized(this){
 			for (MotorVehicle mv : motors.values())
 			{
 				mv.render(g);
 			}
+			
 		}
+		
+	
 		
 		
 	}

@@ -50,10 +50,18 @@ public class Config {
 	public static double bulbWidth = 40;
 	public static double bulbDistance = 30;
 	//red light bulb points
-	public static Point northLight = new Point (382, 380);
-	public static Point southLight = new Point (165, 170);
-	public static Point eastLight = new Point (170, 385);
-	public static Point westLight = new Point (380, 167);
+	public static Point northRLight = new Point (382, 380);
+	public static Point northYLight = new Point (382, 410);
+	public static Point northGLight = new Point (382, 440);
+	public static Point southRLight = new Point (165, 170);
+	public static Point southYLight = new Point (165, 140);
+	public static Point southGLight = new Point (165, 110);
+	public static Point eastRLight = new Point (170, 385);
+	public static Point eastYLight = new Point (140, 385);
+	public static Point eastGLight = new Point (110, 385);
+	public static Point westRLight = new Point (380, 167);
+	public static Point westYLight = new Point (410, 167);
+	public static Point westGLight = new Point (440, 167);
 	
 	
 	
