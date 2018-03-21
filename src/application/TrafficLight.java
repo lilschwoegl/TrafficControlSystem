@@ -64,6 +64,8 @@ public class TrafficLight {
 	}
 	
 	// cycle the light from green to yellow, pause, then change to red
+	/*TODO: downgrade writelock to readlock to allow clients to query yellow status. Because you can't upgrade a lock from read to write, would
+	 * need to release read lock grab new write lock, change to red, then unlock.*/
 	public void TurnRed() {
 		if (this.color == Color.Green) {
 			try {

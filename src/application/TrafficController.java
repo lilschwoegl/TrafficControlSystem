@@ -286,7 +286,7 @@ public class TrafficController implements TrafficObserver {
 		}
 	}
 		
-	// fn to purge obsolete vehicles from the collection
+	// fn to purge obsolete vehicles from the collection, either because they are out of range of traffic light cameras or they haven't been updated for a long time
 	private void DropOldVehiclesFromCollector() {
 		log("DropOldVehiclesFromCollector: %d vehicles to examine", vehicles.size());
 		
