@@ -12,26 +12,27 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-//import application.Direction;
+import application.Direction;
 import observer.TrafficObserver;
 import observer.TrafficUpdateObservable;
-import simulator.Config;
-import simulator.MotorVehicle;
 import tracking.Track;
 
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import application.Direction;
-import application.Color;
+//import application.Direction;
+//import application.Color;
+import simulator.MotorVehicle;
+//import simulator.Display;
 
 public class TrafficController implements TrafficObserver {
+	
 	// private subclass for keeping track of vehicles w/in range of intersection traffic cameras
 	private class Vehicle {
 		public int id = 0;
 		public MotorVehicle vehicle = null;
 		public Instant timestampLastObserved = null;
-		public Direction direction = null;//Direction.North;
+		public Direction direction = application.Direction.North;
 		public Vehicle(int trackId, MotorVehicle simVehicle, Instant firstObserved) {
 			this.id = trackId;
 			this.vehicle = simVehicle;
@@ -44,56 +45,51 @@ public class TrafficController implements TrafficObserver {
 		}
 	}
 	
-	//public enum TravelDirection { North, South, East, West }
+	// types of controller configurations, default = FixedTimers
 	public enum SignalLogicConfiguration { FixedTimers, OnDemand }
 	
+	// thread pool
 	private ScheduledExecutorService  taskExecutor = Executors.newScheduledThreadPool(10);
 	
-	private static SignalLogicConfiguration signalLogicConfiguration = SignalLogicConfiguration.FixedTimers;
-	private static double intersectionWidth = Config.simDisplayWidth - (2 * Config.roadStripLength);
-	private static double intersectionHeight = Config.simDisplayHeight - (2 * Config.roadStripLength);
-	private static double minDistanceEW = intersectionWidth; 
-	private static double minDistanceNS = intersectionHeight;
-	private static double maxDistanceEW = -intersectionWidth;
-	private static double maxDistanceNS = -intersectionHeight;
+	// intersection dimensions
+	private SignalLogicConfiguration signalLogicConfiguration = SignalLogicConfiguration.FixedTimers;
+	private double intersectionWidthNS = 0;
+	private double intersectionWidthEW = 0;
+	private int numLanesNS = 0;
+	private int numLanesEW = 0;
+	private double laneWidthNS = 0;
+	private double laneWidthEW = 0;
 	
 	// settings for fixed-timer signal logic
 	private static TimeUnit timeUnitForFixedTimerConfiguration = TimeUnit.SECONDS;
-	private static long periodForFixedTimerConfiguration = 10; // green light duration, normally this would be 30s - 120s in real life
 	private static boolean isNS = false; // true=North-South signals own green, false means East-West signals own green
 	
-	// system settings. TODO: move to config file
-	private static int secondsYellowLightDuration = 3;		// duration for light to stay yellow when changing to red
-	public static int GetSecondsYellowLightDuration() { return secondsYellowLightDuration; }
-	
-	private static int secondsMaxGreenLightDuration = 30;	// max duration a light may stay green if any are waiting on a green
-	public static int GetSecondsMaxGreenLightDuration() { return secondsMaxGreenLightDuration; } 
-	
-	private static int maxFeetLightMonitoring = 200;		// max range a light is to monitor vehicles & pedestrians 
-	public static int GetMaxFeetLightMonitoring() { return maxFeetLightMonitoring; } 
-	
-	private static long maxSecondsVehicleAgeToTrack = 5L; // N seconds: if vehicles collection contains any objects not updated any sooner, they're dropped
-	
 	// Traffic lights are assumed to be placed on the FAR side of an intersection for visibility reasons
-	@SuppressWarnings("serial")
-	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>() {{
-/*		add(new TrafficLight(Direction.North));
-		add(new TrafficLight(Direction.South));
-		add(new TrafficLight(Direction.East));
-		add(new TrafficLight(Direction.West));
-*/	}};
+	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	
-	// vehicles currently using the intersection
+	// collection tracking vehicles currently using the intersection
 	private HashMap<Integer,Vehicle> vehicles = new HashMap<Integer,Vehicle>();
 	
-	//constructor
-	public TrafficController()
+		
+	// constructor: traffic cameras are assumed to be placed on the far side of the intersection to privide safest viewing angles by vehicles
+	public TrafficController(int numLanesNS, double laneWidthNS, int numLanesEW, double laneWidthEW)
 	{
 		log("System timestamp: " + LocalDateTime.now());
-		log("simDisplayWidth=" + Config.simDisplayWidth + ", simDisplayHeight="  + Config.simDisplayHeight);
-		log("intersectionWidth=" + intersectionWidth + ", intersectionHeight=" + intersectionHeight);
-		log("Distances: minDistanceEW=%s maxDistanceEW=%s minDistanceNS=%s maxDistanceNS=%s",
-				minDistanceEW, maxDistanceEW, minDistanceNS, maxDistanceNS);
+		this.numLanesNS = numLanesNS;
+		this.numLanesEW = numLanesEW;
+		this.laneWidthNS = laneWidthNS;
+		this.laneWidthEW = laneWidthEW;
+		// intersection dimensions determined
+		this.intersectionWidthEW = (double)this.numLanesNS * this.laneWidthNS;
+		this.intersectionWidthNS = (double)this.numLanesEW * this.laneWidthEW;
+		
+		log("Intersection Dimensions:"
+				+ "\n  Lanes NS      %d"
+				+ "\n  Width NS      %f"
+				+ "\n  Lanes EW      %d"
+				+ "\n  Height EW     %f"
+				+ "\n  Camera Range  %f (pixels)",
+				this.numLanesNS, this.laneWidthNS, this.numLanesEW, this.laneWidthEW, Config.pixelsCameraRange);
 		
 		log("Logic configuration: %s", signalLogicConfiguration.toString());
 		if (signalLogicConfiguration == SignalLogicConfiguration.FixedTimers) {
@@ -101,7 +97,17 @@ public class TrafficController implements TrafficObserver {
 			taskExecutor.scheduleAtFixedRate(() -> {
 				log("Calling SignalLogicConfiguration...");
 				ToggleTrafficLightsForFixedTimerConfig();
-			}, 0, periodForFixedTimerConfiguration, timeUnitForFixedTimerConfiguration);
+			}, 0, Config.periodForFixedTimerConfiguration, timeUnitForFixedTimerConfiguration);
+		}
+		
+		// add requested traffic lights
+		if (numLanesNS > 0) {
+			AddTrafficLight(application.Direction.North);
+			AddTrafficLight(application.Direction.South);
+		}
+		if (numLanesEW > 0) {
+			AddTrafficLight(application.Direction.East);
+			AddTrafficLight(application.Direction.West);
 		}
 		
 		log("Starting DropOldVehiclesFromCollector scheduled task");
@@ -122,68 +128,10 @@ public class TrafficController implements TrafficObserver {
 		}, 0, 1, TimeUnit.SECONDS);
 	}
 	
-	/****************************** PRIVATE METHODS *******************************/
-	
-	// toggle traffic lights
-	private void ToggleTrafficLightsForFixedTimerConfig() {
-		if (signalLogicConfiguration != SignalLogicConfiguration.FixedTimers)
-			return;
-		
-		try {
-			//log("ToggleTrafficLightsForFixedTimerConfig (start): %s", GetStatusForAllLights());
-			
-			// change any green lights to red
-			//log("ToggleTrafficLightsForFixedTimerConfig: triggering all green lights to change to red");
-			for (TrafficLight light : trafficLights) {
-				if (light.GetColor() == Color.Green) {
-					taskExecutor.submit(() -> {
-						light.TurnRed();
-					});
-				}
-			}
-			
-			// wait sufficient time for lights to turn red
-			//log("ToggleTrafficLightsForFixedTimerConfig: waiting for lights to finish cycling to red...");
-			int numLights = trafficLights.size();
-			int numRedLights = 0;
-			int numChecks = 5;
-			while (numChecks > 0 && numRedLights < numLights) {				
-				numRedLights = 0;
-				for (TrafficLight light : trafficLights) {
-					if (light.GetColor() == Color.Red)
-						numRedLights++;
-				}
-				//log("ToggleTrafficLightsForFixedTimerConfig: %d red lights", numRedLights);
-				if (numRedLights < numLights)
-					Thread.sleep(1000L);
-				numChecks--;
-			}
-			
-			// toggle direction change
-			isNS = !isNS;
-			
-			// change signals in sets, simple version is 2 sets, toggling, seeding with North-South lights
-			//log("ToggleTrafficLightsForFixedTimerConfig: triggering lights for new direction to change to green, isNS=%s", isNS);
-			ArrayList<TrafficLight> lights = isNS ? GetTrafficLights(Direction.North) : GetTrafficLights(Direction.East);
-			lights.addAll(isNS ? GetTrafficLights(Direction.South) : GetTrafficLights(Direction.West));
-			for (TrafficLight light : lights) {
-				if (light.GetColor() != Color.Green) {
-					taskExecutor.submit(() -> {
-						light.TurnGreen();
-					});
-				}
-			}
-		}
-		catch (Exception ex) { ex.printStackTrace(); }
-		finally {
-		}
-		
-		//log("ToggleTrafficLightsForFixedTimerConfig (finish): %s", GetStatusForAllLights());
-	}
-	
 	/****************************** PUBLIC METHODS *******************************/
 	
 	public TrafficLight AddTrafficLight(Direction directionOfTravel) {
+		log("AddTrafficLight(%s)", directionOfTravel.toString());
 		TrafficLight light = new TrafficLight(directionOfTravel); 
 		trafficLights.add(light);
 		return light;
@@ -262,21 +210,8 @@ public class TrafficController implements TrafficObserver {
 	
 	// return true if a vehicle is in the effective range of a camera
 	public boolean IsInRangeOfCamera(MotorVehicle car) {
-		boolean inRange = false;
-		double dist = car.distToIntersection();
-		simulator.MotorVehicle.Direction dir = car.getDirection();
-		switch (dir) {
-			case WEST:
-			case EAST:
-				inRange = dist >= maxDistanceEW && dist <= minDistanceEW; 
-				break;
-			case NORTH:
-			case SOUTH:
-				inRange = dist >= maxDistanceNS && dist <= minDistanceNS; 
-				break;
-		}
-		//log("Vehicle " + car.getTrack().track_id + " IsInRangeOfCamera: " + inRange);
-		return inRange;
+		double dist = GetDistanceToCamera(car);
+		return dist > 0 && dist <= Config.pixelsCameraRange;
 	}
 	
 	// record vehicle movement updates, ignore anything not in-range of cameras
@@ -284,14 +219,99 @@ public class TrafficController implements TrafficObserver {
 	public void update(MotorVehicle vehicle) {
 		// TODO Auto-generated method stub
 		boolean isInRange = IsInRangeOfCamera(vehicle);
+		double distToCamera = GetDistanceToCamera(vehicle);		
 		//log("Track %d is %f pixels from intersection, lane %d, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), vehicle.getLane(), isInRange);
 		if (isInRange) {
 			if (Config.doTrafficControllerTrackEventLogging)
-				log("Track %d is %f pixels from intersection, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), isInRange);
+				log("Track %d is %f pixels from intersection, %f pixes from camera, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), distToCamera, isInRange);
 			vehicles.put(vehicle.getTrack().track_id, new Vehicle(vehicle.getTrack().track_id, vehicle, Instant.now()));
 		}
 	}
 		
+	// return distance of vehicle to its facing camera, considering vehicle's distance to intersection and intersection width
+	public double GetDistanceToCamera(MotorVehicle car) {
+		double distance = 0;
+		switch (GetCarDirectionOfTravel(car)) {
+			case West:
+			case East:
+				distance = car.distToIntersection() + this.intersectionWidthEW;
+				break;
+			case North:
+			case South:
+				distance = car.distToIntersection() + this.intersectionWidthNS;
+				break;
+		}
+		return distance;
+	}
+	
+	
+	/****************************** PRIVATE METHODS *******************************/
+	
+	// toggle traffic lights	
+	private void ToggleTrafficLightsForFixedTimerConfig() {
+		if (signalLogicConfiguration != SignalLogicConfiguration.FixedTimers)
+			return;
+		
+		try {
+			//log("ToggleTrafficLightsForFixedTimerConfig (start): %s", GetStatusForAllLights());
+			
+			// change any green lights to red
+			//log("ToggleTrafficLightsForFixedTimerConfig: triggering all green lights to change to red");
+			for (TrafficLight light : trafficLights) {
+				if (light.GetColor() == Color.Green) {
+					taskExecutor.submit(() -> {
+						light.TurnRed();
+					});
+				}
+			}
+			
+			// wait sufficient time for lights to turn red
+			//log("ToggleTrafficLightsForFixedTimerConfig: waiting for lights to finish cycling to red...");
+			int numLights = trafficLights.size();
+			int numRedLights = 0;
+			int numChecks = 5;
+			while (numChecks > 0 && numRedLights < numLights) {				
+				numRedLights = 0;
+				for (TrafficLight light : trafficLights) {
+					if (light.GetColor() == Color.Red)
+						numRedLights++;
+				}
+				//log("ToggleTrafficLightsForFixedTimerConfig: %d red lights", numRedLights);
+				if (numRedLights < numLights)
+					Thread.sleep(1000L);
+				numChecks--;
+			}
+			
+			// toggle direction change
+			isNS = !isNS;
+			
+			// change signals in sets, simple version is 2 sets, toggling, seeding with North-South lights
+			//log("ToggleTrafficLightsForFixedTimerConfig: triggering lights for new direction to change to green, isNS=%s", isNS);
+			ArrayList<TrafficLight> lights = isNS ? GetTrafficLights(Direction.North) : GetTrafficLights(Direction.East);
+			lights.addAll(isNS ? GetTrafficLights(Direction.South) : GetTrafficLights(Direction.West));
+			for (TrafficLight light : lights) {
+				if (light.GetColor() != Color.Green) {
+					taskExecutor.submit(() -> {
+						light.TurnGreen();
+					});
+				}
+			}
+		}
+		catch (Exception ex) { ex.printStackTrace(); }
+		finally {
+		}
+		
+		//log("ToggleTrafficLightsForFixedTimerConfig (finish): %s", GetStatusForAllLights());
+	}
+	
+	// convert simulator vehicle direction into global application direction (for local calculations)
+	private application.Direction GetCarDirectionOfTravel(MotorVehicle car) {
+		return car.getDirection() == simulator.MotorVehicle.Direction.NORTH ? application.Direction.North
+			: car.getDirection() == simulator.MotorVehicle.Direction.EAST ? application.Direction.East
+			: car.getDirection() == simulator.MotorVehicle.Direction.WEST ? application.Direction.West
+			: application.Direction.South;
+	}
+	
 	// fn to purge obsolete vehicles from the collection, either because they are out of range of traffic light cameras or they haven't been updated for a long time
 	private void DropOldVehiclesFromCollector() {
 		log("DropOldVehiclesFromCollector: %d vehicles to examine", vehicles.size());
@@ -313,7 +333,7 @@ public class TrafficController implements TrafficObserver {
 				Instant lastObserved = entry.getValue().timestampLastObserved;
 				long age = ChronoUnit.SECONDS.between(lastObserved, now);
 				log("vehicle %d age = %ds", entry.getKey(), age);
-				if (age > maxSecondsVehicleAgeToTrack) {
+				if (age > Config.maxSecondsVehicleAgeToTrack) {
 					idsToRemove.add(entry.getKey());
 					log("Removing vehicle %d due to aging", entry.getKey());
 				}
@@ -348,8 +368,9 @@ public class TrafficController implements TrafficObserver {
 		return sb.toString();
 	}
 	
+	
 	private void log(String format, Object ... args) {
-		if (Config.doTrafficControllerLogging) {
+		if (Config.doTrafficControllerLsogging) {
 			System.out.println(String.format("%s %s %s", "TrafficController:", Instant.now().toString(), String.format(format, args)));
 		}
 	}

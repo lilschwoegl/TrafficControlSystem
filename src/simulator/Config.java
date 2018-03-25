@@ -62,11 +62,4 @@ public class Config {
 	public static Point westRLight = new Point (380, 167);
 	public static Point westYLight = new Point (410, 167);
 	public static Point westGLight = new Point (440, 167);
-	
-	
-	
-	// TrafficController settings
-	public static boolean doTrafficControllerLogging = false;			// if true, runtime metrics are logged to console
-	public static boolean doTrafficControllerTrackEventLogging = false;	// if true, observer events are logged to console
-	public static boolean doMetricsLogging = false;						// set to true to record runtime metrics to persistent storage
 }

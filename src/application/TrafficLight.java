@@ -18,7 +18,6 @@ import observer.TrafficLightObserver;
 import observer.TrafficObserver;
 import observer.TrafficUpdateObservable;
 import application.Color;
-import simulator.Config;
 import simulator.MotorVehicle;
 
 public class TrafficLight implements TrafficLightObservable {
@@ -107,7 +106,7 @@ public class TrafficLight implements TrafficLightObservable {
 				rwLock.readLock().lock();
 				rwLock.writeLock().unlock();
 				notifyObservers();
-				TimeUnit.SECONDS.sleep((long)TrafficController.GetSecondsYellowLightDuration());
+				TimeUnit.SECONDS.sleep((long)Config.secondsYellowLightDuration);
 				// upgrade to writelock for light change
 				rwLock.readLock().unlock();
 				rwLock.writeLock().lock();
@@ -134,7 +133,7 @@ public class TrafficLight implements TrafficLightObservable {
 	}
 	
 	private void log(String format, Object ... args) {
-		if (Config.doTrafficControllerLogging) {
+		if (Config.doTrafficLightLogging) {
 			System.out.println(String.format("%s %04d: %s %s", "TrafficLight", this.id, Instant.now().toString(), String.format(format, args)));
 		}
 	}

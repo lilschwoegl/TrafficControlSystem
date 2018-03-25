@@ -44,11 +44,9 @@ public class SimulatorManager implements TrafficLightObserver {
 		observer = new SimulatorObserver(this);
 		TrackUpdateObservable.getInstance().addObserver(observer);
 		
-		trafficController = new TrafficController();
-		trafficLights.add(trafficController.AddTrafficLight(application.Direction.North));
-		trafficLights.add(trafficController.AddTrafficLight(application.Direction.East));
-		trafficLights.add(trafficController.AddTrafficLight(application.Direction.West));
-		trafficLights.add(trafficController.AddTrafficLight(application.Direction.South));
+		trafficController = new TrafficController(3, 60, 3, 60); // 3 N-S lanes, 3 E-W lanes, 60 pixel lane width everywhere (based on calculations from simulator config file)
+		trafficLights = trafficController.GetTrafficLights();
+		System.out.println(String.format("SimulatorManager: %d Traffic Lights", trafficLights.size()));
 		for (TrafficLight light : trafficLights) {
 			light.addObserver(this);
 		}
