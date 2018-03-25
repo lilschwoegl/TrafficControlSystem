@@ -1,19 +1,13 @@
 package observer;
 
+import java.time.Instant;
+
 import application.Color;
 import application.Direction;
+import application.TrafficLight;
 import simulator.paintTrafficLight;
 
-public class TrafficLightObserver {
-	paintTrafficLight trafficLight;
-
+public interface TrafficLightObserver {
 	
-	public TrafficLightObserver (paintTrafficLight paint) {
-		trafficLight = paint;
-	}
-	
-	public void update (Direction direction, Color color) {
-		
-	}
-	
+	public void update (TrafficLight light);
 }

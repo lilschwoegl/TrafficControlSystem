@@ -10,14 +10,16 @@ import java.util.Random;
 import org.opencv.core.Point;
 
 import application.TrafficController;
+import application.TrafficLight;
 import observer.SimulatorObserver;
 import observer.TrackUpdateObservable;
+import observer.TrafficLightObserver;
 import observer.TrafficUpdateObservable;
 import simulator.MotorVehicle.Direction;
 import tracking.SimulatedTrack;
 import tracking.Track;
 
-public class SimulatorManager {
+public class SimulatorManager implements TrafficLightObserver {
 	
 	private long time = System.nanoTime();
 	private long delay;
@@ -27,6 +29,7 @@ public class SimulatorManager {
 	int simulatedCarsCounter = 5000;
 	
 	private HashMap<Integer,MotorVehicle> motors;
+	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	
 	TrafficController trafficController;
 	
@@ -42,7 +45,22 @@ public class SimulatorManager {
 		TrackUpdateObservable.getInstance().addObserver(observer);
 		
 		trafficController = new TrafficController();
+		trafficLights.add(trafficController.AddTrafficLight(application.Direction.North));
+		trafficLights.add(trafficController.AddTrafficLight(application.Direction.East));
+		trafficLights.add(trafficController.AddTrafficLight(application.Direction.West));
+		trafficLights.add(trafficController.AddTrafficLight(application.Direction.South));
+		for (TrafficLight light : trafficLights) {
+			light.addObserver(this);
+		}
+		
 		TrafficUpdateObservable.getInstance().addObserver(trafficController);
+	}
+	
+	// receive updates on TrafficLight state changes (i.e. color changes)
+	public void update (TrafficLight light) {
+		System.out.println(String.format("Light %d, travel direction %s, changed to %s at %s",
+			light.getID(), light.getTravelDirection().toString(), light.GetColor().toString(), light.getLastChanged().toString()
+			));
 	}
 	
 	//methods

@@ -43,6 +43,7 @@ public class Main extends Application {
 			// show the GUI
 			primaryStage.show();
 			
+			//Config.runSimulator = false;
 			if (Config.runSimulator)
 			{
 				// create a new thread for the simulator

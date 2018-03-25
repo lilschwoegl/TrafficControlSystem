@@ -2,6 +2,7 @@ package application;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -14,11 +15,13 @@ import observer.SimulatorObserver;
 import observer.TrackUpdateObservable;
 import observer.TrafficLightObservable;
 import observer.TrafficLightObserver;
+import observer.TrafficObserver;
 import observer.TrafficUpdateObservable;
 import application.Color;
 import simulator.Config;
+import simulator.MotorVehicle;
 
-public class TrafficLight {
+public class TrafficLight implements TrafficLightObservable {
 	//public enum SignalColor { Green, Yellow, Red }
 	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -40,7 +43,7 @@ public class TrafficLight {
 	private Instant lastChanged = Instant.now();
 	public Instant getLastChanged() { return lastChanged; }
 	
-
+	private ArrayList<TrafficLightObserver> observers = new ArrayList<TrafficLightObserver>();
 	
 	public TrafficLight(Direction forTravelDirection) {
 		this.id = ++lightCounter;
@@ -52,9 +55,25 @@ public class TrafficLight {
 			: this.forTravelDirection == Direction.East	? Direction.West
 			: Direction.East;
 		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
-		
-
 	}
+	
+	/* observeable methods */
+	public void addObserver(TrafficLightObserver o) {
+		observers.add(o);
+		log("Light %04d added observer %s", this.id, o.toString());
+	}
+	
+	public void removeObserver(TrafficLightObserver o) {
+		observers.remove(o);
+		log("Light %04d removed observer %s", this.id, o.toString());
+	}
+	
+	public void notifyObservers() {
+		for (TrafficLightObserver observer : observers) {
+			observer.update(this);
+		}
+	}
+	/* end of observable methods */
 	
 	// change the light to green only if it's red
 	public void TurnGreen() {
@@ -69,6 +88,7 @@ public class TrafficLight {
 			finally {
 				rwLock.writeLock().unlock();
 			}
+			notifyObservers();
 		}
 	}
 	
@@ -78,11 +98,19 @@ public class TrafficLight {
 	public void TurnRed() {
 		if (this.color == Color.Green) {
 			try {
+				// grab writelock for light change
 				rwLock.writeLock().lock();
 				this.color = Color.Yellow;
 				logColorState();
 				this.lastChanged = Instant.now();
+				// downgrade to readlock, lets clients view signal color change
+				rwLock.readLock().lock();
+				rwLock.writeLock().unlock();
+				notifyObservers();
 				TimeUnit.SECONDS.sleep((long)TrafficController.GetSecondsYellowLightDuration());
+				// upgrade to writelock for light change
+				rwLock.readLock().unlock();
+				rwLock.writeLock().lock();
 				this.color = Color.Red;
 				logColorState();
 				this.lastChanged = Instant.now();
@@ -91,6 +119,7 @@ public class TrafficLight {
 			finally {
 				rwLock.writeLock().unlock();
 			}
+			notifyObservers();
 		}
 	}
 	

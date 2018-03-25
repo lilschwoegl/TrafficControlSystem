@@ -2,6 +2,7 @@ package observer;
 
 import application.Color;
 import application.Direction;
+import application.TrafficLight;
 
 public interface TrafficLightObservable {
 	
@@ -9,6 +10,6 @@ public interface TrafficLightObservable {
 	
 	public void removeObserver(TrafficLightObserver o);
 	
-	public void notifyObserver(int ID, Direction direction, Color light);
+	public void notifyObservers();
 	
 }

@@ -77,11 +77,11 @@ public class TrafficController implements TrafficObserver {
 	// Traffic lights are assumed to be placed on the FAR side of an intersection for visibility reasons
 	@SuppressWarnings("serial")
 	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>() {{
-		add(new TrafficLight(Direction.North));
+/*		add(new TrafficLight(Direction.North));
 		add(new TrafficLight(Direction.South));
 		add(new TrafficLight(Direction.East));
 		add(new TrafficLight(Direction.West));
-	}};
+*/	}};
 	
 	// vehicles currently using the intersection
 	private HashMap<Integer,Vehicle> vehicles = new HashMap<Integer,Vehicle>();
@@ -183,7 +183,13 @@ public class TrafficController implements TrafficObserver {
 	
 	/****************************** PUBLIC METHODS *******************************/
 	
-	public Color RequestGreenLight(MotorVehicle car) {
+	public TrafficLight AddTrafficLight(Direction directionOfTravel) {
+		TrafficLight light = new TrafficLight(directionOfTravel); 
+		trafficLights.add(light);
+		return light;
+	}
+	
+ 	public Color RequestGreenLight(MotorVehicle car) {
 		/*	- priority order: opposing traffic has green, oncoming left-turn is green
 			- look at curr direction: is signal already green? Y -> grant green light
 			- does cross traffic have green?
