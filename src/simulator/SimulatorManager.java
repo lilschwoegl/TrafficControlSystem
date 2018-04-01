@@ -1,11 +1,8 @@
 package simulator;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
 
 import org.opencv.core.Point;
 
@@ -32,6 +29,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	
 	TrafficController trafficController;
+	private simulator.TrafficLight simLight;
 	
 	//constructor
 	public SimulatorManager(){
@@ -46,7 +44,9 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 		trafficController = new TrafficController(3, 60, 3, 60); // 3 N-S lanes, 3 E-W lanes, 60 pixel lane width everywhere (based on calculations from simulator config file)
 		trafficLights = trafficController.GetTrafficLights();
+		
 		System.out.println(String.format("SimulatorManager: %d Traffic Lights", trafficLights.size()));
+		
 		for (TrafficLight light : trafficLights) {
 			light.addObserver(this);
 		}
@@ -59,6 +59,11 @@ public class SimulatorManager implements TrafficLightObserver {
 		System.out.println(String.format("Light %d, travel direction %s, changed to %s at %s",
 			light.getID(), light.getTravelDirection().toString(), light.GetColor().toString(), light.getLastChanged().toString()
 			));
+		
+		simLight = new simulator.TrafficLight(light.getTravelDirection(), light.GetColor());
+		simLight.render(g);
+		
+		
 	}
 	
 	//methods
@@ -208,6 +213,7 @@ public class SimulatorManager implements TrafficLightObserver {
 			
 		}
 		
+		//render traffic light
 	
 		
 		
