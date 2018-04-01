@@ -26,12 +26,11 @@ public class SimulatorManager implements TrafficLightObserver {
 	
 	int simulatedCarsCounter = 5000;
 	
-	private HashMap<Integer,MotorVehicle> motors;
-	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
-	private HashMap<Integer,simulator.TrafficLight> lights;
+	public HashMap<Integer,MotorVehicle> motors;
+	public ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
+	public HashMap<Integer,simulator.TrafficLight> lights;
 	
 	TrafficController trafficController;
-	private simulator.TrafficLight simLight;
 	
 	//constructor
 	public SimulatorManager(){
