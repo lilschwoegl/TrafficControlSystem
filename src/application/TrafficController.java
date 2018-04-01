@@ -1,6 +1,7 @@
 package application;
 
 import java.lang.String;
+import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import application.Direction;
+import javafx.util.Pair;
 import observer.TrafficObserver;
 import observer.TrafficUpdateObservable;
 import tracking.Track;
@@ -20,8 +22,8 @@ import tracking.Track;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-//import application.Direction;
-//import application.Color;
+import application.Direction;
+import application.Color;
 import simulator.MotorVehicle;
 //import simulator.Display;
 
@@ -31,16 +33,18 @@ public class TrafficController implements TrafficObserver {
 	private class Vehicle {
 		public int id = 0;
 		public MotorVehicle vehicle = null;
+		public Instant timestampFirstObserved = null;
 		public Instant timestampLastObserved = null;
 		public Direction direction = application.Direction.North;
-		public Vehicle(int trackId, MotorVehicle simVehicle, Instant firstObserved) {
+		public Vehicle(int trackId, MotorVehicle vehicle, Instant firstObserved) {
 			this.id = trackId;
-			this.vehicle = simVehicle;
+			this.vehicle = vehicle;
+			this.timestampFirstObserved = firstObserved;
 			this.timestampLastObserved = firstObserved;
 			this.direction =
-				  vehicle.getDirection() == simulator.MotorVehicle.Direction.NORTH ? Direction.North
-				: vehicle.getDirection() == simulator.MotorVehicle.Direction.EAST ? Direction.East
-				: vehicle.getDirection() == simulator.MotorVehicle.Direction.WEST ? Direction.West
+				  this.vehicle.getDirection() == simulator.MotorVehicle.Direction.NORTH ? Direction.North
+				: this.vehicle.getDirection() == simulator.MotorVehicle.Direction.EAST ? Direction.East
+				: this.vehicle.getDirection() == simulator.MotorVehicle.Direction.WEST ? Direction.West
 				: Direction.South;
 		}
 	}
@@ -51,6 +55,9 @@ public class TrafficController implements TrafficObserver {
 	// thread pool
 	private ScheduledExecutorService  taskExecutor = Executors.newScheduledThreadPool(10);
 	
+	// SQLite database connection for persistent metric storage
+	private SQLite sql = null;
+	
 	// intersection dimensions
 	private SignalLogicConfiguration signalLogicConfiguration = SignalLogicConfiguration.FixedTimers;
 	private double intersectionWidthNS = 0;
@@ -59,6 +66,8 @@ public class TrafficController implements TrafficObserver {
 	private int numLanesEW = 0;
 	private double laneWidthNS = 0;
 	private double laneWidthEW = 0;
+	
+	private boolean isEmergencyVehicleControlled = false; // set to true while emergency vehicle takes control of intersection, set back to false when done
 	
 	// settings for fixed-timer signal logic
 	private static TimeUnit timeUnitForFixedTimerConfiguration = TimeUnit.SECONDS;
@@ -70,11 +79,13 @@ public class TrafficController implements TrafficObserver {
 	// collection tracking vehicles currently using the intersection
 	private HashMap<Integer,Vehicle> vehicles = new HashMap<Integer,Vehicle>();
 	
+	private String statusOfAllLights = null; // defined globally because Java doesn't permit lambdas modifying non-class properties (it's an "effective final" thing, grrr)
 		
-	// constructor: traffic cameras are assumed to be placed on the far side of the intersection to privide safest viewing angles by vehicles
+	// constructor: traffic cameras are assumed to be placed on the far side of the intersection to provide safest viewing angles by vehicles
 	public TrafficController(int numLanesNS, double laneWidthNS, int numLanesEW, double laneWidthEW)
 	{
 		log("System timestamp: " + LocalDateTime.now());
+		sql = new SQLite(Config.databaseName, Config.databaseSchema);
 		this.numLanesNS = numLanesNS;
 		this.numLanesEW = numLanesEW;
 		this.laneWidthNS = laneWidthNS;
@@ -95,8 +106,12 @@ public class TrafficController implements TrafficObserver {
 		if (signalLogicConfiguration == SignalLogicConfiguration.FixedTimers) {
 			log("Starting SignalLogicConfiguration scheduled task");
 			taskExecutor.scheduleAtFixedRate(() -> {
-				log("Calling SignalLogicConfiguration...");
-				ToggleTrafficLightsForFixedTimerConfig();
+				if (!this.isEmergencyVehicleControlled) {
+					log("Calling ToggleTrafficLightsForFixedTimerConfig...");
+					ToggleTrafficLightsForFixedTimerConfig();
+				} else {
+					log("Skip calling ToggleTrafficLightsForFixedTimerConfig due to EmergencyVehicleControlled = true");
+				}
 			}, 0, Config.periodForFixedTimerConfiguration, timeUnitForFixedTimerConfiguration);
 		}
 		
@@ -122,7 +137,12 @@ public class TrafficController implements TrafficObserver {
 		log("Starting TrafficLight monitor scheduled task");
 		taskExecutor.scheduleAtFixedRate(() -> {
 			try {
-				log(GetStatusForAllLights());
+				String status = GetStatusForAllLights();
+				log("TrafficLights Status: %s, statusOfAllLights: %s", status, statusOfAllLights);
+				// record initial state and state changes only
+				if (statusOfAllLights == null || !statusOfAllLights.equals(status))
+					RecordEvent("Lights Changed", status);
+				statusOfAllLights = status;
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
 		}, 0, 1, TimeUnit.SECONDS);
@@ -214,20 +234,6 @@ public class TrafficController implements TrafficObserver {
 		return dist > 0 && dist <= Config.pixelsCameraRange;
 	}
 	
-	// record vehicle movement updates, ignore anything not in-range of cameras
-	@Override
-	public void update(MotorVehicle vehicle) {
-		// TODO Auto-generated method stub
-		boolean isInRange = IsInRangeOfCamera(vehicle);
-		double distToCamera = GetDistanceToCamera(vehicle);		
-		//log("Track %d is %f pixels from intersection, lane %d, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), vehicle.getLane(), isInRange);
-		if (isInRange) {
-			if (Config.doTrafficControllerTrackEventLogging)
-				log("Track %d is %f pixels from intersection, %f pixes from camera, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), distToCamera, isInRange);
-			vehicles.put(vehicle.getTrack().track_id, new Vehicle(vehicle.getTrack().track_id, vehicle, Instant.now()));
-		}
-	}
-		
 	// return distance of vehicle to its facing camera, considering vehicle's distance to intersection and intersection width
 	public double GetDistanceToCamera(MotorVehicle car) {
 		double distance = 0;
@@ -244,8 +250,184 @@ public class TrafficController implements TrafficObserver {
 		return distance;
 	}
 	
+	// convert simulator vehicle direction into global application direction (for local calculations)
+	public application.Direction GetCarDirectionOfTravel(MotorVehicle car) {
+		return car.getDirection() == simulator.MotorVehicle.Direction.NORTH ? application.Direction.North
+			: car.getDirection() == simulator.MotorVehicle.Direction.EAST ? application.Direction.East
+			: car.getDirection() == simulator.MotorVehicle.Direction.WEST ? application.Direction.West
+			: application.Direction.South;
+	}
+	
+	public TrafficLight GetTrafficLightForVehicle(MotorVehicle car) {
+		for (TrafficLight light : trafficLights) {
+			if (light.getTravelDirection() == GetCarDirectionOfTravel(car))
+				return light;
+		}
+		
+		return null;
+	}
+	
+	// record vehicle movement updates, ignore anything not in-range of cameras
+	@Override
+	public void update(MotorVehicle vehicle) {
+		// TODO Auto-generated method stub
+		Instant now = Instant.now();
+		boolean isInRange = IsInRangeOfCamera(vehicle);
+		double distToCamera = GetDistanceToCamera(vehicle);		
+		//log("Track %d is %f pixels from intersection, lane %d, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), vehicle.getLane(), isInRange);
+		if (isInRange) {
+			if (Config.doTrafficControllerTrackEventLogging)
+				log("Track %d is %f pixels from intersection, %f pixels from camera, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), distToCamera, isInRange);
+			if (vehicles.containsKey(vehicle.getTrack().track_id)) { //update
+				//vehicles.put(vehicle.getTrack().track_id, new Vehicle(vehicle.getTrack().track_id, vehicle, now));
+				//log("Updating vehicle %d, timestampLastObserved = %s", vehicle.getTrack().track_id, now.toString());
+				vehicles.get(vehicle.getTrack().track_id).timestampLastObserved = now;
+			}
+			else { // insert
+				vehicles.put(vehicle.getTrack().track_id, new Vehicle(vehicle.getTrack().track_id, vehicle, Instant.now()));
+				RecordEvent("New Vehicle Tracked", String.format("ID: %d, direction: %s", vehicle.getTrack().track_id, vehicle.getTrack().direction).toString());
+			}
+			
+			// emergency vehicle taking control of intersection?
+			if (IsEmergencyVehicleWithActiveStrobe(vehicle) && !isEmergencyVehicleControlled) {
+				log("Emergency Vehicle with active strobe detected! Giving intersection override...");
+				SetEmergencyVehicleControlled(vehicles.get(vehicle.getTrack().track_id).direction);
+			}
+		}
+	}
+		
 	
 	/****************************** PRIVATE METHODS *******************************/
+	
+	
+	// fn to purge obsolete vehicles from the collection, either because they are out of range of traffic light cameras or they haven't been updated for a long time
+	private void DropOldVehiclesFromCollector() {
+		log("DropOldVehiclesFromCollector: %d vehicles to examine", vehicles.size());
+		
+		// nothing to track? exit early.
+		if (vehicles.size() == 0)
+			return;
+		
+		ReentrantLock lock = new ReentrantLock();
+		try {
+			lock.lock();
+			
+			Instant now = Instant.now();
+			
+			// list of vehicles to remove, do NOT remove items from collection while iterating thru it
+			List<Integer> idsToRemove = new LinkedList<>();
+			
+			for (Entry<Integer,Vehicle> entry : vehicles.entrySet()) {
+				Instant lastObserved = entry.getValue().timestampLastObserved;
+				long age = ChronoUnit.SECONDS.between(lastObserved, now);
+				log("vehicle %d age = %ds, lastObserved = %s", entry.getKey(), age, lastObserved.toString());
+				if (age > Config.maxSecondsVehicleAgeToTrack) {
+					idsToRemove.add(entry.getKey());
+					log("Removing vehicle %d due to aging", entry.getKey());
+					RecordEvent("Stop Tracking Vehicle", String.format("ID: %d, reason: aging", entry.getValue().id).toString());
+				}
+				else if (!IsInRangeOfCamera(entry.getValue().vehicle)) {
+					idsToRemove.add(entry.getKey());
+					log("Removing vehicle %d due to out-of-range condition", entry.getKey());
+					RecordEvent("Stop Tracking Vehicle", String.format("ID: %d, reason: out-of-range", entry.getValue().id).toString());
+				}
+			}
+			if (!idsToRemove.isEmpty()) {
+				idsToRemove.forEach(id -> vehicles.remove(id));
+				log("DropOldVehiclesFromCollector: %d vehicles remain in collection", vehicles.size());
+			}
+		}
+		catch (Exception ex) { ex.printStackTrace(); }
+		finally {
+			if (lock.isLocked())
+				lock.unlock();
+		}
+	}
+	
+	private void CheckAllLightSForWaitingTraffic() {
+		if (vehicles.size() == 0)
+			return;
+		
+		Integer i = 0;
+		i++;
+		
+		
+		int[] arrAllLights = new int[Direction.values().length];	// number of cars at every light
+		Arrays.fill(arrAllLights, 0);
+		int[] arrWaiting = new int[Direction.values().length];		// number of cars at red lights
+		Arrays.fill(arrWaiting, 0);
+		//int [] ra = arrWaiting.clone();
+		
+		//ArrayList<Pair<Direction,Integer>> lightsPerDirection = new ArrayList<Pair<Direction,Integer>>(); // cars per set of lights facing each direction
+		for (Entry<Integer,Vehicle> entry : vehicles.entrySet()) {
+			int indexForDirection = entry.getValue().direction.hashCode();
+			arrAllLights[indexForDirection]++;
+			TrafficLight light = GetTrafficLightForVehicle(entry.getValue().vehicle);
+			if (light.GetColor() == application.Color.Red)
+				arrWaiting[indexForDirection]++;
+		}
+		//Arrays.sort(arrWaiting, Collections.reverseOrder());
+		
+		for (TrafficLight light : trafficLights) {
+			
+		}
+	}
+	
+	// TODO: implement emergency vehicle detection AND white-light strobe detection
+	private boolean IsEmergencyVehicleWithActiveStrobe(MotorVehicle vehicle) {
+		return false;
+	}
+	
+	public String GetStatusForAllLights() {
+		StringBuilder sb = new StringBuilder();
+		
+		//sb.append("TrafficLights Status: ");
+		int numLights = 0;
+		for (TrafficLight light : trafficLights) {
+			if (++numLights > 1)
+				sb.append(String.format("\t"));
+			sb.append(String.format("%04d=%s", light.getID(), light.GetColor()));
+		}
+		
+		return sb.toString();
+	}
+		
+	// usage: emergency vehicles needing all lights to go red except theirs (optionally)
+	private void SetEmergencyVehicleControlled(Direction exceptForTravelDirection) {
+		this.isEmergencyVehicleControlled = true;
+		log("SetEmergencyVehicleControlled: turning all signals red (exception: %s)", exceptForTravelDirection == null ? "none" : exceptForTravelDirection.toString());
+		for (TrafficLight light : trafficLights) {
+			if (light.GetColor() != application.Color.Red && (exceptForTravelDirection == null || light.getTravelDirection() != exceptForTravelDirection)) {
+				log("TurnAllTrafficLightsRed: Changing light %d to Red", light.getID());
+				light.TurnRed();
+			}
+		}
+		// start sleep-looping until emergency vehicle has passed or max wait time is exceeded
+		log("SetEmergencyVehicleControlled: Intersection under emergency vehicle control, waiting until vehicles have released control...");
+		Instant startChecking = Instant.now();
+		long age = 0;
+		while (this.isEmergencyVehicleControlled || age > Config.maxSecondsToWaitForEmergencyVehicles) {
+			try {
+				log("SetEmergencyVehicleControlled: Wait time is no %d seconds", age);
+				TimeUnit.SECONDS.sleep((long)5);
+				age = ChronoUnit.SECONDS.between(startChecking, Instant.now());
+			} catch (Exception ex) { ex.printStackTrace(); }
+		}
+		
+		log("SetEmergencyVehicleControlled: Recovered from emergency vehicle control.");
+		ResetFromEmergencyVehicleControlled();
+		log("SetEmergencyVehicleControlled: Regular intersection management control resuming.");
+	}
+	
+	// usage: after emergency vehicles have passed through the intersection, restart regular light logic
+	private void ResetFromEmergencyVehicleControlled() {
+		log("ResetFromEmergencyVehicleControlled: resetting North-South signals");
+		for (TrafficLight light : trafficLights) {
+			if (light.GetColor() == application.Color.Red && (light.getTravelDirection() == application.Direction.North || light.getTravelDirection() == application.Direction.South))
+				light.TurnGreen();
+		}
+		this.isEmergencyVehicleControlled = false;
+	}
 	
 	// toggle traffic lights	
 	private void ToggleTrafficLightsForFixedTimerConfig() {
@@ -304,73 +486,24 @@ public class TrafficController implements TrafficObserver {
 		//log("ToggleTrafficLightsForFixedTimerConfig (finish): %s", GetStatusForAllLights());
 	}
 	
-	// convert simulator vehicle direction into global application direction (for local calculations)
-	private application.Direction GetCarDirectionOfTravel(MotorVehicle car) {
-		return car.getDirection() == simulator.MotorVehicle.Direction.NORTH ? application.Direction.North
-			: car.getDirection() == simulator.MotorVehicle.Direction.EAST ? application.Direction.East
-			: car.getDirection() == simulator.MotorVehicle.Direction.WEST ? application.Direction.West
-			: application.Direction.South;
-	}
-	
-	// fn to purge obsolete vehicles from the collection, either because they are out of range of traffic light cameras or they haven't been updated for a long time
-	private void DropOldVehiclesFromCollector() {
-		log("DropOldVehiclesFromCollector: %d vehicles to examine", vehicles.size());
-		
-		// nothing to track? exit early.
-		if (vehicles.size() == 0)
-			return;
-		
-		ReentrantLock lock = new ReentrantLock();
-		try {
-			lock.lock();
-			
-			Instant now = Instant.now();
-			
-			// list of vehicles to remove, do NOT remove items from collection while iterating thru it
-			List<Integer> idsToRemove = new LinkedList<>();
-			
-			for (Entry<Integer,Vehicle> entry : vehicles.entrySet()) {
-				Instant lastObserved = entry.getValue().timestampLastObserved;
-				long age = ChronoUnit.SECONDS.between(lastObserved, now);
-				log("vehicle %d age = %ds", entry.getKey(), age);
-				if (age > Config.maxSecondsVehicleAgeToTrack) {
-					idsToRemove.add(entry.getKey());
-					log("Removing vehicle %d due to aging", entry.getKey());
-				}
-				else if (!IsInRangeOfCamera(entry.getValue().vehicle)) {
-					idsToRemove.add(entry.getKey());
-					log("Removing vehicle %d due to out-of-range condition", entry.getKey());
+	private void RecordEvent(String name, String value) {
+		if (Config.doMetricsLogging ) {
+			try {
+				Instant now = Instant.now();
+				String text = String.format("insert into Events (timestamp, name, value) values ('%s','%s','%s')", now.toString(), name, value).toString();
+				//log("RecordEvent: SQL = %s", text);
+				int result = sql.executeUpdate(text);
+				//log("RecordEvent: result = %d", result);
+				if (result < 1) {
+					log("RecordEvent: Failed to store data in database");
 				}
 			}
-			if (!idsToRemove.isEmpty()) {
-				idsToRemove.forEach(id -> vehicles.remove(id));
-				log("DropOldVehiclesFromCollector: %d vehicles remain in collection", vehicles.size());
-			}
-		}
-		catch (Exception ex) { ex.printStackTrace(); }
-		finally {
-			if (lock.isLocked())
-				lock.unlock();
+			catch (Exception ex) { ex.printStackTrace(); }
 		}
 	}
-	
-	public String GetStatusForAllLights() {
-		StringBuilder sb = new StringBuilder();
-		
-		sb.append("TrafficLights Status: ");
-		int numLights = 0;
-		for (TrafficLight light : trafficLights) {
-			if (++numLights > 1)
-				sb.append(String.format("\t"));
-			sb.append(String.format("%04d=%s", light.getID(), light.GetColor()));
-		}
-		
-		return sb.toString();
-	}
-	
 	
 	private void log(String format, Object ... args) {
-		if (Config.doTrafficControllerLsogging) {
+		if (Config.doTrafficControllerLogging) {
 			System.out.println(String.format("%s %s %s", "TrafficController:", Instant.now().toString(), String.format(format, args)));
 		}
 	}
