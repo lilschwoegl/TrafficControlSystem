@@ -53,6 +53,8 @@ public class TrafficLight implements TrafficLightObservable {
 			: this.forTravelDirection == Direction.South	? Direction.North
 			: this.forTravelDirection == Direction.East	? Direction.West
 			: Direction.East;
+		
+		//create simulator light
 		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
 	}
 	

@@ -5,12 +5,14 @@ import application.Color;
 import application.Direction;
 
 public class TrafficLight {
-	public Direction direction;
-	public Color lightColor;
-	public org.opencv.core.Point lightPoint;
+	Direction direction;
+	Color lightColor;
+	org.opencv.core.Point lightPoint;
+	int id;
 	
 	//Constructor
-	public TrafficLight(Direction direction, Color lightColor) {
+	public TrafficLight(int id, Direction direction, Color lightColor) {
+		this.id = id;
 		this.direction = direction;
 		this.lightColor = lightColor;
 		lightPoint = getLightPoint(direction, lightColor);

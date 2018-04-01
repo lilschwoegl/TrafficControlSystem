@@ -60,7 +60,7 @@ public class SimulatorManager implements TrafficLightObserver {
 			light.getID(), light.getTravelDirection().toString(), light.GetColor().toString(), light.getLastChanged().toString()
 			));
 		
-		simLight = new simulator.TrafficLight(light.getTravelDirection(), light.GetColor());
+		simLight = new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor());
 		simLight.render(g);
 		
 		
