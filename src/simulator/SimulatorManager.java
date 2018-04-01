@@ -53,6 +53,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 		for (TrafficLight light : trafficLights) {
 			light.addObserver(this);
+			//add simulator traffic lights to hashmap
 			lights.put(light.getID(), new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor()));
 		}
 		
@@ -64,8 +65,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		System.out.println(String.format("Light %d, travel direction %s, changed to %s at %s",
 			light.getID(), light.getTravelDirection().toString(), light.GetColor().toString(), light.getLastChanged().toString()
 			));
-		
-		//simLight = new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor());
+		//updates lights in hashmap if same ID
 		lights.put(light.getID(), new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor()));		
 	}
 	
