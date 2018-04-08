@@ -1,10 +1,16 @@
 package tracking;
 
+import java.util.ArrayList;
+
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
+import application.Color;
 import application.DetectedObject;
+import application.TrafficController;
+import application.TrafficLight;
 import simulator.MotorVehicle.Direction;
+import simulator.SimulatorManager;
 
 public class SimulatedTrack extends Track{
 
@@ -13,6 +19,7 @@ public class SimulatedTrack extends Track{
 	private double speed = 0.05;
 	private double elapsedTime = 0.0;
 	private Direction travelDirection;
+
 	
 	public SimulatedTrack(Point pt, float dt, float Accel_noise_mag, int id, DetectedObject lastUpdate) {
 		super(pt, dt, Accel_noise_mag, id, lastUpdate);
@@ -30,6 +37,7 @@ public class SimulatedTrack extends Track{
 		
 		lastPosition = pt;
 		newPosition = pt;
+		
 	}
 	
 	public Point getDistChange()
@@ -69,6 +77,25 @@ public class SimulatedTrack extends Track{
 	{
 		newPosition = p;
 	}
+	
+	/*public Color checkLight(Direction travelDirection){
+		Direction direction = travelDirection;
+		
+		for (Color light :  ) {
+			switch(light) {
+			case Green:
+				break;
+			case Yellow:
+				break;
+			case Red:
+				break;
+			default:
+				break;
+			}
+		}
+		
+		return null;
+	}*/
 	
 	public void updateTrackPosition()
 	{
