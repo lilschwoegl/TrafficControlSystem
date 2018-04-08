@@ -71,7 +71,10 @@ public class TrafficLight implements TrafficLightObservable {
 	
 	public void notifyObservers() {
 		for (TrafficLightObserver observer : observers) {
-			observer.update(this);
+			try {
+				observer.update(this);
+			}
+			catch (Exception ex) { ex.printStackTrace(); }
 		}
 	}
 	/* end of observable methods */
@@ -108,7 +111,10 @@ public class TrafficLight implements TrafficLightObservable {
 				rwLock.readLock().lock();
 				rwLock.writeLock().unlock();
 				notifyObservers();
-				TimeUnit.SECONDS.sleep((long)Config.secondsYellowLightDuration);
+				try {
+					TimeUnit.SECONDS.sleep((long)Config.secondsYellowLightDuration);
+				}
+				catch (Exception ex2) { ex2.printStackTrace(); }
 				// upgrade to writelock for light change
 				rwLock.readLock().unlock();
 				rwLock.writeLock().lock();

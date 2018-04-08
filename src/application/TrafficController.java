@@ -84,8 +84,16 @@ public class TrafficController implements TrafficObserver {
 	// constructor: traffic cameras are assumed to be placed on the far side of the intersection to provide safest viewing angles by vehicles
 	public TrafficController(int numLanesNS, double laneWidthNS, int numLanesEW, double laneWidthEW)
 	{
-		log("System timestamp: " + LocalDateTime.now());
-		sql = new SQLite(Config.databaseName, Config.databaseSchema);
+		Instant now = Instant.now();
+		
+		// create/open database
+		this.sql = new SQLite(Config.databaseName, Config.databaseSchema);
+		
+		// record controller creation as event and metric entry
+		log("System timestamp: " + now.toString());
+		RecordEvent("TrafficController Creation", now.toString());
+		RecordMetric("TrafficController", "Creation", now);
+		
 		this.numLanesNS = numLanesNS;
 		this.numLanesEW = numLanesEW;
 		this.laneWidthNS = laneWidthNS;
@@ -128,7 +136,7 @@ public class TrafficController implements TrafficObserver {
 		log("Starting DropOldVehiclesFromCollector scheduled task");
 		taskExecutor.scheduleAtFixedRate(() -> {
 			try {
-				log("Calling DropOldVehiclesFromCollector...");
+				//log("Calling DropOldVehiclesFromCollector...");
 				DropOldVehiclesFromCollector();
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
@@ -140,8 +148,10 @@ public class TrafficController implements TrafficObserver {
 				String status = GetStatusForAllLights();
 				log("TrafficLights Status: %s, statusOfAllLights: %s", status, statusOfAllLights);
 				// record initial state and state changes only
-				if (statusOfAllLights == null || !statusOfAllLights.equals(status))
+				if (statusOfAllLights == null || !statusOfAllLights.equals(status)) {
 					RecordEvent("Lights Changed", status);
+					RecordMetric("Lights", "Lights Changed", status);
+				}
 				statusOfAllLights = status;
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
@@ -286,10 +296,13 @@ public class TrafficController implements TrafficObserver {
 			else { // insert
 				vehicles.put(vehicle.getTrack().track_id, new Vehicle(vehicle.getTrack().track_id, vehicle, Instant.now()));
 				RecordEvent("New Vehicle Tracked", String.format("ID: %d, direction: %s", vehicle.getTrack().track_id, vehicle.getTrack().direction).toString());
+				RecordMetric("New Vehicle", "New Track", vehicle.getTrack().track_id);
 			}
 			
 			// emergency vehicle taking control of intersection?
 			if (IsEmergencyVehicleWithActiveStrobe(vehicle) && !isEmergencyVehicleControlled) {
+				RecordEvent("Emergency Vehicle", String.format("Vehicle is an emergency responder, ID=%d", vehicle.getTrack().track_id));
+				RecordMetric("Emergency Vehicle", "Vehicle is an emergency responder", vehicle.getTrack().track_id);
 				log("Emergency Vehicle with active strobe detected! Giving intersection override...");
 				SetEmergencyVehicleControlled(vehicles.get(vehicle.getTrack().track_id).direction);
 			}
@@ -305,8 +318,11 @@ public class TrafficController implements TrafficObserver {
 		log("DropOldVehiclesFromCollector: %d vehicles to examine", vehicles.size());
 		
 		// nothing to track? exit early.
-		if (vehicles.size() == 0)
+		if (vehicles.size() == 0) {
+			// record metric
+			RecordMetric("Vehicles", "0 Tracked", 0);
 			return;
+		}
 		
 		ReentrantLock lock = new ReentrantLock();
 		try {
@@ -342,6 +358,9 @@ public class TrafficController implements TrafficObserver {
 			if (lock.isLocked())
 				lock.unlock();
 		}
+		
+		// record metric
+		RecordMetric("Vehicles", "Currently Tracked", vehicles.size());
 	}
 	
 	private void CheckAllLightSForWaitingTraffic() {
@@ -486,6 +505,7 @@ public class TrafficController implements TrafficObserver {
 		//log("ToggleTrafficLightsForFixedTimerConfig (finish): %s", GetStatusForAllLights());
 	}
 	
+	// record an event to the database in text format
 	private void RecordEvent(String name, String value) {
 		if (Config.doMetricsLogging ) {
 			try {
@@ -496,6 +516,28 @@ public class TrafficController implements TrafficObserver {
 				//log("RecordEvent: result = %d", result);
 				if (result < 1) {
 					log("RecordEvent: Failed to store data in database");
+				}
+			}
+			catch (Exception ex) { ex.printStackTrace(); }
+		}
+	}
+	
+	// record a metric (as an Object) to the database 
+	private void RecordMetric(String name, String description, Object value) {
+		if (Config.doMetricsLogging ) {
+			try {
+				Instant now = Instant.now();
+				
+				// value needs SQL quotes?
+				String valueAsText = (value instanceof String || value instanceof Instant) ? String.format("'%s'", value.toString()) : value.toString();
+				
+				String text = String.format("insert into Metrics (timestamp, name, description, valueType, value) values ('%s','%s','%s','%s', %s)",
+					now.toString(), name, description, value.getClass().getName(), valueAsText).toString();
+				log("RecordMetric: SQL = %s", text);
+				int result = sql.executeUpdate(text);
+				//log("RecordMetric: result = %d", result);
+				if (result < 1) {
+					log("RecordMetric: Failed to store data in database");
 				}
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
