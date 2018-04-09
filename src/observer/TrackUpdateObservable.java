@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import tracking.Track;
-import tracking.Track.Aspect;
+import tracking.Track.MOVEMENT_TYPE;
 
 public class TrackUpdateObservable implements TrackObservable {
 

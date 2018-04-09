@@ -13,7 +13,7 @@ import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
 import observer.TrackUpdateObservable;
-import tracking.Track.Aspect;
+import tracking.Track.MOVEMENT_TYPE;
 
 /**
  * Tracker.java TODO:
@@ -237,19 +237,29 @@ public class Tracker extends JTracker {
 			// update track direction
 			if (tracks.get(i).trace.size() > 1)
 			{
-				if (tracks.get(i).trace.get(tracks.get(i).trace.size() - 1).y > 
+				
+				Point p1 = tracks.get(i).trace.get(tracks.get(i).trace.size() - 1);
+				Point p2 = tracks.get(i).trace.get(0);
+				
+				double mag = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+				
+				if (mag < TrackerConfig._min_dist_change) 
+				{
+					tracks.get(i).direction = MOVEMENT_TYPE.STATIONARY;
+				}
+				else if (tracks.get(i).trace.get(tracks.get(i).trace.size() - 1).y > 
 					tracks.get(i).trace.get(0).y)
 				{
-					tracks.get(i).direction = Aspect.ONCOMING;
+					tracks.get(i).direction = MOVEMENT_TYPE.ONCOMING;
 				}
 				else
 				{
-					tracks.get(i).direction = Aspect.OUTGOING;
+					tracks.get(i).direction = MOVEMENT_TYPE.OUTGOING;
 				}
 			}
 			else
 			{
-				tracks.get(i).direction = Aspect.UNCERTAIN;
+				tracks.get(i).direction = MOVEMENT_TYPE.UNCERTAIN;
 			}
 			
 			TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i));

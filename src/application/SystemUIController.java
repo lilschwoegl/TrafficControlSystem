@@ -1,10 +1,18 @@
 package application;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
 
 import org.opencv.core.Core;
 import org.opencv.core.Core.MinMaxLocResult;
@@ -66,11 +74,14 @@ public class SystemUIController {
 	static Mat orgin;
 	static Mat kalman;
 	
+	boolean saveFramesToFile = true;
+	boolean firstRun = true;
+	long frameCounter = 0;
 
 	UITrackObserver trafficObserver;
 	
 	float confidenceThreshold  = (float)0.1;	
-	float probabilityThreshold = (float)0.2;
+	float probabilityThreshold = (float)0.1;
 	boolean drawTrace = true;
 	boolean extrapDetects = true;
 	
@@ -184,6 +195,46 @@ public class SystemUIController {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					
+					if (saveFramesToFile)
+					{
+						
+						if (firstRun)
+						{
+							Path dir = FileSystems.getDefault().getPath("H:\\CarImages");
+							DirectoryStream<Path> stream;
+							long maxFileCount = 0;
+							try {
+								stream = Files.newDirectoryStream( dir );
+							
+							String fileName;
+						      for (Path path : stream) {
+						    	  fileName = path.getFileName().toString();
+						    	  fileName = fileName.substring(fileName.indexOf('_')+1, fileName.indexOf('.'));  
+						    	  maxFileCount = Math.max(maxFileCount, Integer.parseInt(fileName));
+						      }
+						      stream.close();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+							frameCounter = ++maxFileCount;
+							firstRun = false;
+						}
+						
+						if (++frameCounter % 10 == 0)
+						{
+							
+							try {
+								BufferedImage bi = Utils.matToBufferedImage(frame);
+								ImageIO.write(bi, "jpg", new File("H:\\CarImages\\img_" + frameCounter + ".jpg"));
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
 
 					frame = processFrame(frame);
 
@@ -295,7 +346,7 @@ if (!testCaffe)
 								tracker.tracks.get(i).trace.get(jt - 1), 
 								tracker.tracks.get(i).trace.get(jt), 
 								TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
-								5, 4, 0);
+								2, 4, 0);
 	
 					}
 				}
@@ -334,6 +385,14 @@ if (!testCaffe)
 					}
 				}
 
+				Scalar fontColor = new Scalar(255,255,255);
+				Scalar boxColor = new Scalar(0,0,0);
+				double fontScale = .4;
+				int thickness = 1;
+				int xPixelStep = 20;
+				int[] baseline = new int[] {0};
+				Size fontSize = Imgproc.getTextSize("A", Core.FONT_HERSHEY_SIMPLEX, fontScale, thickness, baseline);
+				
 				// draw the bounding box around the detect
 				Imgproc.rectangle(
 						imag,
@@ -348,7 +407,7 @@ if (!testCaffe)
 						lb,
 						new Point(lb.x + 200, lb.y - 80),
 						//CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
-						new Scalar(0,0,0),
+						boxColor,
 						Core.FILLED
 						);
 				
@@ -358,9 +417,9 @@ if (!testCaffe)
 						String.format("%s - %.0f%%", detect.getClassName(), detect.classProb * 100), 
 						new Point(lb.x, lb.y - 60), 
 						Core.FONT_HERSHEY_SIMPLEX, 
-						1, 
-						new Scalar(255,255,255),
-						3);
+						fontScale, 
+						fontColor,
+						thickness);
 				
 				// draw the direction the detected object is traveling
 				Imgproc.putText(
@@ -368,9 +427,9 @@ if (!testCaffe)
 						String.format("%s", tracker.tracks.get(i).getDirectionToString()), 
 						new Point(lb.x, lb.y-30), 
 						Core.FONT_HERSHEY_SIMPLEX, 
-						1, 
-						new Scalar(255,255,255),
-						3);
+						fontScale, 
+						fontColor,
+						thickness);
 				
 				// determine teh lane that the car is in
 				tracker.tracks.get(i).lane = rlc.isInLane(tracker.tracks.get(i).getBestPositionCenter());
@@ -381,9 +440,9 @@ if (!testCaffe)
 						String.format("Lane: %d", tracker.tracks.get(i).lane), 
 						new Point(lb.x, lb.y), 
 						Core.FONT_HERSHEY_SIMPLEX, 
-						1, 
-						new Scalar(255,255,255),
-						3);
+						fontScale, 
+						fontColor,
+						thickness);
 			}
 			catch (Exception e)
 			{
@@ -433,7 +492,9 @@ if (!testCaffe)
 			classProb = res.maxVal;
 			classId = (int)res.maxLoc.x;
 
-			if (classProb > probabilityThreshold)
+			if (classProb > probabilityThreshold &&
+				confidence > confidenceThreshold &&
+				DetectedObject.isClassAllowed(classId))
 			{
 
 				/* outputs from network are:

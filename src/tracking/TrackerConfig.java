@@ -31,4 +31,5 @@ public class TrackerConfig {
 	public static int _maximum_allowed_skipped_frames = 10;
 	public static int _max_trace_length = 10;
 	public static int _max_sec_before_stale = 5; // 2 sec for better computer but my mac sucks
+	public static int _min_dist_change = 10;
 }

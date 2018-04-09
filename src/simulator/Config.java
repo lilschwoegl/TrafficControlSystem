@@ -4,7 +4,7 @@ import org.opencv.core.Point;
 
 public class Config {
 
-	public static boolean runSimulator = true;
+	public static boolean runSimulator = false;
 	
 	public static double simDisplayWidth = 600;
 	public static double simDisplayHeight = 600;

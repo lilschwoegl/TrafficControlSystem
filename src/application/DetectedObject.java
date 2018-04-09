@@ -12,6 +12,12 @@ import org.opencv.core.Rect;
 public class DetectedObject {
 	
 	static List<String> classes = new ArrayList<String>();
+	static List<String> allowedClasses = new ArrayList<String>() {{
+		add("car");
+		add("person");
+		add("bus");
+		add("motorbike");
+	}};
 	
 	public int classId;
 	public double classProb;
@@ -39,6 +45,16 @@ public class DetectedObject {
 		{
 			classes.add(line);
 		}
+	}
+	
+	public static boolean isClassAllowed(String className)
+	{
+		return allowedClasses.contains(className);
+	}
+	
+	public static boolean isClassAllowed(int classId)
+	{
+		return isClassAllowed(classes.get(classId));
 	}
 	
 	/**
