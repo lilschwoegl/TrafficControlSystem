@@ -11,13 +11,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import application.Direction;
+import application.Color;
+
 import observer.SimulatorObserver;
 import observer.TrackUpdateObservable;
 import observer.TrafficLightObservable;
 import observer.TrafficLightObserver;
 import observer.TrafficObserver;
 import observer.TrafficUpdateObservable;
-import application.Color;
+
 import simulator.MotorVehicle;
 
 public class TrafficLight implements TrafficLightObservable {
@@ -53,6 +55,8 @@ public class TrafficLight implements TrafficLightObservable {
 			: this.forTravelDirection == Direction.South	? Direction.North
 			: this.forTravelDirection == Direction.East	? Direction.West
 			: Direction.East;
+		
+		//create simulator light
 		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
 	}
 	
@@ -69,7 +73,10 @@ public class TrafficLight implements TrafficLightObservable {
 	
 	public void notifyObservers() {
 		for (TrafficLightObserver observer : observers) {
-			observer.update(this);
+			try {
+				observer.update(this);
+			}
+			catch (Exception ex) { ex.printStackTrace(); }
 		}
 	}
 	/* end of observable methods */
@@ -92,7 +99,7 @@ public class TrafficLight implements TrafficLightObservable {
 	}
 	
 	// cycle the light from green to yellow, pause, then change to red
-	/*TODO: downgrade writelock to readlock to allow clients to query yellow status. Because you can't upgrade a lock from read to write, would
+	/*TODO (DONE): downgrade writelock to readlock to allow clients to query yellow status. Because you can't upgrade a lock from read to write, would
 	 * need to release read lock grab new write lock, change to red, then unlock.*/
 	public void TurnRed() {
 		if (this.color == Color.Green) {
@@ -106,7 +113,10 @@ public class TrafficLight implements TrafficLightObservable {
 				rwLock.readLock().lock();
 				rwLock.writeLock().unlock();
 				notifyObservers();
-				TimeUnit.SECONDS.sleep((long)Config.secondsYellowLightDuration);
+				try {
+					TimeUnit.SECONDS.sleep((long)Config.secondsYellowLightDuration);
+				}
+				catch (Exception ex2) { ex2.printStackTrace(); }
 				// upgrade to writelock for light change
 				rwLock.readLock().unlock();
 				rwLock.writeLock().lock();
@@ -120,6 +130,11 @@ public class TrafficLight implements TrafficLightObservable {
 			}
 			notifyObservers();
 		}
+	}
+	
+	// return true if this light's color has remained unchanged (i.e. owned) for its min duration
+	public boolean IsMinOwnershipDurationElapsed() {
+		return secondsSinceLastChange() >= Config.minSecondsOwnershipUntilChangeAllowed;
 	}
 	
 	// return number of seconds since the light last changed color

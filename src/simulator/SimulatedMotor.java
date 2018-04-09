@@ -39,7 +39,7 @@ public class SimulatedMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 		((SimulatedTrack)track).updateTrackPosition();
 		updateTrackPosition();
-
+		//need to add a getlight status method call here... if green proceed, if red stop, if yellow slow down
 		notifyObservers();
 	}
 

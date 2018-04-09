@@ -11,5 +11,6 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="TrafficControlSystem/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/sqlite-jdbc-3.21.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

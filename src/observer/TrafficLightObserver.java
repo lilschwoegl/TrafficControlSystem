@@ -5,7 +5,6 @@ import java.time.Instant;
 import application.Color;
 import application.Direction;
 import application.TrafficLight;
-import simulator.paintTrafficLight;
 
 public interface TrafficLightObserver {
 	

@@ -1,11 +1,8 @@
 package simulator;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
 
 import org.opencv.core.Point;
 
@@ -25,11 +22,13 @@ public class SimulatorManager implements TrafficLightObserver {
 	private long delay;
 	private SimulatorObserver observer;
 	Graphics g;
+	private int bulbID = 900;
 	
 	int simulatedCarsCounter = 5000;
 	
-	private HashMap<Integer,MotorVehicle> motors;
-	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
+	public HashMap<Integer,MotorVehicle> motors;
+	public ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
+	public HashMap<Integer,simulator.TrafficLight> lights;
 	
 	TrafficController trafficController;
 	
@@ -37,6 +36,8 @@ public class SimulatorManager implements TrafficLightObserver {
 	public SimulatorManager(){
 		//motor = new objectMotor();
 		motors = new HashMap<Integer,MotorVehicle>();
+		lights = new HashMap<Integer, simulator.TrafficLight>();
+		
 		
 		// delay = to 2secs
 		delay = 2000;
@@ -46,9 +47,13 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 		trafficController = new TrafficController(3, 60, 3, 60); // 3 N-S lanes, 3 E-W lanes, 60 pixel lane width everywhere (based on calculations from simulator config file)
 		trafficLights = trafficController.GetTrafficLights();
+		
 		System.out.println(String.format("SimulatorManager: %d Traffic Lights", trafficLights.size()));
+		
 		for (TrafficLight light : trafficLights) {
 			light.addObserver(this);
+			//add simulator traffic lights to hashmap
+			lights.put(light.getID(), new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor()));
 		}
 		
 		TrafficUpdateObservable.getInstance().addObserver(trafficController);
@@ -59,13 +64,14 @@ public class SimulatorManager implements TrafficLightObserver {
 		System.out.println(String.format("Light %d, travel direction %s, changed to %s at %s",
 			light.getID(), light.getTravelDirection().toString(), light.GetColor().toString(), light.getLastChanged().toString()
 			));
+		//updates lights in hashmap if same ID
+		lights.put(light.getID(), new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor()));		
 	}
 	
 	//methods
 	//method init to initialize 
 	public void init(){
 		loadImage.init();	
-		
 		// TODO: Clean this up...
 		//------------------------------------------------------------
 		//START SIMULATED CARS
@@ -196,6 +202,9 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 		//render background image
 		g.drawImage(loadImage.fullImage,0,0,600,600,null);
+		
+		//renders initial traffic light bulbs
+
 		//g.drawImage(loadImage.redLight,410,167,40,40,null);
 		
 		
@@ -208,7 +217,16 @@ public class SimulatorManager implements TrafficLightObserver {
 			
 		}
 		
-	
+		//render traffic light
+		synchronized(this){
+			//simulator.TrafficLight.init(g);
+
+			for (simulator.TrafficLight tl : lights.values())
+			{
+				tl.render(g);
+			}
+			
+		}
 		
 		
 	}
