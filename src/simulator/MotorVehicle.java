@@ -93,6 +93,11 @@ public abstract class MotorVehicle {
 		return speed;
 	}
 	
+	public void setSpeed(double s)
+	{
+		this.speed = s;
+	}
+	
 	public abstract void tick();
 	
 	public void leftTurn(){

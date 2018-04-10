@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.opencv.core.Point;
 
+import application.Color;
 import application.TrafficController;
 import application.TrafficLight;
 import observer.SimulatorObserver;
@@ -30,7 +31,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	public ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	public HashMap<Integer,simulator.TrafficLight> lights;
 	
-	TrafficController trafficController;
+	public static TrafficController trafficController;
 	
 	//constructor
 	public SimulatorManager(){
@@ -148,7 +149,21 @@ public class SimulatorManager implements TrafficLightObserver {
 	{
 		for (MotorVehicle m : motors.values())
 		{
+			
+			Color l = trafficController.GetTrafficLightForVehicle(m).GetColor();
+			switch (l) {
+			case Yellow:
+				m.speed = m.speed * 0.5;
+				break;
+			case Red:
+				m.speed = 0;
+				break;
+			default:
+				continue;
+			}
+			
 			m.tick();
+			
 		}
 	}
 	
