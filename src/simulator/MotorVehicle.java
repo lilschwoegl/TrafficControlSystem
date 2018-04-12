@@ -14,7 +14,7 @@ public abstract class MotorVehicle {
 	protected double x = -100;
 	protected double y = -100;
 	protected int lane;
-	protected double speed;
+	protected double speed = 0.08f;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
 	public enum Direction {NORTH, SOUTH, EAST, WEST};
 	protected Direction direction;
@@ -26,7 +26,7 @@ public abstract class MotorVehicle {
 		this.direction = dir;
 		this.track = track;
 
-		speed = 0.5f;
+		((SimulatedTrack)track).setSpeed(speed);
 	}
 	
 	//methods
@@ -72,13 +72,13 @@ public abstract class MotorVehicle {
 		switch (direction)
 		{
 			case NORTH:
-				return y - (Config.simDisplayHeight - Config.roadStripLength);
+				return y - (Config.simDisplayHeight - Config.roadStripLength + 10);
 			case SOUTH:
-				return Config.roadStripLength - y;
+				return Config.roadStripLength - y - 55;
 			case EAST:
-				return Config.roadStripLength - x;
+				return Config.roadStripLength - x - 55;
 			case WEST:
-				return x - (Config.simDisplayWidth - Config.roadStripLength);
+				return x - (Config.simDisplayWidth - Config.roadStripLength + 10);
 		}
 		
 		return -99999;
@@ -97,6 +97,7 @@ public abstract class MotorVehicle {
 	public void setSpeed(double s)
 	{
 		this.speed = s;
+		((SimulatedTrack)track).setSpeed(s);
 	}
 	
 	public abstract void tick();
