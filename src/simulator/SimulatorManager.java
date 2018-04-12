@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.opencv.core.Point;
 
+import application.Color;
 import application.TrafficController;
 import application.TrafficLight;
 import observer.SimulatorObserver;
@@ -30,7 +31,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	public ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	public HashMap<Integer,simulator.TrafficLight> lights;
 	
-	TrafficController trafficController;
+	public static TrafficController trafficController;
 	
 	//constructor
 	public SimulatorManager(){
@@ -147,11 +148,38 @@ public class SimulatorManager implements TrafficLightObserver {
 		this.g = g;
 	}
 	
+	
 	public synchronized void tick()
 	{
 		for (MotorVehicle m : motors.values())
 		{
+
+			Color l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
+			
+			switch (l) {
+			case Red:
+				/*if (m.distToIntersection() < 0 || m.distToIntersection() == Config.simDisplayHeight || m.distToIntersection() == Config.simDisplayWidth) {
+					break;
+				} else {
+				continue; }*/
+				if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
+					continue;
+				} else {
+					break;
+				}
+			case Yellow:
+				if (m.distToIntersection() < 0) {
+					break;
+				} else {
+				m.setSpeed(m.speed-0.001); 
+				break; }
+			default:
+				m.setSpeed(0.08f);
+				break;
+			}
+			
 			m.tick();
+			
 		}
 	}
 	
@@ -168,7 +196,10 @@ public class SimulatorManager implements TrafficLightObserver {
 			SimulatedTrack simTrack = (SimulatedTrack)track;
 			
 			motors.put(track.track_id, new SimulatedMotor(lane, dir, simTrack));
+
 			return;
+			
+			
 		}
 		
 		switch (dir)
@@ -204,8 +235,30 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 		// notify observers of update
 		motors.get(track.track_id).notifyObservers();
-		
 	}
+	
+	/*public Boolean trackClear(int lane, Direction dir) {
+		Boolean trackClear = false;
+		
+		for (MotorVehicle m : motors.values())
+		{
+			while (trackClear = false) {
+				if (lane == m.lane && dir == m.direction && m.distToIntersection() > 100){
+					trackClear = false;
+					continue;
+				} else {
+					trackClear = true;
+					break;
+				}
+
+			}
+			
+			break;
+						
+		}
+		
+		return trackClear;
+	}*/
 	
 	
 	//method render to set graphic location and size

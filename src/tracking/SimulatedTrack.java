@@ -9,6 +9,7 @@ import application.Color;
 import application.DetectedObject;
 import application.TrafficController;
 import application.TrafficLight;
+import simulator.MotorVehicle;
 import simulator.MotorVehicle.Direction;
 import simulator.SimulatorManager;
 
@@ -78,24 +79,7 @@ public class SimulatedTrack extends Track{
 		newPosition = p;
 	}
 	
-	/*public Color checkLight(Direction travelDirection){
-		Direction direction = travelDirection;
 		
-		for (Color light :  ) {
-			switch(light) {
-			case Green:
-				break;
-			case Yellow:
-				break;
-			case Red:
-				break;
-			default:
-				break;
-			}
-		}
-		
-		return null;
-	}*/
 	
 	public void updateTrackPosition()
 	{
