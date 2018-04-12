@@ -193,6 +193,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 		if (simulated)
 		{
+
 			SimulatedTrack simTrack = (SimulatedTrack)track;
 			
 			motors.put(track.track_id, new SimulatedMotor(lane, dir, simTrack));
