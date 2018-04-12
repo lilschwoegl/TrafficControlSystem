@@ -145,21 +145,23 @@ public class SimulatorManager implements TrafficLightObserver {
 		this.g = g;
 	}
 	
+	
 	public synchronized void tick()
 	{
 		for (MotorVehicle m : motors.values())
 		{
+
+			Color l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
 			
-			Color l = trafficController.GetTrafficLightForVehicle(m).GetColor();
 			switch (l) {
+			case Red:
+				//m.speed = 0;
+				continue;
 			case Yellow:
 				m.speed = m.speed * 0.5;
 				break;
-			case Red:
-				m.speed = 0;
-				break;
 			default:
-				continue;
+				break;
 			}
 			
 			m.tick();
