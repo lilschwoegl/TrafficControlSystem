@@ -79,26 +79,6 @@ public class SimulatedTrack extends Track{
 		newPosition = p;
 	}
 	
-	/*public void checkLight(MotorVehicle car){
-		TrafficLight tl;
-		tl = simulator.SimulatorManager.trafficController.GetTrafficLightForVehicle(car);
-		Color light = tl.GetColor();
-		double oldSpeed;
-		oldSpeed = car.getSpeed();
-				
-			switch(light) {
-				case Green:
-					break;
-				case Yellow:
-					car.setSpeed(oldSpeed*0.5);
-					break;
-				case Red:
-					car.setSpeed(0);
-					break;
-				default:
-					break;
-				}
-	}*/
 		
 	
 	public void updateTrackPosition()

@@ -184,8 +184,11 @@ public class SimulatorManager implements TrafficLightObserver {
 	{
 		if (simulated)
 		{
+			
 			motors.put(track.track_id, new SimulatedMotor(lane, dir, (SimulatedTrack)track));
 			return;
+			
+			
 		}
 		
 		switch (dir)
@@ -221,8 +224,30 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 		// notify observers of update
 		motors.get(track.track_id).notifyObservers();
-		
 	}
+	
+	/*public Boolean trackClear(int lane, Direction dir) {
+		Boolean trackClear = false;
+		
+		for (MotorVehicle m : motors.values())
+		{
+			while (trackClear = false) {
+				if (lane == m.lane && dir == m.direction && m.distToIntersection() > 100){
+					trackClear = false;
+					continue;
+				} else {
+					trackClear = true;
+					break;
+				}
+
+			}
+			
+			break;
+						
+		}
+		
+		return trackClear;
+	}*/
 	
 	
 	//method render to set graphic location and size
