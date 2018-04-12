@@ -80,8 +80,8 @@ public class SystemUIController {
 
 	UITrackObserver trafficObserver;
 	
-	float confidenceThreshold  = (float)0.1;	
-	float probabilityThreshold = (float)0.1;
+	float confidenceThreshold  = (float)0.2;	
+	float probabilityThreshold = (float)0.2;
 	boolean drawTrace = true;
 	boolean extrapDetects = true;
 	
@@ -391,7 +391,9 @@ if (!testCaffe)
 				int thickness = 1;
 				int xPixelStep = 20;
 				int[] baseline = new int[] {0};
-				Size fontSize = Imgproc.getTextSize("A", Core.FONT_HERSHEY_SIMPLEX, fontScale, thickness, baseline);
+				Size fontSize = Imgproc.getTextSize(tracker.tracks.get(i).getDirectionToString(), 
+						Core.FONT_HERSHEY_SIMPLEX, fontScale, thickness, baseline);
+				Size boxSize = new Size(fontSize.width + 20, fontSize.height * 4);
 				
 				// draw the bounding box around the detect
 				Imgproc.rectangle(
@@ -405,7 +407,7 @@ if (!testCaffe)
 				Imgproc.rectangle(
 						imag,
 						lb,
-						new Point(lb.x + 200, lb.y - 80),
+						new Point(lb.x + boxSize.width, lb.y - boxSize.height),
 						//CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
 						boxColor,
 						Core.FILLED
@@ -415,7 +417,7 @@ if (!testCaffe)
 				Imgproc.putText(
 						imag, 
 						String.format("%s - %.0f%%", detect.getClassName(), detect.classProb * 100), 
-						new Point(lb.x, lb.y - 60), 
+						new Point(lb.x, lb.y - fontSize.height * 3), 
 						Core.FONT_HERSHEY_SIMPLEX, 
 						fontScale, 
 						fontColor,
@@ -425,7 +427,7 @@ if (!testCaffe)
 				Imgproc.putText(
 						imag, 
 						String.format("%s", tracker.tracks.get(i).getDirectionToString()), 
-						new Point(lb.x, lb.y-30), 
+						new Point(lb.x, lb.y-fontSize.height * 2), 
 						Core.FONT_HERSHEY_SIMPLEX, 
 						fontScale, 
 						fontColor,
@@ -438,6 +440,16 @@ if (!testCaffe)
 				Imgproc.putText(
 						imag, 
 						String.format("Lane: %d", tracker.tracks.get(i).lane), 
+						new Point(lb.x, lb.y-fontSize.height * 1), 
+						Core.FONT_HERSHEY_SIMPLEX, 
+						fontScale, 
+						fontColor,
+						thickness);
+				
+				// draw the track ID
+				Imgproc.putText(
+						imag, 
+						String.format("ID: %d", tracker.tracks.get(i).track_id), 
 						new Point(lb.x, lb.y), 
 						Core.FONT_HERSHEY_SIMPLEX, 
 						fontScale, 

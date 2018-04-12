@@ -24,9 +24,8 @@ public class SimulatorObserver implements TrackObserver{
 	public void update(Track track, TrackUpdate updateType) {
 		// TODO Auto-generated method stub
 		
-//		System.out.printf("Updated track %d, type %s, lane %d, changex %f changey %f\n", 
+//		System.out.printf("Updated track %d, lane %d, changex %f changey %f\n", 
 //				track.track_id, 
-//				TrafficUpdateObservable.getUpdateToString(updateType), 
 //				track.lane,
 //				track.getDistChange().x,
 //				track.getDistChange().y);

@@ -76,65 +76,68 @@ public class SimulatorManager implements TrafficLightObserver {
 		//------------------------------------------------------------
 		//START SIMULATED CARS
 		//below the addCar functions will created simulated vehicles
-		addCar(
-				1-1, 
-				Direction.WEST, 
-				new SimulatedTrack(
-						new Point(Config.simDisplayWidth,0), 
-						simulatedCarsCounter++, 
-						Direction.WEST,
-						.01),
-				true);
-		
-		addCar(
-				2-1, 
-				Direction.WEST, 
-				new SimulatedTrack(
-						new Point(Config.simDisplayWidth,0), 
-						simulatedCarsCounter++, 
-						Direction.WEST,
-						.05),
-				true);
-		
-		addCar(
-				2-1, 
-				Direction.EAST, 
-				new SimulatedTrack(
-						new Point(0,0), 
-						simulatedCarsCounter++, 
-						Direction.EAST,
-						.05),
-				true);
-		
-		addCar(
-				2-1, 
-				Direction.NORTH, 
-				new SimulatedTrack(
-						new Point(0,Config.simDisplayHeight), 
-						simulatedCarsCounter++, 
-						Direction.NORTH,
-						.05),
-				true);
-		
-		addCar(
-				1-1, 
-				Direction.NORTH, 
-				new SimulatedTrack(
-						new Point(0,Config.simDisplayHeight), 
-						simulatedCarsCounter++, 
-						Direction.NORTH,
-						.05),
-				true);
-		
-		addCar(
-				2-1, 
-				Direction.SOUTH, 
-				new SimulatedTrack(
-						new Point(0,0), 
-						simulatedCarsCounter++, 
-						Direction.SOUTH,
-						.05),
-				true);
+		if (Config.startSimulatedMotors)
+		{
+			addCar(
+					1-1, 
+					Direction.WEST, 
+					new SimulatedTrack(
+							new Point(Config.simDisplayWidth,0), 
+							simulatedCarsCounter++, 
+							Direction.WEST,
+							.01),
+					true);
+			
+			addCar(
+					2-1, 
+					Direction.WEST, 
+					new SimulatedTrack(
+							new Point(Config.simDisplayWidth,0), 
+							simulatedCarsCounter++, 
+							Direction.WEST,
+							.05),
+					true);
+			
+			addCar(
+					2-1, 
+					Direction.EAST, 
+					new SimulatedTrack(
+							new Point(0,0), 
+							simulatedCarsCounter++, 
+							Direction.EAST,
+							.05),
+					true);
+			
+			addCar(
+					2-1, 
+					Direction.NORTH, 
+					new SimulatedTrack(
+							new Point(0,Config.simDisplayHeight), 
+							simulatedCarsCounter++, 
+							Direction.NORTH,
+							.05),
+					true);
+			
+			addCar(
+					1-1, 
+					Direction.NORTH, 
+					new SimulatedTrack(
+							new Point(0,Config.simDisplayHeight), 
+							simulatedCarsCounter++, 
+							Direction.NORTH,
+							.05),
+					true);
+			
+			addCar(
+					2-1, 
+					Direction.SOUTH, 
+					new SimulatedTrack(
+							new Point(0,0), 
+							simulatedCarsCounter++, 
+							Direction.SOUTH,
+							.05),
+					true);
+		}
 		//END SIMULATED CARS
 		//-----------------------------------------------------------------
 	}
@@ -154,9 +157,17 @@ public class SimulatorManager implements TrafficLightObserver {
 	
 	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
+		
+		System.out.printf("Added track %d, lane %d, dir %d\n", 
+				track.track_id,
+				lane,
+				dir.ordinal());
+		
 		if (simulated)
 		{
-			motors.put(track.track_id, new SimulatedMotor(lane, dir, (SimulatedTrack)track));
+			SimulatedTrack simTrack = (SimulatedTrack)track;
+			
+			motors.put(track.track_id, new SimulatedMotor(lane, dir, simTrack));
 			return;
 		}
 		

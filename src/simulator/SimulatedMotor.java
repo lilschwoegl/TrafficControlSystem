@@ -17,8 +17,11 @@ public class SimulatedMotor extends MotorVehicle{
 	@Override
 	public void updateTrackPosition() {
 		// TODO Auto-generated method stub
-		x = track.getBestPositionCenter().x;
-		y = track.getBestPositionCenter().y;
+		//x = track.getBestPositionCenter().x;
+		//y = track.getBestPositionCenter().y;
+		
+		x = ((SimulatedTrack)track).getBestPositionCenter().x;
+		y = ((SimulatedTrack)track).getBestPositionCenter().y;
 	}
 
 	@Override
