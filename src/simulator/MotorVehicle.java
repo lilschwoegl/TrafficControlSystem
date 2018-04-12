@@ -7,6 +7,7 @@ import org.opencv.core.Point;
 
 import javafx.scene.text.Font;
 import observer.TrafficUpdateObservable;
+import tracking.SimulatedTrack;
 import tracking.Track;
 
 public abstract class MotorVehicle {
