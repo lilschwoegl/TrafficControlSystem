@@ -41,7 +41,8 @@ public class SQLite {
 	// execute a SQL query, return the result
 	public ResultSet executeQuery(String sqlStatement) throws SQLException {
 		try {
-			PreparedStatement sql = getConnection().prepareStatement(sqlStatement);
+			//PreparedStatement sql = getConnection().prepareStatement(sqlStatement);
+			Statement sql = getConnection().createStatement();
 			return sql.executeQuery(sqlStatement);
 		}
 		catch (Exception ex) {
