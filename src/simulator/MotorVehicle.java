@@ -15,7 +15,7 @@ public abstract class MotorVehicle {
 	protected double x = -100;
 	protected double y = -100;
 	protected int lane;
-	protected double speed = 0.08f;
+	protected double speed = Config.speed;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
 	protected Direction direction;
 	Track track;
@@ -45,6 +45,7 @@ public abstract class MotorVehicle {
 	
 	public abstract void updateTrackPosition();
 	
+
 	public int getLane(){
 		//return lane;	
 		return lane;
@@ -60,6 +61,8 @@ public abstract class MotorVehicle {
 	{
 		return new Point(x, y);
 	}
+	
+	
 	
 	public abstract void initLane(int lane);
 	

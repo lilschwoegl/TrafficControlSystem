@@ -26,6 +26,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	Graphics g;
 	private int bulbID = 900;
 	
+	
 	int simulatedCarsCounter = 5000;
 	
 	public HashMap<Integer,MotorVehicle> motors;
@@ -77,6 +78,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		//------------------------------------------------------------
 		//START SIMULATED CARS
 		//below the addCar functions will created simulated vehicles
+		
 		if (SimConfig.startSimulatedMotors)
 		{
 			addCar(
@@ -155,31 +157,43 @@ public class SimulatorManager implements TrafficLightObserver {
 		{
 
 			BulbColor l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
+			Double d = m.distToIntersection();
+			
 			
 			switch (l) {
-				case Red:
-					if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
-						continue;
-					} else {
-						break;
-					}
-				case Yellow:
-					if (m.distToIntersection() < 0) {
-						break;
-					} else {
-					m.setSpeed(m.speed-0.001); 
-					break; }
-				default:
-					m.setSpeed(0.08f);
+			case Red:
+				if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+					continue;
+				} else if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
+					continue;
+				} else {
 					break;
-			}
-			
+				}
+			case Yellow:
+				if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+					continue;				
+				} else if (m.distToIntersection() < 0) {
+					break;
+				} else {
+				while (m.speed > 0) {
+					m.setSpeed(m.speed-0.001); 
+				}
+				break; }
+			default:
+				if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+					continue;
+				} else {
+					m.setSpeed(Config.speed);
+					break;
+				}					
+			}			
+				
 			m.tick();
 			
 		}
 	}
 	
-	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
+	public void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
 
 		if (simulated)
@@ -204,29 +218,59 @@ public class SimulatorManager implements TrafficLightObserver {
 			
 		}
 		
-		System.out.printf("Added track %d, lane %d, dir %d\n", 
-				track.track_id,
-				lane,
-				dir.ordinal());
-		
-		switch (dir)
-		{
-			case NORTH:
-				motors.put(track.track_id, new NorthboundMotor(lane, track));
-				break;
-			case SOUTH:
-				motors.put(track.track_id, new SouthboundMotor(lane, track));
-				break;
-			case EAST:
-				motors.put(track.track_id, new EastboundMotor(lane, track));
-				break;
-			case WEST:
-				motors.put(track.track_id, new WestboundMotor(lane, track));
-				break;
-			default:
-				break;
+		while (trackClear(lane,dir,track.track_id)) {
+			if (simulated)
+			{
+				
+				motors.put(track.track_id, new SimulatedMotor(lane, dir, (SimulatedTrack)track));
+				
+				return;
+				
+				
+			}
+			
+			switch (dir)
+			{
+				case NORTH:
+					motors.put(track.track_id, new NorthboundMotor(lane, track));
+					break;
+				case SOUTH:
+					motors.put(track.track_id, new SouthboundMotor(lane, track));
+					break;
+				case EAST:
+					motors.put(track.track_id, new EastboundMotor(lane, track));
+					break;
+				case WEST:
+					motors.put(track.track_id, new WestboundMotor(lane, track));
+					break;
+				default:
+					break;
+			}
 		}
 	}
+	
+	public Boolean trackClear(int lane, Direction dir, int id) {
+		Boolean trackClear = true;
+		
+		for (MotorVehicle m : motors.values())
+		{
+			if (m.lane == lane && m.direction == dir && m.track.track_id != id){
+				if (m.distToIntersection() > 150) {
+					trackClear = false;
+					continue;
+				} else {
+					trackClear = true;
+					continue;
+				}
+			} else {
+					trackClear = true;
+					continue;
+			}
+		}
+		
+		return trackClear;
+	}
+	
 	
 	//comment out if you do not want to remove cars from video feed
 	public synchronized void removeCar(Track track)
@@ -243,30 +287,6 @@ public class SimulatorManager implements TrafficLightObserver {
 		// notify observers of update
 		motors.get(track.track_id).notifyObservers();
 	}
-	
-	/*public Boolean trackClear(int lane, Direction dir) {
-		Boolean trackClear = false;
-		
-		for (MotorVehicle m : motors.values())
-		{
-			while (trackClear = false) {
-				if (lane == m.lane && dir == m.direction && m.distToIntersection() > 100){
-					trackClear = false;
-					continue;
-				} else {
-					trackClear = true;
-					break;
-				}
-
-			}
-			
-			break;
-						
-		}
-		
-		return trackClear;
-	}*/
-	
 	
 	//method render to set graphic location and size
 	public void render(Graphics g){

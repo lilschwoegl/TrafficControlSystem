@@ -84,7 +84,7 @@ public class SimulatedTrack extends Track{
 	public void updateTrackPosition()
 	{
 		Point temp = newPosition;
-		
+	
 		switch (travelDirection)
 		{
 		case NORTH:
