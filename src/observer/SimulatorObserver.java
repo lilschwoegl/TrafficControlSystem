@@ -24,11 +24,12 @@ public class SimulatorObserver implements TrackObserver{
 	public void update(Track track, TrackUpdate updateType) {
 		// TODO Auto-generated method stub
 		
-//		System.out.printf("Updated track %d, lane %d, changex %f changey %f\n", 
-//				track.track_id, 
-//				track.lane,
-//				track.getDistChange().x,
-//				track.getDistChange().y);
+		//System.out.printf("Updated track %d, lane %d, changex %f changey %f\n", 
+		//		track.track_id, 
+		//		track.lane,
+		//		track.getDistChange().x,
+		//		track.getDistChange().y);
+		
 		SimulatedTrack strack;
 		
 		
@@ -40,12 +41,14 @@ public class SimulatorObserver implements TrackObserver{
 						simulatedCarsCounter++,
 						Direction.SOUTH,
 						.05);
-				//simulator.addCar(track.lane, Direction.SOUTH, track, false);
+				
 				simulator.addCar(
 						track.lane, 
 						Direction.SOUTH, 
 						strack, 
 						true);
+				
+//				simulator.addCar(track.lane, Direction.SOUTH, track, false);
 				break;
 			case REMOVED:
 				//simulator.removeCar(strack);

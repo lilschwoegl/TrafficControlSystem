@@ -26,9 +26,10 @@ public class VideoInput extends VideoCapture{
 		"http://170.93.143.139:1935/rtplive/d6009a3500e50039004606363d235daa/playlist.m3u8",
 		"http://170.93.143.139:1935/rtplive/dbff12ba0057008d004be2369e235daa/playlist.m3u8",
 		"http://170.93.143.139:1935/rtplive/6001ce5800f700d700437a45351f0214/playlist.m3u8",
+		"http://pa511wmedia101.ilchost.com/live/CAM-11-226.stream/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9NC8xMi8yMDE4IDk6MzA6NTAgUE0maGFzaF92YWx1ZT1aaEU5bXNTMnF5TmZaVFVzTDN2Y1dnPT0mdmFsaWRtaW51dGVzPTIwJmlkPTE3My42OS4xNzQuMTA3",
 		"video/cars.mp4",
 		"video/dog_people.mp4",
-		"video/Autonomous Intersection in Action.mp4",
+		"https://itsvideo.arlingtonva.us:8012/live/cam136.stream/playlist.m3u8",
 		"https://itsvideo.arlingtonva.us:8011/live/cam74.stream/playlist.m3u8"
 	};
 	
@@ -41,11 +42,14 @@ public class VideoInput extends VideoCapture{
 		"I-695 E of I-95",
 		"I-695 AT PUTTY HILL AVE",
 		"I-695 AT HARFORD RD",
+		"Stump Road",
 		"RAW VIDEO",
 		"Dog and People",
 		"Intersection",
 		"Crashes"
 	};
+	
+	private static long counter = 0;
 	
 	private static Hashtable<String, String> videoFeeds;
 	
@@ -118,14 +122,21 @@ public class VideoInput extends VideoCapture{
 	{
 		Mat frame = new Mat();
 		
+		//System.out.printf("Img Counter: %d\n", counter);
+		
 		try {
 			// read the current frame
 			this.read(frame);
 			
+			//System.out.printf("Reading image: %d\n", counter-1);
+			
+			counter++;
+			
 			return frame;
 		} catch (Exception e) {
 			// log the (full) error
-			System.err.print("Exception during the image elaboration...");
+			//System.err.print("Exception during the image elaboration...");
+			
 			e.printStackTrace();
 			
 			// bubble the error up

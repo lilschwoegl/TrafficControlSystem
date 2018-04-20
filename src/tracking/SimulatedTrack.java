@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import application.Color;
+import application.BulbColor;
 import application.DetectedObject;
 import application.TrafficController;
 import application.TrafficLight;
@@ -77,9 +77,9 @@ public class SimulatedTrack extends Track{
 	public void setPosition(Point p)
 	{
 		newPosition = p;
-	}
-	
 		
+		System.out.printf("33333 Setting Track %d Y: %f\n", track_id, p.y);
+	}
 	
 	public void updateTrackPosition()
 	{
@@ -100,6 +100,9 @@ public class SimulatedTrack extends Track{
 			newPosition.x = lastPosition.x - (speed * getSecSinceUpdate());
 			break;
 		}
+		
+		System.out.printf("Track %d new X=%f Y=%f, Sec=%d, Speed=%f\n", 
+				track_id, newPosition.x, newPosition.y, getSecSinceUpdate(), speed);
 		
 		lastPosition = temp;
 	}

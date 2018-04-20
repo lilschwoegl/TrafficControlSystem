@@ -5,6 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.*?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="703.0" prefWidth="980.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.SystemUIController">
   <bottom>
@@ -20,6 +21,11 @@
       <children>
         <ImageView fx:id="imageOutputImgvw" fitHeight="350.92511734872494" fitWidth="569.0" pickOnBounds="true" preserveRatio="true" />
         <Label fx:id="trackLbl" alignment="CENTER" text="Label" textAlignment="LEFT" />
+        <Label fx:id="statusLbl" text="Label">
+          <font>
+            <Font size="14.0" />
+          </font>
+        </Label>
       </children>
     </VBox>
   </center>

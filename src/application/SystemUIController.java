@@ -7,6 +7,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -25,6 +26,7 @@ import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
 import org.opencv.dnn.Net;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoWriter;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -74,7 +76,7 @@ public class SystemUIController {
 	static Mat orgin;
 	static Mat kalman;
 	
-	boolean saveFramesToFile = true;
+	boolean saveFramesToFile = false;
 	boolean firstRun = true;
 	long frameCounter = 0;
 
@@ -87,6 +89,9 @@ public class SystemUIController {
 	
 	boolean testCaffe = false;
 	static Net caffe;
+	
+	VideoWriter vwriter = new VideoWriter();
+	boolean recordVideo = false;
 
 	public void initialize()
 	{
@@ -107,13 +112,17 @@ public class SystemUIController {
 				TrackerConfig._maximum_allowed_skipped_frames,
 				TrackerConfig._max_trace_length,
 				TrackerConfig._max_sec_before_stale);
+		
+		
 
 		// load the darknet yolo network
 		if (useVocYolo)
 		{
 			yolo = Dnn.readNetFromDarknet(
-					"yolo/cfg/tiny-yolo-voc.cfg",
-					"yolo/weights/tiny-yolo-voc.weights");
+					//"yolo/cfg/tiny-yolo-voc.cfg",
+					"yolo/cfg/yolov2-custom.cfg",
+					//"yolo/weights/tiny-yolo-voc.weights");
+					"yolo/weights/yolov2-tiny-obj_10500.weights");
 		}
 		else
 		{
@@ -126,7 +135,8 @@ public class SystemUIController {
 			// load the yolo class names
 			if (useVocYolo)
 			{
-				DetectedObject.loadClassNames("yolo/classes/voc.names");
+//				DetectedObject.loadClassNames("yolo/classes/voc.names");
+				DetectedObject.loadClassNames("yolo/classes/custom-training.names");
 			}
 			else
 			{
@@ -188,13 +198,28 @@ public class SystemUIController {
 					Mat frame = new Mat();
 
 					try {
+						
+						logMsg("Grabbing frame");
+						
 						frame = videoFeed.grabFrame();
+						
+						logMsg("Grabbed frame");
+						
+						if (frame.empty() || frame.width() <= 0 || frame.height() <= 0)
+						{
+							logMsg("Got an empty frame!");
+							videoFeed.release();
+							videoFeed.selectCameraFeed(feedName);
+							frame = videoFeed.grabFrame();
+						}
 						
 						//System.out.println(frame.size().height);
 						//System.out.println(frame.size().width);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					
+					
 					
 					if (saveFramesToFile)
 					{
@@ -234,6 +259,26 @@ public class SystemUIController {
 								e.printStackTrace();
 							}
 						}
+					}
+					
+					if (recordVideo)
+					{
+						if (firstRun)
+						{
+							vwriter.open("C:\\Temp\\intersection_17.avi", VideoWriter.fourcc('D', 'I', 'V', 'X'), 15, frame.size(), true);
+							firstRun = false;
+						}
+						
+						if (frame.width() > 0 && frame.height() > 0)
+						{
+							Mat f = new Mat();
+							Imgproc.resize(frame, f, new Size(frame.width(), frame.height()));
+							if (f.channels() == 4)
+								Imgproc.cvtColor(f, f, Imgproc.COLOR_BGRA2BGR);
+							
+							vwriter.write(f);
+						}
+
 					}
 
 					frame = processFrame(frame);
@@ -276,13 +321,13 @@ public class SystemUIController {
 
 		Mat output = new Mat();
 
-		
+		logMsg("Processing frame");
 
 		imag = curFrame.clone();
 		orgin = curFrame.clone();
 		kalman = curFrame.clone();
 		
-		detectLanes(imag);
+		//detectLanes(imag);
 		
 		// try caffe
 		if (testCaffe)
@@ -319,6 +364,8 @@ if (!testCaffe)
 			// https://github.com/Franciscodesign/Moving-Target-Tracking-with-OpenCV/blob/master/src/sonkd/Main.java
 			Vector<DetectedObject> rects = detectObjectYolo(curFrame);
 			
+			logMsg("Updating tracker");
+			
 		// update the tracker if there are detected objects,
 		// otherwise update the kalman filter
 		if (rects.size() > 0)
@@ -331,6 +378,8 @@ if (!testCaffe)
 			tracker.checkForStaleTracks();
 		}
 
+		logMsg("Drawing detects");
+		
 		for (int i = 0; i < tracker.tracks.size(); i++)
 		{
 			// if there is a trace available, draw it on the image
@@ -387,7 +436,8 @@ if (!testCaffe)
 
 				Scalar fontColor = new Scalar(255,255,255);
 				Scalar boxColor = new Scalar(0,0,0);
-				double fontScale = .4;
+				int boxThickness = 2;
+				double fontScale = .3;
 				int thickness = 1;
 				int xPixelStep = 20;
 				int[] baseline = new int[] {0};
@@ -395,66 +445,75 @@ if (!testCaffe)
 						Core.FONT_HERSHEY_SIMPLEX, fontScale, thickness, baseline);
 				Size boxSize = new Size(fontSize.width + 20, fontSize.height * 4);
 				
-				// draw the bounding box around the detect
-				Imgproc.rectangle(
-						imag,
-						lb,
-						rt, 
-						TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
-						5);
+				boolean drawBox = true;
+				boolean drawDetectInfo = false;
 				
-				// draw the box to put info in
-				Imgproc.rectangle(
-						imag,
-						lb,
-						new Point(lb.x + boxSize.width, lb.y - boxSize.height),
-						//CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
-						boxColor,
-						Core.FILLED
-						);
+				if (drawBox) 
+				{
+					// draw the bounding box around the detect
+					Imgproc.rectangle(
+							imag,
+							lb,
+							rt, 
+							TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
+							boxThickness);
+				}
 				
-				// draw the class and probability of the detect
-				Imgproc.putText(
-						imag, 
-						String.format("%s - %.0f%%", detect.getClassName(), detect.classProb * 100), 
-						new Point(lb.x, lb.y - fontSize.height * 3), 
-						Core.FONT_HERSHEY_SIMPLEX, 
-						fontScale, 
-						fontColor,
-						thickness);
-				
-				// draw the direction the detected object is traveling
-				Imgproc.putText(
-						imag, 
-						String.format("%s", tracker.tracks.get(i).getDirectionToString()), 
-						new Point(lb.x, lb.y-fontSize.height * 2), 
-						Core.FONT_HERSHEY_SIMPLEX, 
-						fontScale, 
-						fontColor,
-						thickness);
-				
-				// determine teh lane that the car is in
-				tracker.tracks.get(i).lane = rlc.isInLane(tracker.tracks.get(i).getBestPositionCenter());
-				
-				// draw the lane the car is in
-				Imgproc.putText(
-						imag, 
-						String.format("Lane: %d", tracker.tracks.get(i).lane), 
-						new Point(lb.x, lb.y-fontSize.height * 1), 
-						Core.FONT_HERSHEY_SIMPLEX, 
-						fontScale, 
-						fontColor,
-						thickness);
-				
-				// draw the track ID
-				Imgproc.putText(
-						imag, 
-						String.format("ID: %d", tracker.tracks.get(i).track_id), 
-						new Point(lb.x, lb.y), 
-						Core.FONT_HERSHEY_SIMPLEX, 
-						fontScale, 
-						fontColor,
-						thickness);
+				if (drawDetectInfo)
+				{
+					// draw the box to put info in
+					Imgproc.rectangle(
+							imag,
+							lb,
+							new Point(lb.x + boxSize.width, lb.y - boxSize.height),
+							//CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
+							boxColor,
+							Core.FILLED
+							);
+					
+					// draw the class and probability of the detect
+					Imgproc.putText(
+							imag, 
+							String.format("%s - %.0f%%", detect.getClassName(), detect.classProb * 100), 
+							new Point(lb.x, lb.y - fontSize.height * 3), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+					
+					// draw the direction the detected object is traveling
+					Imgproc.putText(
+							imag, 
+							String.format("%s", tracker.tracks.get(i).getDirectionToString()), 
+							new Point(lb.x, lb.y-fontSize.height * 2), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+					
+					// determine teh lane that the car is in
+					tracker.tracks.get(i).lane = rlc.isInLane(tracker.tracks.get(i).getBestPositionCenter());
+					
+					// draw the lane the car is in
+					Imgproc.putText(
+							imag, 
+							String.format("Lane: %d", tracker.tracks.get(i).lane), 
+							new Point(lb.x, lb.y-fontSize.height * 1), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+					
+					// draw the track ID
+					Imgproc.putText(
+							imag, 
+							String.format("ID: %d", tracker.tracks.get(i).track_id), 
+							new Point(lb.x, lb.y), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+				}
 			}
 			catch (Exception e)
 			{
@@ -474,6 +533,8 @@ if (!testCaffe)
 	private Vector<DetectedObject> detectObjectYolo(Mat inputMat)
 	{
 		Vector<DetectedObject> rects = new Vector<DetectedObject>();
+		
+		logMsg("Detecting objects with YOLO");
 
 		Mat m = new Mat();
 		inputMat.copyTo(m);
@@ -555,6 +616,8 @@ if (!testCaffe)
 
 			}
 		}
+		
+		logMsg("Done with YOLO");
 
 		return rects;
 	}
@@ -773,6 +836,15 @@ if (!testCaffe)
 	protected void setClosed()
 	{
 		this.stopAcquisition();
+		vwriter.release();
 	}
+	
+	private boolean printLogs = false;
+	private void logMsg(String format, String ... args)
+	{
+		if (printLogs)
+			System.out.printf(format + "\n", args);
+	}
+
 
 }

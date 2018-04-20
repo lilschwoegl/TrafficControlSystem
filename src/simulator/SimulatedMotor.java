@@ -10,24 +10,27 @@ public class SimulatedMotor extends MotorVehicle{
 	public SimulatedMotor(int lane, Direction dir, SimulatedTrack track) {
 		super(lane, dir, track);
 		// TODO Auto-generated constructor stub
+		System.out.printf("Calling init lane Track %d\n", track.track_id);
 		
+		setSpeed(speed);
 		initLane(lane);
 	}
 
 	@Override
 	public void updateTrackPosition() {
-		// TODO Auto-generated method stub
-		//x = track.getBestPositionCenter().x;
-		//y = track.getBestPositionCenter().y;
 		
+		((SimulatedTrack)track).updateTrackPosition();
 		x = ((SimulatedTrack)track).getBestPositionCenter().x;
 		y = ((SimulatedTrack)track).getBestPositionCenter().y;
+		
+		System.out.printf("Track %d new Y = %f\n", track.track_id, y);
 	}
 
 	@Override
 	public void initLane(int lane) {
 		// TODO Auto-generated method stub
 		Point p = getLaneStartPoint();
+		System.out.printf("22222 Setting Track %d Y: %f\n", track.track_id, p.y);
 		((SimulatedTrack)track).setPosition(p);
 	}
 
@@ -40,10 +43,12 @@ public class SimulatedMotor extends MotorVehicle{
 	@Override
 	public void tick() {
 		// TODO Auto-generated method stub
-		((SimulatedTrack)track).updateTrackPosition();
+		//((SimulatedTrack)track).updateTrackPosition();
 		updateTrackPosition();
 		//need to add a getlight status method call here... if green proceed, if red stop, if yellow slow down
 		notifyObservers();
+		
+		//System.out.printf("Track %d tick\n", track.track_id);
 	}
 
 }

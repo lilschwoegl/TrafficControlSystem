@@ -13,10 +13,15 @@ public class DetectedObject {
 	
 	static List<String> classes = new ArrayList<String>();
 	static List<String> allowedClasses = new ArrayList<String>() {{
-		add("car");
-		add("person");
-		add("bus");
-		add("motorbike");
+		//add("car");
+		//add("person");
+		//add("bus");
+		//add("motorbike");
+		add("Regular Vehicle");
+		add("Bicycle");
+		add("Motorcycle");
+		add("Emergency Vehicle"); 
+		add("Pedestrian");
 	}};
 	
 	public int classId;

@@ -4,18 +4,18 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-import application.Color;
+import application.BulbColor;
 import application.Direction;
 
 public class TrafficLight {
 	Direction direction;
-	Color lightColor;
+	BulbColor lightColor;
 	org.opencv.core.Point lightPoint;
 	int id;
 	public static Graphics g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12;
 	
 	//Constructor
-	public TrafficLight(int id, Direction direction, Color lightColor) {
+	public TrafficLight(int id, Direction direction, BulbColor lightColor) {
 		this.id = id;
 		this.direction = direction;
 		this.lightColor = lightColor;
@@ -39,62 +39,62 @@ public class TrafficLight {
 			g12 = g;
 		
 			//north
-			g1.drawImage(loadImage.greenLight, (int)Config.northGLight.x, (int)Config.northGLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g2.drawImage(loadImage.yellowLight, (int)Config.northYLight.x, (int)Config.northYLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g3.drawImage(loadImage.redLight, (int)Config.northRLight.x, (int)Config.northRLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
+			g1.drawImage(loadImage.greenLight, (int)SimConfig.northGLight.x, (int)SimConfig.northGLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g2.drawImage(loadImage.yellowLight, (int)SimConfig.northYLight.x, (int)SimConfig.northYLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g3.drawImage(loadImage.redLight, (int)SimConfig.northRLight.x, (int)SimConfig.northRLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
 			//south
-			g4.drawImage(loadImage.greenLight, (int)Config.southGLight.x, (int)Config.southGLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g5.drawImage(loadImage.yellowLight, (int)Config.southYLight.x, (int)Config.southYLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g6.drawImage(loadImage.redLight, (int)Config.southRLight.x, (int)Config.southRLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
+			g4.drawImage(loadImage.greenLight, (int)SimConfig.southGLight.x, (int)SimConfig.southGLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g5.drawImage(loadImage.yellowLight, (int)SimConfig.southYLight.x, (int)SimConfig.southYLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g6.drawImage(loadImage.redLight, (int)SimConfig.southRLight.x, (int)SimConfig.southRLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
 			//east
-			g7.drawImage(loadImage.greenLight, (int)Config.eastGLight.x, (int)Config.eastGLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g8.drawImage(loadImage.yellowLight, (int)Config.eastYLight.x, (int)Config.eastYLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g9.drawImage(loadImage.redLight, (int)Config.eastRLight.x, (int)Config.eastRLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
+			g7.drawImage(loadImage.greenLight, (int)SimConfig.eastGLight.x, (int)SimConfig.eastGLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g8.drawImage(loadImage.yellowLight, (int)SimConfig.eastYLight.x, (int)SimConfig.eastYLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g9.drawImage(loadImage.redLight, (int)SimConfig.eastRLight.x, (int)SimConfig.eastRLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
 			//west
-			g10.drawImage(loadImage.greenLight, (int)Config.westGLight.x, (int)Config.westGLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g11.drawImage(loadImage.yellowLight, (int)Config.westYLight.x, (int)Config.westYLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-			g12.drawImage(loadImage.redLight, (int)Config.westRLight.x, (int)Config.westRLight.y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
+			g10.drawImage(loadImage.greenLight, (int)SimConfig.westGLight.x, (int)SimConfig.westGLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g11.drawImage(loadImage.yellowLight, (int)SimConfig.westYLight.x, (int)SimConfig.westYLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+			g12.drawImage(loadImage.redLight, (int)SimConfig.westRLight.x, (int)SimConfig.westRLight.y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
 	}
 	
 
 	
-	org.opencv.core.Point getLightPoint (Direction direction, Color light) {
+	org.opencv.core.Point getLightPoint (Direction direction, BulbColor light) {
 		
 		switch (direction) {
 		case North:
-			if (light == Color.Green) {
-				lightPoint = Config.northGLight;
-			} else if (light == Color.Yellow) {
-				lightPoint = Config.northYLight;
+			if (light == BulbColor.Green) {
+				lightPoint = SimConfig.northGLight;
+			} else if (light == BulbColor.Yellow) {
+				lightPoint = SimConfig.northYLight;
 			} else {
-				lightPoint = Config.northRLight;
+				lightPoint = SimConfig.northRLight;
 			}
 			break;
 		case South:
-			if (light == Color.Green) {
-				lightPoint = Config.southGLight;
-			} else if (light == Color.Yellow) {
-				lightPoint = Config.southYLight;
+			if (light == BulbColor.Green) {
+				lightPoint = SimConfig.southGLight;
+			} else if (light == BulbColor.Yellow) {
+				lightPoint = SimConfig.southYLight;
 			} else {
-				lightPoint = Config.southRLight;
+				lightPoint = SimConfig.southRLight;
 			}
 			break;
 		case East:
-			if (light == Color.Green) {
-				lightPoint = Config.eastGLight;
-			} else if (light == Color.Yellow) {
-				lightPoint = Config.eastYLight;
+			if (light == BulbColor.Green) {
+				lightPoint = SimConfig.eastGLight;
+			} else if (light == BulbColor.Yellow) {
+				lightPoint = SimConfig.eastYLight;
 			} else {
-				lightPoint = Config.eastRLight;
+				lightPoint = SimConfig.eastRLight;
 			}
 			break;
 		case West:
-			if (light == Color.Green) {
-				lightPoint = Config.westGLight;
-			} else if (light == Color.Yellow) {
-				lightPoint = Config.westYLight;
+			if (light == BulbColor.Green) {
+				lightPoint = SimConfig.westGLight;
+			} else if (light == BulbColor.Yellow) {
+				lightPoint = SimConfig.westYLight;
 			} else {
-				lightPoint = Config.westRLight;
+				lightPoint = SimConfig.westRLight;
 			}	
 			break;
 		}
@@ -112,12 +112,12 @@ public class TrafficLight {
 		x = lightPoint.x;
 		y = lightPoint.y;	
 		
-		if (lightColor == Color.Green) {
-			g1.drawImage(loadImage.greenLight, (int)x, (int)y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-		} else if (lightColor == Color.Yellow) {
-			g2.drawImage(loadImage.yellowLight, (int)x, (int)y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
-		} else if (lightColor == Color.Red) {
-			g3.drawImage(loadImage.redLight, (int)x, (int)y, (int)Config.bulbWidth, (int)Config.bulbHeight, null);
+		if (lightColor == BulbColor.Green) {
+			g1.drawImage(loadImage.greenLight, (int)x, (int)y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+		} else if (lightColor == BulbColor.Yellow) {
+			g2.drawImage(loadImage.yellowLight, (int)x, (int)y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
+		} else if (lightColor == BulbColor.Red) {
+			g3.drawImage(loadImage.redLight, (int)x, (int)y, (int)SimConfig.bulbWidth, (int)SimConfig.bulbHeight, null);
 		}
 	}
 	

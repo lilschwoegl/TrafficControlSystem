@@ -2,7 +2,7 @@ package observer;
 
 import java.time.Instant;
 
-import application.Color;
+import application.BulbColor;
 import application.Direction;
 import application.TrafficLight;
 

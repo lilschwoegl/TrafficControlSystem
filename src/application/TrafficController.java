@@ -23,7 +23,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
 import application.Direction;
-import application.Color;
+import application.BulbColor;
 import simulator.MotorVehicle;
 //import simulator.Display;
 
@@ -167,7 +167,7 @@ public class TrafficController implements TrafficObserver {
 		return light;
 	}
 	
- 	public Color RequestGreenLight(MotorVehicle car) {
+ 	public BulbColor RequestGreenLight(MotorVehicle car) {
 		/*	- priority order: opposing traffic has green, oncoming left-turn is green
 			- look at curr direction: is signal already green? Y -> grant green light
 			- does cross traffic have green?
@@ -180,7 +180,7 @@ public class TrafficController implements TrafficObserver {
 		
 		*/
 		
-		return Color.Red;
+		return BulbColor.Red;
 	}
 	
 	// returns all TrafficLight objects
@@ -382,7 +382,7 @@ public class TrafficController implements TrafficObserver {
 			int indexForDirection = entry.getValue().direction.hashCode();
 			arrAllLights[indexForDirection]++;
 			TrafficLight light = GetTrafficLightForVehicle(entry.getValue().vehicle);
-			if (light.GetColor() == application.Color.Red)
+			if (light.GetColor() == application.BulbColor.Red)
 				arrWaiting[indexForDirection]++;
 		}
 		//Arrays.sort(arrWaiting, Collections.reverseOrder());
@@ -416,7 +416,7 @@ public class TrafficController implements TrafficObserver {
 		this.isEmergencyVehicleControlled = true;
 		log("SetEmergencyVehicleControlled: turning all signals red (exception: %s)", exceptForTravelDirection == null ? "none" : exceptForTravelDirection.toString());
 		for (TrafficLight light : trafficLights) {
-			if (light.GetColor() != application.Color.Red && (exceptForTravelDirection == null || light.getTravelDirection() != exceptForTravelDirection)) {
+			if (light.GetColor() != application.BulbColor.Red && (exceptForTravelDirection == null || light.getTravelDirection() != exceptForTravelDirection)) {
 				log("TurnAllTrafficLightsRed: Changing light %d to Red", light.getID());
 				light.TurnRed();
 			}
@@ -442,7 +442,7 @@ public class TrafficController implements TrafficObserver {
 	private void ResetFromEmergencyVehicleControlled() {
 		log("ResetFromEmergencyVehicleControlled: resetting North-South signals");
 		for (TrafficLight light : trafficLights) {
-			if (light.GetColor() == application.Color.Red && (light.getTravelDirection() == application.Direction.North || light.getTravelDirection() == application.Direction.South))
+			if (light.GetColor() == application.BulbColor.Red && (light.getTravelDirection() == application.Direction.North || light.getTravelDirection() == application.Direction.South))
 				light.TurnGreen();
 		}
 		this.isEmergencyVehicleControlled = false;
@@ -459,7 +459,7 @@ public class TrafficController implements TrafficObserver {
 			// change any green lights to red
 			//log("ToggleTrafficLightsForFixedTimerConfig: triggering all green lights to change to red");
 			for (TrafficLight light : trafficLights) {
-				if (light.GetColor() == Color.Green) {
+				if (light.GetColor() == BulbColor.Green) {
 					taskExecutor.submit(() -> {
 						light.TurnRed();
 					});
@@ -474,7 +474,7 @@ public class TrafficController implements TrafficObserver {
 			while (numChecks > 0 && numRedLights < numLights) {				
 				numRedLights = 0;
 				for (TrafficLight light : trafficLights) {
-					if (light.GetColor() == Color.Red)
+					if (light.GetColor() == BulbColor.Red)
 						numRedLights++;
 				}
 				//log("ToggleTrafficLightsForFixedTimerConfig: %d red lights", numRedLights);
@@ -491,7 +491,7 @@ public class TrafficController implements TrafficObserver {
 			ArrayList<TrafficLight> lights = isNS ? GetTrafficLights(Direction.North) : GetTrafficLights(Direction.East);
 			lights.addAll(isNS ? GetTrafficLights(Direction.South) : GetTrafficLights(Direction.West));
 			for (TrafficLight light : lights) {
-				if (light.GetColor() != Color.Green) {
+				if (light.GetColor() != BulbColor.Green) {
 					taskExecutor.submit(() -> {
 						light.TurnGreen();
 					});

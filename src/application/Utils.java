@@ -2,6 +2,7 @@ package application;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.util.Date;
 
 import org.opencv.core.Mat;
 
@@ -76,4 +77,11 @@ public final class Utils
 		
 		return image;
 	}
+	
+	
+	private static long getCurrentTimeMs()
+	{
+		return System.currentTimeMillis();
+	}
+	
 }

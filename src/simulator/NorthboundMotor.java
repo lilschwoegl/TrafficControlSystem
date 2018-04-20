@@ -26,12 +26,12 @@ public class NorthboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 
 		if(lane == 1){
-			x = Config.northBoundLane1.x;
-			y = Config.northBoundLane1.y;
+			//x = Config.northBoundLane1.x;
+			//y = Config.northBoundLane1.y;
 		}
 		if(lane == 2){
-			x = Config.northBoundLane2.x;
-			y = Config.northBoundLane2.y;
+			//x = Config.northBoundLane2.x;
+			//y = Config.northBoundLane2.y;
 		}
 	}
 
@@ -49,7 +49,7 @@ public class NorthboundMotor extends MotorVehicle{
 	@Override
 	public void updateTrackPosition() {
 		// TODO Auto-generated method stub
-		y = Config.simDisplayHeight - (track.getBestPositionCenter().y * Config.roadStripRatio);
+		y = SimConfig.simDisplayHeight - (track.getBestPositionCenter().y * SimConfig.roadStripRatio);
 	}
 	
 	/*public void render(Graphics g){

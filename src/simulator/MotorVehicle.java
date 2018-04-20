@@ -25,8 +25,6 @@ public abstract class MotorVehicle {
 		this.lane = lane;
 		this.direction = dir;
 		this.track = track;
-
-		((SimulatedTrack)track).setSpeed(speed);
 	}
 	
 	//methods
@@ -35,7 +33,7 @@ public abstract class MotorVehicle {
 	{
 		this.track = track;
 		
-		updateLane(track.lane);
+		updateLane(this.track.lane);
 		
 		updateTrackPosition();
 	}
@@ -72,13 +70,13 @@ public abstract class MotorVehicle {
 		switch (direction)
 		{
 			case NORTH:
-				return y - (Config.simDisplayHeight - Config.roadStripLength + 10);
+				return y - (SimConfig.simDisplayHeight - SimConfig.roadStripLength + 10);
 			case SOUTH:
-				return Config.roadStripLength - y - 55;
+				return SimConfig.roadStripLength - y - 55;
 			case EAST:
-				return Config.roadStripLength - x - 55;
+				return SimConfig.roadStripLength - x - 55;
 			case WEST:
-				return x - (Config.simDisplayWidth - Config.roadStripLength + 10);
+				return x - (SimConfig.simDisplayWidth - SimConfig.roadStripLength + 10);
 		}
 		
 		return -99999;
@@ -123,11 +121,19 @@ public abstract class MotorVehicle {
 		}
 
 		g.setColor(Color.WHITE);
-		g.drawString(String.format("%.0f", distToIntersection()), (int)x+5, (int)y+30);
+		//g.drawString(String.format("%.0f", distToIntersection()), (int)x+5, (int)y+30);
+		g.drawString(String.format("%d", track.track_id), (int)x+5, (int)y+30);
 	}
 	
 	protected Point getLaneStartPoint()
 	{
-		return Config.laneStartPoints[direction.ordinal()][lane];
+		Point p = new Point();// = SimConfig.laneStartPoints[direction.ordinal()][lane];
+		
+		p.x = SimConfig.laneStartPoints[direction.ordinal()][lane].x;
+		p.y = SimConfig.laneStartPoints[direction.ordinal()][lane].y;	
+		
+		System.out.printf("11111 Setting Track %d Y: %f\n", track.track_id, p.y);
+		
+		return p;
 	}
 }

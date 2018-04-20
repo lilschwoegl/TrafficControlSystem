@@ -9,7 +9,7 @@ import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import simulator.Config;
+import simulator.SimConfig;
 import simulator.simulatorSetUp;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -26,7 +26,7 @@ public class Main extends Application {
 			// store the root element so that the controllers can use it
 			BorderPane rootElement = (BorderPane) loader.load();
 			// create and style a scene
-			Scene scene = new Scene(rootElement, Config.videoDisplayWidth, Config.videoDisplayHeight);
+			Scene scene = new Scene(rootElement, SimConfig.videoDisplayWidth, SimConfig.videoDisplayHeight);
 			scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			// create the stage with the given title and the previously created
 			// scene
@@ -44,15 +44,15 @@ public class Main extends Application {
 			primaryStage.show();
 			
 			//Config.runSimulator = false;
-			if (Config.runSimulator)
+			if (SimConfig.runSimulator)
 			{
 				// create a new thread for the simulator
 				Thread simulator = new Thread()
 				{
 					public void run()
 					{
-						int width = (int)Config.simDisplayWidth;
-						int height = (int)Config.simDisplayHeight;
+						int width = (int)SimConfig.simDisplayWidth;
+						int height = (int)SimConfig.simDisplayHeight;
 						int posX = (int) (screenSize.getWidth() / 2 - width);
 						int posY = (int) (screenSize.getHeight() / 2 - height / 2);
 						simulatorSetUp simulator = new simulatorSetUp("Traffic Controller Simulator", width, height, posX, posY);

@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 import org.opencv.core.Point;
 
-import application.Color;
+import application.BulbColor;
 import application.TrafficController;
 import application.TrafficLight;
 import observer.SimulatorObserver;
@@ -35,7 +35,6 @@ public class SimulatorManager implements TrafficLightObserver {
 	
 	//constructor
 	public SimulatorManager(){
-		//motor = new objectMotor();
 		motors = new HashMap<Integer,MotorVehicle>();
 		lights = new HashMap<Integer, simulator.TrafficLight>();
 		
@@ -77,13 +76,13 @@ public class SimulatorManager implements TrafficLightObserver {
 		//------------------------------------------------------------
 		//START SIMULATED CARS
 		//below the addCar functions will created simulated vehicles
-		if (Config.startSimulatedMotors)
+		if (SimConfig.startSimulatedMotors)
 		{
 			addCar(
 					1-1, 
 					Direction.WEST, 
 					new SimulatedTrack(
-							new Point(Config.simDisplayWidth,0), 
+							new Point(SimConfig.simDisplayWidth,0), 
 							simulatedCarsCounter++, 
 							Direction.WEST,
 							.01),
@@ -93,7 +92,7 @@ public class SimulatorManager implements TrafficLightObserver {
 					2-1, 
 					Direction.WEST, 
 					new SimulatedTrack(
-							new Point(Config.simDisplayWidth,0), 
+							new Point(SimConfig.simDisplayWidth,0), 
 							simulatedCarsCounter++, 
 							Direction.WEST,
 							.05),
@@ -113,7 +112,7 @@ public class SimulatorManager implements TrafficLightObserver {
 					2-1, 
 					Direction.NORTH, 
 					new SimulatedTrack(
-							new Point(0,Config.simDisplayHeight), 
+							new Point(0,SimConfig.simDisplayHeight), 
 							simulatedCarsCounter++, 
 							Direction.NORTH,
 							.05),
@@ -123,7 +122,7 @@ public class SimulatorManager implements TrafficLightObserver {
 					1-1, 
 					Direction.NORTH, 
 					new SimulatedTrack(
-							new Point(0,Config.simDisplayHeight), 
+							new Point(0,SimConfig.simDisplayHeight), 
 							simulatedCarsCounter++, 
 							Direction.NORTH,
 							.05),
@@ -154,28 +153,24 @@ public class SimulatorManager implements TrafficLightObserver {
 		for (MotorVehicle m : motors.values())
 		{
 
-			Color l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
+			BulbColor l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
 			
 			switch (l) {
-			case Red:
-				/*if (m.distToIntersection() < 0 || m.distToIntersection() == Config.simDisplayHeight || m.distToIntersection() == Config.simDisplayWidth) {
+				case Red:
+					if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
+						continue;
+					} else {
+						break;
+					}
+				case Yellow:
+					if (m.distToIntersection() < 0) {
+						break;
+					} else {
+					m.setSpeed(m.speed-0.001); 
+					break; }
+				default:
+					m.setSpeed(0.08f);
 					break;
-				} else {
-				continue; }*/
-				if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
-					continue;
-				} else {
-					break;
-				}
-			case Yellow:
-				if (m.distToIntersection() < 0) {
-					break;
-				} else {
-				m.setSpeed(m.speed-0.001); 
-				break; }
-			default:
-				m.setSpeed(0.08f);
-				break;
 			}
 			
 			m.tick();
@@ -185,23 +180,33 @@ public class SimulatorManager implements TrafficLightObserver {
 	
 	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
-		
-		System.out.printf("Added track %d, lane %d, dir %d\n", 
-				track.track_id,
-				lane,
-				dir.ordinal());
-		
+
 		if (simulated)
 		{
 
 			SimulatedTrack simTrack = (SimulatedTrack)track;
 			
-			motors.put(track.track_id, new SimulatedMotor(lane, dir, simTrack));
+			System.out.printf("Added track %d, sim %d, lane %d, dir %d\n", 
+					track.track_id,
+					simTrack.track_id,
+					lane,
+					dir.ordinal());
+			
+			if (motors.containsKey(track.track_id))
+			{
+				System.out.println("Key already exists: " + track.track_id);
+			}
+			
+			motors.put(simTrack.track_id, new SimulatedMotor(lane, dir, simTrack));
 
 			return;
 			
-			
 		}
+		
+		System.out.printf("Added track %d, lane %d, dir %d\n", 
+				track.track_id,
+				lane,
+				dir.ordinal());
 		
 		switch (dir)
 		{

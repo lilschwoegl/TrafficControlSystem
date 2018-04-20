@@ -24,12 +24,12 @@ public class SouthboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 
 		if(lane == 2){
-			x = Config.southBoundLane1.x;
-			y = Config.southBoundLane1.y;
+			x = SimConfig.southBoundLane1.x;
+			y = SimConfig.southBoundLane1.y;
 		}
 		if(lane == 1){
-			x = Config.southBoundLane2.x;
-			y = Config.southBoundLane2.y;
+			x = SimConfig.southBoundLane2.x;
+			y = SimConfig.southBoundLane2.y;
 		}
 	}
 
@@ -48,7 +48,7 @@ public class SouthboundMotor extends MotorVehicle{
 	public void updateTrackPosition() {
 		// TODO Auto-generated method stub
 		
-		y = (track.getBestPositionCenter().y * Config.roadStripRatio);
+		y = (track.getBestPositionCenter().y * SimConfig.roadStripRatio);
 	}
 	
 	/*public void render(Graphics g){

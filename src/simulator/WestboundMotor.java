@@ -25,12 +25,12 @@ public class WestboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 
 		if(lane == 1){
-			x = Config.westBoundLane1.x;
-			y = Config.westBoundLane1.y;
+			//x = Config.westBoundLane1.x;
+			//y = Config.westBoundLane1.y;
 		}
 		if(lane == 2){
-			x = Config.westBoundLane2.x;
-			y = Config.westBoundLane2.y;
+			//x = Config.westBoundLane2.x;
+			//y = Config.westBoundLane2.y;
 		}
 	}
 
@@ -48,7 +48,7 @@ public class WestboundMotor extends MotorVehicle{
 	@Override
 	public void updateTrackPosition() {
 		// TODO Auto-generated method stub
-		x = Config.simDisplayWidth - (track.getBestPositionCenter().x * Config.roadStripRatio);
+		x = SimConfig.simDisplayWidth - (track.getBestPositionCenter().x * SimConfig.roadStripRatio);
 	}
 	
 	/*public void render(Graphics g){

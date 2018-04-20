@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import application.Direction;
-import application.Color;
+import application.BulbColor;
 import application.TrafficLight;
 
 public class Initial_Main_Test {
@@ -25,7 +25,7 @@ public class Initial_Main_Test {
 	    TrafficLight light = new TrafficLight(Direction.North);
 	    assertEquals(light.getTravelDirection(), Direction.North);
 	    assertEquals(light.getFacingDirection(), Direction.South);
-	    assertEquals(light.GetColor(), Color.Red);
+	    assertEquals(light.GetColor(), BulbColor.Red);
 	}
 	
 	@Test
@@ -38,24 +38,24 @@ public class Initial_Main_Test {
 	@Test
 	  public void testLightChangeToGreen() {
 	    TrafficLight light = new TrafficLight(Direction.North);
-	    assertEquals(light.GetColor(), Color.Red);
+	    assertEquals(light.GetColor(), BulbColor.Red);
 	    light.TurnGreen();
 //	    try { Thread.sleep(1000); }
 //    	catch (InterruptedException e) { e.printStackTrace(); }
-	    assertEquals(light.GetColor(), Color.Green);
+	    assertEquals(light.GetColor(), BulbColor.Green);
 	}
 	 
 	@Test
 	  public void testLightChangeToRed() {
 	    TrafficLight light = new TrafficLight(Direction.North);
-	    assertEquals(light.GetColor(), Color.Red);
+	    assertEquals(light.GetColor(), BulbColor.Red);
 	    light.TurnGreen();
 //	    try { Thread.sleep(1000); }
 //	    catch (InterruptedException e) { e.printStackTrace(); }
-	    assertEquals(light.GetColor(), Color.Green);
+	    assertEquals(light.GetColor(), BulbColor.Green);
 	    light.TurnRed();
 //	    try { Thread.sleep(6000); }
 //    	catch (InterruptedException e) { e.printStackTrace(); }
-	    assertEquals(light.GetColor(), Color.Red);
+	    assertEquals(light.GetColor(), BulbColor.Red);
 	}
 }

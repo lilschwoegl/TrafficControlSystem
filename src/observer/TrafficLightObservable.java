@@ -1,6 +1,6 @@
 package observer;
 
-import application.Color;
+import application.BulbColor;
 import application.Direction;
 import application.TrafficLight;
 
