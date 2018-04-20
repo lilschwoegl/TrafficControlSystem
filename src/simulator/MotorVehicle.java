@@ -47,6 +47,7 @@ public abstract class MotorVehicle {
 	
 	public abstract void updateTrackPosition();
 	
+
 	public int getLane(){
 		//return lane;	
 		return lane;
@@ -61,6 +62,19 @@ public abstract class MotorVehicle {
 	public Point getPosition()
 	{
 		return new Point(x, y);
+	}
+	
+	public void resetPosition(){
+		switch(direction) {
+		case NORTH:
+			y = Config.simDisplayHeight + 100;			
+		case SOUTH:
+			y = -100;
+		case EAST:
+			x = -100;
+		case WEST:
+			x = Config.simDisplayWidth + 100;		
+		}
 	}
 	
 	public abstract void initLane(int lane);
@@ -128,6 +142,43 @@ public abstract class MotorVehicle {
 	
 	protected Point getLaneStartPoint()
 	{
-		return Config.laneStartPoints[direction.ordinal()][lane];
+		Point p = null;
+		
+		//p = Config.laneStartPoints[direction.ordinal()][lane];
+		//p = new Point (250,0);
+		
+		switch (direction) {
+			case NORTH:
+				if (lane == 2-1) {
+					p = new Point (Config.northBoundLane2.x,Config.northBoundLane2.y);
+				} else {
+					p = new Point (Config.northBoundLane1.x,Config.northBoundLane1.y);
+				}
+				break;
+			case SOUTH:
+				if (lane == 2-1) {
+					p = new Point (Config.southBoundLane2.x,Config.southBoundLane2.y);
+				} else {
+					p = new Point (Config.southBoundLane1.x,Config.southBoundLane1.y);
+				}
+				break;
+			case EAST:
+				if (lane == 2-1) {
+					p = new Point (Config.eastBoundLane2.x,Config.eastBoundLane2.y);
+				} else {
+					p = new Point (Config.eastBoundLane1.x,Config.eastBoundLane1.y);
+				}
+				break;
+			case WEST:
+				if (lane == 2-1) {
+					p = new Point (Config.westBoundLane2.x,Config.westBoundLane2.y);
+				} else {
+					p = new Point (Config.westBoundLane1.x,Config.westBoundLane1.y);
+				}
+				break;
+		}
+		
+		return p;
+		
 	}
 }

@@ -25,6 +25,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	Graphics g;
 	private int bulbID = 900;
 	
+	
 	int simulatedCarsCounter = 5000;
 	
 	public HashMap<Integer,MotorVehicle> motors;
@@ -84,8 +85,10 @@ public class SimulatorManager implements TrafficLightObserver {
 						new Point(Config.simDisplayWidth,0), 
 						simulatedCarsCounter++, 
 						Direction.WEST,
-						.01),
+						.05),
 				true);
+		
+	
 		
 		addCar(
 				2-1, 
@@ -136,6 +139,32 @@ public class SimulatorManager implements TrafficLightObserver {
 						Direction.SOUTH,
 						.05),
 				true);
+		
+		
+		addCar(
+				1-1, 
+				Direction.WEST, 
+				new SimulatedTrack(
+						new Point(Config.simDisplayWidth + 100,0), 
+						simulatedCarsCounter++, 
+						Direction.WEST,
+						.05),
+				true);
+		
+		/*
+		addCar2( simulatedCarsCounter++,
+				1-1, 
+				Direction.WEST, 
+				true);
+		
+		
+		
+		addCar2( simulatedCarsCounter++,
+				1-1, 
+				Direction.WEST, 
+				true);
+		*/
+		
 		//END SIMULATED CARS
 		//-----------------------------------------------------------------
 	}
@@ -151,64 +180,161 @@ public class SimulatorManager implements TrafficLightObserver {
 		for (MotorVehicle m : motors.values())
 		{
 
-			Color l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
-			
-			switch (l) {
-			case Red:
-				/*if (m.distToIntersection() < 0 || m.distToIntersection() == Config.simDisplayHeight || m.distToIntersection() == Config.simDisplayWidth) {
-					break;
-				} else {
-				continue; }*/
-				if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
-					continue;
-				} else {
-					break;
+				Color l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
+				Double d = m.distToIntersection();
+				
+				
+				switch (l) {
+				case Red:
+					if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+						m.resetPosition();
+						continue;
+					} else if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
+						continue;
+					} else {
+						break;
+					}
+				case Yellow:
+					if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+						m.resetPosition();	
+						continue;				
+					} else if (m.distToIntersection() < 0) {
+						break;
+					} else {
+					while (m.speed > 0) {
+						m.setSpeed(m.speed-0.001); 
+					}
+					break; }
+				default:
+					if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+						m.resetPosition();
+						continue;
+					} else {
+						m.setSpeed(0.05);
+						break;
+					}					
 				}
-			case Yellow:
-				if (m.distToIntersection() < 0) {
-					break;
-				} else {
-				m.setSpeed(m.speed-0.001); 
-				break; }
-			default:
-				m.setSpeed(0.08f);
-				break;
-			}
+				
 			
-			m.tick();
+				
+				m.tick();
+				
+				
 			
 		}
 	}
 	
-	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
+	public void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
-		if (simulated)
-		{
-			
-			motors.put(track.track_id, new SimulatedMotor(lane, dir, (SimulatedTrack)track));
-			return;
-			
-			
-		}
+	
 		
-		switch (dir)
-		{
-			case NORTH:
-				motors.put(track.track_id, new NorthboundMotor(lane, track));
-				break;
-			case SOUTH:
-				motors.put(track.track_id, new SouthboundMotor(lane, track));
-				break;
-			case EAST:
-				motors.put(track.track_id, new EastboundMotor(lane, track));
-				break;
-			case WEST:
-				motors.put(track.track_id, new WestboundMotor(lane, track));
-				break;
-			default:
-				break;
+		
+		//while (trackClear(lane,dir)) {
+		while (trackClear(lane,dir,track.track_id)) {
+			if (simulated)
+			{
+				
+				motors.put(track.track_id, new SimulatedMotor(lane, dir, (SimulatedTrack)track));
+				
+				return;
+				
+				
+			}
+			
+			switch (dir)
+			{
+				case NORTH:
+					motors.put(track.track_id, new NorthboundMotor(lane, track));
+					break;
+				case SOUTH:
+					motors.put(track.track_id, new SouthboundMotor(lane, track));
+					break;
+				case EAST:
+					motors.put(track.track_id, new EastboundMotor(lane, track));
+					break;
+				case WEST:
+					motors.put(track.track_id, new WestboundMotor(lane, track));
+					break;
+				default:
+					break;
+			}
 		}
 	}
+	
+	/*public void addCar2(int id, int lane, Direction dir, boolean simulated)
+	{
+		Track track;
+		
+		//while (trackClear(lane,dir)) {
+		//while (trackClear(lane,dir,id)) {
+			
+			switch (dir)
+			{
+				case NORTH:
+					track = new SimulatedTrack(
+							new Point(0,Config.simDisplayHeight), 
+							id, 
+							Direction.NORTH,
+							.05);
+					motors.put(id, new SimulatedMotor(lane, dir,(SimulatedTrack)track));
+					break;
+				case SOUTH:
+					track = new SimulatedTrack(
+							new Point(0,0), 
+							id, 
+							Direction.SOUTH,
+							.05);
+					motors.put(id, 
+							new SimulatedMotor(lane, dir,(SimulatedTrack)track));
+					break;
+				case EAST:
+					track = new SimulatedTrack(
+							new Point(0,0), 
+							id, 
+							Direction.EAST,
+							.05);
+					motors.put(id, 
+							new SimulatedMotor(lane, dir,(SimulatedTrack)track));
+					break;
+				case WEST:
+					track = new SimulatedTrack(
+							new Point(Config.simDisplayWidth,0), 
+							id, 
+							Direction.WEST,
+							.05);
+					motors.put(id, 
+							new SimulatedMotor(lane, dir,(SimulatedTrack)track));
+					break;
+				default:
+					break;
+			}		
+		
+	} */
+	
+	
+	
+	public Boolean trackClear(int lane, Direction dir, int id) {
+		Boolean trackClear = true;
+		
+		for (MotorVehicle m : motors.values())
+		{
+			if (m.lane == lane && m.direction == dir && m.track.track_id != id){
+				if (m.distToIntersection() > 150) {
+					trackClear = false;
+					continue;
+				} else {
+					trackClear = true;
+					continue;
+				}
+			} else {
+					trackClear = true;
+					continue;
+			}
+		}
+		
+		return trackClear;
+	}
+	
 	
 	//comment out if you do not want to remove cars from video feed
 	public synchronized void removeCar(Track track)
