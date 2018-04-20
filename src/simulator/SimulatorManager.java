@@ -85,7 +85,7 @@ public class SimulatorManager implements TrafficLightObserver {
 						new Point(Config.simDisplayWidth,0), 
 						simulatedCarsCounter++, 
 						Direction.WEST,
-						.05),
+						Config.speed),
 				true);
 		
 	
@@ -97,7 +97,7 @@ public class SimulatorManager implements TrafficLightObserver {
 						new Point(Config.simDisplayWidth,0), 
 						simulatedCarsCounter++, 
 						Direction.WEST,
-						.05),
+						Config.speed),
 				true);
 		
 		addCar(
@@ -107,7 +107,7 @@ public class SimulatorManager implements TrafficLightObserver {
 						new Point(0,0), 
 						simulatedCarsCounter++, 
 						Direction.EAST,
-						.05),
+						Config.speed),
 				true);
 		
 		addCar(
@@ -117,7 +117,7 @@ public class SimulatorManager implements TrafficLightObserver {
 						new Point(0,Config.simDisplayHeight), 
 						simulatedCarsCounter++, 
 						Direction.NORTH,
-						.05),
+						Config.speed),
 				true);
 		
 		addCar(
@@ -127,7 +127,7 @@ public class SimulatorManager implements TrafficLightObserver {
 						new Point(0,Config.simDisplayHeight), 
 						simulatedCarsCounter++, 
 						Direction.NORTH,
-						.05),
+						Config.speed),
 				true);
 		
 		addCar(
@@ -137,7 +137,7 @@ public class SimulatorManager implements TrafficLightObserver {
 						new Point(0,0), 
 						simulatedCarsCounter++, 
 						Direction.SOUTH,
-						.05),
+						Config.speed),
 				true);
 		
 		
@@ -145,10 +145,10 @@ public class SimulatorManager implements TrafficLightObserver {
 				1-1, 
 				Direction.WEST, 
 				new SimulatedTrack(
-						new Point(Config.simDisplayWidth + 100,0), 
+						new Point(Config.simDisplayWidth,0), 
 						simulatedCarsCounter++, 
 						Direction.WEST,
-						.05),
+						Config.speed),
 				true);
 		
 		/*
@@ -187,7 +187,6 @@ public class SimulatorManager implements TrafficLightObserver {
 				switch (l) {
 				case Red:
 					if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
-						m.resetPosition();
 						continue;
 					} else if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
 						continue;
@@ -196,7 +195,6 @@ public class SimulatorManager implements TrafficLightObserver {
 					}
 				case Yellow:
 					if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
-						m.resetPosition();	
 						continue;				
 					} else if (m.distToIntersection() < 0) {
 						break;
@@ -207,10 +205,9 @@ public class SimulatorManager implements TrafficLightObserver {
 					break; }
 				default:
 					if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
-						m.resetPosition();
 						continue;
 					} else {
-						m.setSpeed(0.05);
+						m.setSpeed(Config.speed);
 						break;
 					}					
 				}

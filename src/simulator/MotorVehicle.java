@@ -14,7 +14,7 @@ public abstract class MotorVehicle {
 	protected double x = -100;
 	protected double y = -100;
 	protected int lane;
-	protected double speed = 0.08f;
+	protected double speed = Config.speed;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
 	public enum Direction {NORTH, SOUTH, EAST, WEST};
 	protected Direction direction;
@@ -64,18 +64,7 @@ public abstract class MotorVehicle {
 		return new Point(x, y);
 	}
 	
-	public void resetPosition(){
-		switch(direction) {
-		case NORTH:
-			y = Config.simDisplayHeight + 100;			
-		case SOUTH:
-			y = -100;
-		case EAST:
-			x = -100;
-		case WEST:
-			x = Config.simDisplayWidth + 100;		
-		}
-	}
+	
 	
 	public abstract void initLane(int lane);
 	

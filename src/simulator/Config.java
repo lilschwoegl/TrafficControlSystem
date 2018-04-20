@@ -6,6 +6,8 @@ public class Config {
 
 	public static boolean runSimulator = true;
 	
+	public static float speed = .1f;
+	
 	public static double simDisplayWidth = 600;
 	public static double simDisplayHeight = 600;
 	
