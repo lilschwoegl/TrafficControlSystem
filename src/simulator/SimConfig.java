@@ -7,11 +7,13 @@ public class SimConfig {
 	public static boolean runSimulator = true;
 	public static boolean startSimulatedMotors = false;
 	
+	public static float speed = .1f;
+	
 	public static double simDisplayWidth = 600;
 	public static double simDisplayHeight = 600;
 	
 	public static double videoDisplayWidth = 950;
-	public static double videoDisplayHeight = 700;
+	public static double videoDisplayHeight = 750;
 	
 	public static double frameHeight = 1080;
 	public static double frameWidth = 1920;

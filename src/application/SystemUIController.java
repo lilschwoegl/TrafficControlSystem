@@ -56,21 +56,6 @@ public class SystemUIController {
 	@FXML
 	private Label trackLbl1, trackLbl2, trackLbl3, trackLbl4;
 	public static ObjectProperty<String> trackLblProp1, trackLblProp2, trackLblProp3, trackLblProp4;
-
-	private VideoInput videoFeed1 = new VideoInput();
-	private VideoInput videoFeed2 = new VideoInput();
-	private VideoInput videoFeed3 = new VideoInput();
-	private VideoInput videoFeed4 = new VideoInput();
-	
-	private Runnable feedRunner1;
-	private Runnable feedRunner2;
-	private Runnable feedRunner3;
-	private Runnable feedRunner4;
-
-	private Thread timer1 = new Thread();
-	private Thread timer2 = new Thread();
-	private Thread timer3 = new Thread();
-	private Thread timer4 = new Thread();
 	
 	private CameraFeedDisplay[] cameraFeeds = new CameraFeedDisplay[4];
 
@@ -930,11 +915,11 @@ public class SystemUIController {
 //			}
 //		}
 
-		if (this.videoFeed1.isOpened())
-		{
+		//if (this.videoFeed1.isOpened())
+		//{
 			// release the video feed
-			this.videoFeed1.release();
-		}
+		//	this.videoFeed1.release();
+		//}
 	}
 
 	/**

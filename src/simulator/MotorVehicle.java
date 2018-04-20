@@ -15,7 +15,7 @@ public abstract class MotorVehicle {
 	protected double x = -100;
 	protected double y = -100;
 	protected int lane;
-	protected double speed = Config.speed;
+	protected double speed = SimConfig.speed;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
 	protected Direction direction;
 	Track track;

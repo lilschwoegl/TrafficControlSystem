@@ -183,7 +183,7 @@ public class SimulatorManager implements TrafficLightObserver {
 				if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
 					continue;
 				} else {
-					m.setSpeed(Config.speed);
+					m.setSpeed(SimConfig.speed);
 					break;
 				}					
 			}			
@@ -196,27 +196,27 @@ public class SimulatorManager implements TrafficLightObserver {
 	public void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
 
-		if (simulated)
-		{
-
-			SimulatedTrack simTrack = (SimulatedTrack)track;
-			
-			System.out.printf("Added track %d, sim %d, lane %d, dir %d\n", 
-					track.track_id,
-					simTrack.track_id,
-					lane,
-					dir.ordinal());
-			
-			if (motors.containsKey(track.track_id))
-			{
-				System.out.println("Key already exists: " + track.track_id);
-			}
-			
-			motors.put(simTrack.track_id, new SimulatedMotor(lane, dir, simTrack));
-
-			return;
-			
-		}
+//		if (simulated)
+//		{
+//
+//			SimulatedTrack simTrack = (SimulatedTrack)track;
+//			
+//			System.out.printf("Added track %d, sim %d, lane %d, dir %d\n", 
+//					track.track_id,
+//					simTrack.track_id,
+//					lane,
+//					dir.ordinal());
+//			
+//			if (motors.containsKey(track.track_id))
+//			{
+//				System.out.println("Key already exists: " + track.track_id);
+//			}
+//			
+//			motors.put(simTrack.track_id, new SimulatedMotor(lane, dir, simTrack));
+//
+//			return;
+//			
+//		}
 		
 		while (trackClear(lane,dir,track.track_id)) {
 			if (simulated)
