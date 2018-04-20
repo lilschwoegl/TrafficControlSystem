@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import application.BulbColor;
-import application.Direction;
+import simulator.Constants.Direction;
 
 public class TrafficLight {
 	Direction direction;
@@ -61,7 +61,7 @@ public class TrafficLight {
 	org.opencv.core.Point getLightPoint (Direction direction, BulbColor light) {
 		
 		switch (direction) {
-		case North:
+		case NORTH:
 			if (light == BulbColor.Green) {
 				lightPoint = SimConfig.northGLight;
 			} else if (light == BulbColor.Yellow) {
@@ -70,7 +70,7 @@ public class TrafficLight {
 				lightPoint = SimConfig.northRLight;
 			}
 			break;
-		case South:
+		case SOUTH:
 			if (light == BulbColor.Green) {
 				lightPoint = SimConfig.southGLight;
 			} else if (light == BulbColor.Yellow) {
@@ -79,7 +79,7 @@ public class TrafficLight {
 				lightPoint = SimConfig.southRLight;
 			}
 			break;
-		case East:
+		case EAST:
 			if (light == BulbColor.Green) {
 				lightPoint = SimConfig.eastGLight;
 			} else if (light == BulbColor.Yellow) {
@@ -88,7 +88,7 @@ public class TrafficLight {
 				lightPoint = SimConfig.eastRLight;
 			}
 			break;
-		case West:
+		case WEST:
 			if (light == BulbColor.Green) {
 				lightPoint = SimConfig.westGLight;
 			} else if (light == BulbColor.Yellow) {

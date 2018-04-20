@@ -5,7 +5,8 @@ import simulator.SimulatorManager;
 import org.opencv.core.Point;
 
 import observer.TrackUpdateObservable.TrackUpdate;
-import simulator.MotorVehicle.Direction;
+import simulator.Constants.Direction;
+import simulator.MotorVehicle;
 import tracking.SimulatedTrack;
 import tracking.Track;
 
@@ -21,7 +22,7 @@ public class SimulatorObserver implements TrackObserver{
 	}
 
 	@Override
-	public void update(Track track, TrackUpdate updateType) {
+	public void update(Track track, TrackUpdate updateType, Direction heading) {
 		// TODO Auto-generated method stub
 		
 		//System.out.printf("Updated track %d, lane %d, changex %f changey %f\n", 
@@ -39,12 +40,12 @@ public class SimulatorObserver implements TrackObserver{
 				strack = new SimulatedTrack(  
 						new Point(0,0),
 						simulatedCarsCounter++,
-						Direction.SOUTH,
+						heading,
 						.05);
 				
 				simulator.addCar(
 						track.lane, 
-						Direction.SOUTH, 
+						heading, 
 						strack, 
 						true);
 				

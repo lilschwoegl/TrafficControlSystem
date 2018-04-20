@@ -13,7 +13,8 @@ import observer.SimulatorObserver;
 import observer.TrackUpdateObservable;
 import observer.TrafficLightObserver;
 import observer.TrafficUpdateObservable;
-import simulator.MotorVehicle.Direction;
+import simulator.Constants.Direction;
+import simulator.MotorVehicle;
 import tracking.SimulatedTrack;
 import tracking.Track;
 

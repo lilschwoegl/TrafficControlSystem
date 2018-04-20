@@ -13,6 +13,7 @@ import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
 import observer.TrackUpdateObservable;
+import simulator.Constants.Direction;
 import tracking.Track.MOVEMENT_TYPE;
 
 /**
@@ -24,10 +25,11 @@ import tracking.Track.MOVEMENT_TYPE;
 public class Tracker extends JTracker {
 	int nextTractID = 0;
 	Vector<Integer> assignment = new Vector<>();
+	private Direction oncomingHeading;
 
 	public Tracker(float _dt, float _Accel_noise_mag, double _dist_thres,
 			int _maximum_allowed_skipped_frames, int _max_trace_length, 
-			int _max_sec_before_stale) {
+			int _max_sec_before_stale, Direction oncomingHeading) {
 		tracks = new Vector<>();
 		dt = _dt;
 		Accel_noise_mag = _Accel_noise_mag;
@@ -36,6 +38,7 @@ public class Tracker extends JTracker {
 		max_trace_length = _max_trace_length;
 		max_sec_before_stale = _max_sec_before_stale;
 		track_removed = 0;
+		this.oncomingHeading = oncomingHeading;
 	}
 
 	static Scalar Colors[] = { new Scalar(255, 0, 0), new Scalar(0, 255, 0),
@@ -57,7 +60,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));		
 				tracks.add(tr);
 				
-				TrackUpdateObservable.getInstance().trackAdded(tr);
+				TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
 			}
 		}
 
@@ -140,7 +143,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));
 				tracks.add(tr);
 				
-				TrackUpdateObservable.getInstance().trackAdded(tr);
+				TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
 			}
 		}
 
@@ -185,7 +188,7 @@ public class Tracker extends JTracker {
 		for (int i = 0; i < tracks.size(); i++) {
 			if (tracks.get(i).isTrackStale()) {	
 				
-				TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i));
+				TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i), oncomingHeading);
 				
 				tracks.remove(i);
 				assignment.remove(i);
@@ -262,7 +265,7 @@ public class Tracker extends JTracker {
 				tracks.get(i).direction = MOVEMENT_TYPE.UNCERTAIN;
 			}
 			
-			TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i));
+			TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i), oncomingHeading);
 		}
 	}
 }

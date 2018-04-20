@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import application.Direction;
 import application.BulbColor;
 import application.TrafficLight;
+import simulator.Constants.Direction;
 
 public class Initial_Main_Test {
 	
@@ -22,22 +22,22 @@ public class Initial_Main_Test {
 	
 	@Test
 	public void getLightCreationTest () {
-	    TrafficLight light = new TrafficLight(Direction.North);
-	    assertEquals(light.getTravelDirection(), Direction.North);
-	    assertEquals(light.getFacingDirection(), Direction.South);
+	    TrafficLight light = new TrafficLight(Direction.NORTH);
+	    assertEquals(light.getTravelDirection(), Direction.NORTH);
+	    assertEquals(light.getFacingDirection(), Direction.SOUTH);
 	    assertEquals(light.GetColor(), BulbColor.Red);
 	}
 	
 	@Test
 	public void getLightUniqueIDTest () {
-	    TrafficLight light = new TrafficLight(Direction.North);
-	    TrafficLight light2 = new TrafficLight(Direction.North);
+	    TrafficLight light = new TrafficLight(Direction.NORTH);
+	    TrafficLight light2 = new TrafficLight(Direction.NORTH);
 	    assertNotEquals(light.getID(), light2.getID());
 	}
 	
 	@Test
 	  public void testLightChangeToGreen() {
-	    TrafficLight light = new TrafficLight(Direction.North);
+	    TrafficLight light = new TrafficLight(Direction.NORTH);
 	    assertEquals(light.GetColor(), BulbColor.Red);
 	    light.TurnGreen();
 //	    try { Thread.sleep(1000); }
@@ -47,7 +47,7 @@ public class Initial_Main_Test {
 	 
 	@Test
 	  public void testLightChangeToRed() {
-	    TrafficLight light = new TrafficLight(Direction.North);
+	    TrafficLight light = new TrafficLight(Direction.NORTH);
 	    assertEquals(light.GetColor(), BulbColor.Red);
 	    light.TurnGreen();
 //	    try { Thread.sleep(1000); }

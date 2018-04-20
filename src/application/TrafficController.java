@@ -13,7 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import application.Direction;
+import simulator.Constants.Direction;
 import javafx.util.Pair;
 import observer.TrafficObserver;
 import observer.TrafficUpdateObservable;
@@ -22,10 +22,8 @@ import tracking.Track;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import application.Direction;
 import application.BulbColor;
 import simulator.MotorVehicle;
-//import simulator.Display;
 
 public class TrafficController implements TrafficObserver {
 	
@@ -35,17 +33,13 @@ public class TrafficController implements TrafficObserver {
 		public MotorVehicle vehicle = null;
 		public Instant timestampFirstObserved = null;
 		public Instant timestampLastObserved = null;
-		public Direction direction = application.Direction.North;
+		public Direction direction = Direction.NORTH;
 		public Vehicle(int trackId, MotorVehicle vehicle, Instant firstObserved) {
 			this.id = trackId;
 			this.vehicle = vehicle;
 			this.timestampFirstObserved = firstObserved;
 			this.timestampLastObserved = firstObserved;
-			this.direction =
-				  this.vehicle.getDirection() == simulator.MotorVehicle.Direction.NORTH ? Direction.North
-				: this.vehicle.getDirection() == simulator.MotorVehicle.Direction.EAST ? Direction.East
-				: this.vehicle.getDirection() == simulator.MotorVehicle.Direction.WEST ? Direction.West
-				: Direction.South;
+			this.direction = this.vehicle.getDirection();
 		}
 	}
 	
@@ -125,12 +119,12 @@ public class TrafficController implements TrafficObserver {
 		
 		// add requested traffic lights
 		if (numLanesNS > 0) {
-			AddTrafficLight(application.Direction.North);
-			AddTrafficLight(application.Direction.South);
+			AddTrafficLight(Direction.NORTH);
+			AddTrafficLight(Direction.SOUTH);
 		}
 		if (numLanesEW > 0) {
-			AddTrafficLight(application.Direction.East);
-			AddTrafficLight(application.Direction.West);
+			AddTrafficLight(Direction.EAST);
+			AddTrafficLight(Direction.WEST);
 		}
 		
 		log("Starting DropOldVehiclesFromCollector scheduled task");
@@ -192,19 +186,6 @@ public class TrafficController implements TrafficObserver {
 		return list;
 	}
 	
-	// returns 1st TrafficLight for the requested travel direction, uses MotorVehicle.Direction enum
-	public TrafficLight GetTrafficLight(simulator.MotorVehicle.Direction forDirection) {
-		for (TrafficLight light : trafficLights) {
-			if (	(forDirection == simulator.MotorVehicle.Direction.NORTH	&& light.getTravelDirection() == Direction.North)
-				||	(forDirection == simulator.MotorVehicle.Direction.SOUTH	&& light.getTravelDirection() == Direction.South)
-				||	(forDirection == simulator.MotorVehicle.Direction.EAST	&& light.getTravelDirection() == Direction.East)
-				||	(forDirection == simulator.MotorVehicle.Direction.WEST	&& light.getTravelDirection() == Direction.West)
-			)
-				return light;
-		}
-		return null;
-	}
-	
 	// returns 1st TrafficLight for the requested travel direction, uses TrafficController.Direction enum
 	public TrafficLight GetTrafficLight(Direction forDirection) {
 		for (TrafficLight light : trafficLights) {
@@ -212,20 +193,6 @@ public class TrafficController implements TrafficObserver {
 				return light;
 		}
 		return null;
-	}
-	
-	// returns all TrafficLight objects for the requested travel direction, uses MotorVehicle.Direction enum
-	public ArrayList<TrafficLight> GetTrafficLights(simulator.MotorVehicle.Direction forDirection) {
-		ArrayList<TrafficLight> list = new ArrayList<TrafficLight>();
-		for (TrafficLight light : trafficLights) {
-			if (	(forDirection == simulator.MotorVehicle.Direction.NORTH	&& light.getTravelDirection() == Direction.North)
-				||	(forDirection == simulator.MotorVehicle.Direction.SOUTH	&& light.getTravelDirection() == Direction.South)
-				||	(forDirection == simulator.MotorVehicle.Direction.EAST	&& light.getTravelDirection() == Direction.East)
-				||	(forDirection == simulator.MotorVehicle.Direction.WEST	&& light.getTravelDirection() == Direction.West)
-			)
-				list.add(light);
-		}
-		return list;
 	}
 	
 	// returns all TrafficLight objects for the requested travel direction, uses TrafficController.Direction enum
@@ -248,12 +215,12 @@ public class TrafficController implements TrafficObserver {
 	public double GetDistanceToCamera(MotorVehicle car) {
 		double distance = 0;
 		switch (GetCarDirectionOfTravel(car)) {
-			case West:
-			case East:
+			case WEST:
+			case EAST:
 				distance = car.distToIntersection() + this.intersectionWidthEW;
 				break;
-			case North:
-			case South:
+			case NORTH:
+			case SOUTH:
 				distance = car.distToIntersection() + this.intersectionWidthNS;
 				break;
 		}
@@ -261,11 +228,8 @@ public class TrafficController implements TrafficObserver {
 	}
 	
 	// convert simulator vehicle direction into global application direction (for local calculations)
-	public application.Direction GetCarDirectionOfTravel(MotorVehicle car) {
-		return car.getDirection() == simulator.MotorVehicle.Direction.NORTH ? application.Direction.North
-			: car.getDirection() == simulator.MotorVehicle.Direction.EAST ? application.Direction.East
-			: car.getDirection() == simulator.MotorVehicle.Direction.WEST ? application.Direction.West
-			: application.Direction.South;
+	public Direction GetCarDirectionOfTravel(MotorVehicle car) {
+		return car.getDirection();
 	}
 	
 	public TrafficLight GetTrafficLightForVehicle(MotorVehicle car) {
@@ -442,7 +406,7 @@ public class TrafficController implements TrafficObserver {
 	private void ResetFromEmergencyVehicleControlled() {
 		log("ResetFromEmergencyVehicleControlled: resetting North-South signals");
 		for (TrafficLight light : trafficLights) {
-			if (light.GetColor() == application.BulbColor.Red && (light.getTravelDirection() == application.Direction.North || light.getTravelDirection() == application.Direction.South))
+			if (light.GetColor() == application.BulbColor.Red && (light.getTravelDirection() == Direction.NORTH || light.getTravelDirection() == Direction.SOUTH))
 				light.TurnGreen();
 		}
 		this.isEmergencyVehicleControlled = false;
@@ -488,8 +452,8 @@ public class TrafficController implements TrafficObserver {
 			
 			// change signals in sets, simple version is 2 sets, toggling, seeding with North-South lights
 			//log("ToggleTrafficLightsForFixedTimerConfig: triggering lights for new direction to change to green, isNS=%s", isNS);
-			ArrayList<TrafficLight> lights = isNS ? GetTrafficLights(Direction.North) : GetTrafficLights(Direction.East);
-			lights.addAll(isNS ? GetTrafficLights(Direction.South) : GetTrafficLights(Direction.West));
+			ArrayList<TrafficLight> lights = isNS ? GetTrafficLights(Direction.NORTH) : GetTrafficLights(Direction.EAST);
+			lights.addAll(isNS ? GetTrafficLights(Direction.SOUTH) : GetTrafficLights(Direction.WEST));
 			for (TrafficLight light : lights) {
 				if (light.GetColor() != BulbColor.Green) {
 					taskExecutor.submit(() -> {

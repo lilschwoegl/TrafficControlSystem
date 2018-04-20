@@ -8,50 +8,66 @@
 <?import javafx.scene.text.*?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="703.0" prefWidth="980.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.SystemUIController">
-  <bottom>
-    <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0" BorderPane.alignment="CENTER">
-      <children>
-        <ComboBox fx:id="feedListCbx" prefHeight="27.0" prefWidth="328.0" promptText="Select A Video Feed" />
-        <Button fx:id="selFeedBtn" mnemonicParsing="false" onAction="#startFeed" text="Select Feed" />
-      </children>
-    </VBox>
-  </bottom>
   <center>
-    <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+    <GridPane>
       <children>
-        <ImageView fx:id="imageOutputImgvw" fitHeight="350.92511734872494" fitWidth="569.0" pickOnBounds="true" preserveRatio="true" />
-        <Label fx:id="trackLbl" alignment="CENTER" text="Label" textAlignment="LEFT" />
-        <Label fx:id="statusLbl" text="Label">
-          <font>
-            <Font size="14.0" />
-          </font>
-        </Label>
+        <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
+          <children>
+            <ImageView id="imageOutputImgvw" fx:id="imgOut1" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <Label id="trackLbl" fx:id="trackLbl1" alignment="CENTER" text="Label" textAlignment="LEFT" />
+            <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
+              <children>
+                <ComboBox id="feedListCbx" fx:id="feedList1" prefHeight="27.0" prefWidth="328.0" promptText="Select A Video Feed" />
+                <Button fx:id="selFeedBtn1" mnemonicParsing="false" onAction="#startFeed" text="Select Feed" />
+              </children>
+            </VBox>
+          </children>
+        </VBox>
+        <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
+          <children>
+            <ImageView id="imageOutputImgvw" fx:id="imgOut2" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <Label id="trackLbl" fx:id="trackLbl2" alignment="CENTER" text="Label" textAlignment="LEFT" />
+            <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
+              <children>
+                <ComboBox id="feedListCbx" fx:id="feedList2" prefHeight="27.0" prefWidth="328.0" promptText="Select A Video Feed" />
+                <Button fx:id="selFeedBtn2" mnemonicParsing="false" onAction="#startFeed" text="Select Feed" />
+              </children>
+            </VBox>
+          </children>
+        </VBox>
+        <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
+          <children>
+            <ImageView id="imageOutputImgvw" fx:id="imgOut3" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <Label id="trackLbl" fx:id="trackLbl3" alignment="CENTER" text="Label" textAlignment="LEFT" />
+            <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
+              <children>
+                <ComboBox id="feedListCbx" fx:id="feedList3" prefHeight="27.0" prefWidth="328.0" promptText="Select A Video Feed" />
+                <Button fx:id="selFeedBtn3" mnemonicParsing="false" onAction="#startFeed" text="Select Feed" />
+              </children>
+            </VBox>
+          </children>
+        </VBox>
+        <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+          <children>
+            <ImageView id="imageOutputImgvw" fx:id="imgOut4" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <Label id="trackLbl" fx:id="trackLbl4" alignment="CENTER" text="Label" textAlignment="LEFT" />
+            <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
+              <children>
+                <ComboBox id="feedListCbx" fx:id="feedList4" prefHeight="27.0" prefWidth="328.0" promptText="Select A Video Feed" />
+                <Button fx:id="selFeedBtn4" mnemonicParsing="false" onAction="#startFeed" text="Select Feed" />
+              </children>
+            </VBox>
+          </children>
+        </VBox>
       </children>
-    </VBox>
+      <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+      </columnConstraints>
+      <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      </rowConstraints>
+    </GridPane>
   </center>
-  <left>
-    <VBox prefHeight="450.0" prefWidth="189.0" BorderPane.alignment="CENTER">
-      <children>
-        <Label text="rho" />
-        <Slider fx:id="rho_s" value="2.0" />
-        <Label text="threshold" />
-        <Slider fx:id="threshold_s" value="5.0" />
-        <Label text="min line length" />
-        <Slider fx:id="minLineLength_s" value="10.0" />
-        <Label text="max line gap" />
-        <Slider fx:id="maxLineGap_s" value="20.0" />
-        <Label fx:id="houghLbl" text="Label" />
-      </children>
-    </VBox>
-  </left>
-  <right>
-    <VBox prefHeight="442.0" prefWidth="166.0">
-      <children>
-        <ImageView fx:id="img1vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-        <ImageView fx:id="img2vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-        <ImageView fx:id="img3vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-        <ImageView fx:id="img4vb" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" />
-      </children>
-    </VBox>
-  </right>
 </BorderPane>

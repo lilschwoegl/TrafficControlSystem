@@ -3,6 +3,7 @@ package simulator;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import simulator.Constants.Direction;
 import tracking.Track;
 
 public class WestboundMotor extends MotorVehicle{

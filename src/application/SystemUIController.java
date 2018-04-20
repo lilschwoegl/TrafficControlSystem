@@ -30,6 +30,7 @@ import org.opencv.videoio.VideoWriter;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -39,6 +40,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import observer.TrackUpdateObservable;
 import observer.UITrackObserver;
+import simulator.Constants.Direction;
 import tracking.TrackerConfig;
 import tracking.Tracker;
 
@@ -46,32 +48,37 @@ public class SystemUIController {
 
 	// setup the FXML control accessors
 	@FXML
-	private Button selFeedBtn;
+	private Button selFeedBtn1, selFeedBtn2, selFeedBtn3, selFeedBtn4;
 	@FXML
-	private ImageView imageOutputImgvw;
+	private ImageView imgOut1, imgOut2, imgOut3, imgOut4;
 	@FXML
-	private ComboBox<String> feedListCbx;
+	private ComboBox<String> feedList1, feedList2, feedList3, feedList4;
 	@FXML
-	private Label trackLbl;
-	public static ObjectProperty<String> trackLblProp;
-	@FXML
-	private ImageView img1vb, img2vb, img3vb, img4vb;
+	private Label trackLbl1, trackLbl2, trackLbl3, trackLbl4;
+	public static ObjectProperty<String> trackLblProp1, trackLblProp2, trackLblProp3, trackLblProp4;
+
+	private VideoInput videoFeed1 = new VideoInput();
+	private VideoInput videoFeed2 = new VideoInput();
+	private VideoInput videoFeed3 = new VideoInput();
+	private VideoInput videoFeed4 = new VideoInput();
 	
-	@FXML 
-	Slider rho_s, threshold_s, minLineLength_s, maxLineGap_s;
-	@FXML
-	private Label houghLbl;
-	public static ObjectProperty<String> houghLblProp;
+	private Runnable feedRunner1;
+	private Runnable feedRunner2;
+	private Runnable feedRunner3;
+	private Runnable feedRunner4;
 
-	private VideoInput videoFeed = new VideoInput();
-
-	private ScheduledExecutorService timer;
+	private Thread timer1 = new Thread();
+	private Thread timer2 = new Thread();
+	private Thread timer3 = new Thread();
+	private Thread timer4 = new Thread();
+	
+	private CameraFeedDisplay[] cameraFeeds = new CameraFeedDisplay[4];
 
 	boolean useVocYolo = true;
 
 	static Net yolo;
 
-	Tracker tracker;
+	Tracker tracker[] = new Tracker[4];
 	static Mat imag;
 	static Mat orgin;
 	static Mat kalman;
@@ -84,37 +91,126 @@ public class SystemUIController {
 	
 	float confidenceThreshold  = (float)0.2;	
 	float probabilityThreshold = (float)0.2;
-	boolean drawTrace = true;
+	boolean drawTrace = false;
 	boolean extrapDetects = true;
 	
-	boolean testCaffe = false;
-	static Net caffe;
-	
 	VideoWriter vwriter = new VideoWriter();
-	boolean recordVideo = false;
+	boolean recordVideo = true;
+	
+	private Thread frameGrabber = new Thread()
+	{
+		int counter = 0;
+		public void run()
+		{
+			while(true)
+			{
+				if (cameraFeeds[counter].isAlive())
+				{
+					boolean staleFrame = cameraFeeds[counter].isFrameStale();
+					Mat frame = cameraFeeds[counter].getLastFrame();
+					
+					if (!frame.empty() && frame.width() > 0 && frame.height() > 0)
+					{
+						if (!staleFrame)
+							saveFrame(frame);
+						
+						frame = processFrame(frame, tracker[counter]);
+					}
+					
+					cameraFeeds[counter].showImage(frame);
+	
+					try {
+						sleep(25);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				counter = (++counter % 4);
+			}
+		}
+	};
+	
+	private void saveFrame(Mat frame)
+	{
+		if (recordVideo)
+			{
+				if (firstRun)
+				{
+					vwriter.open("C:\\Temp\\intersection_18.avi", VideoWriter.fourcc('D', 'I', 'V', 'X'), 15, frame.size(), true);
+					firstRun = false;
+				}
+				
+				if (frame.width() > 0 && frame.height() > 0)
+				{
+					Mat f = new Mat();
+					Imgproc.resize(frame, f, new Size(frame.width(), frame.height()));
+					if (f.channels() == 4)
+						Imgproc.cvtColor(f, f, Imgproc.COLOR_BGRA2BGR);
+					
+					vwriter.write(f);
+				}
+
+			}
+	}
 
 	public void initialize()
 	{
 		// load the feed names
-		feedListCbx.getItems().addAll(VideoInput.feedNames);
+		feedList1.getItems().addAll(VideoInput.feedNames);
+		feedList2.getItems().addAll(VideoInput.feedNames);
+		feedList3.getItems().addAll(VideoInput.feedNames);
+		feedList4.getItems().addAll(VideoInput.feedNames);
 
 		// bind labels from the UI
-		trackLblProp = new SimpleObjectProperty<>();
-		this.trackLbl.textProperty().bind(trackLblProp);
+		trackLblProp1 = new SimpleObjectProperty<>();
+		this.trackLbl1.textProperty().bind(trackLblProp1);
+		trackLblProp2 = new SimpleObjectProperty<>();
+		this.trackLbl2.textProperty().bind(trackLblProp2);
+		trackLblProp3 = new SimpleObjectProperty<>();
+		this.trackLbl3.textProperty().bind(trackLblProp3);
+		trackLblProp4 = new SimpleObjectProperty<>();
+		this.trackLbl4.textProperty().bind(trackLblProp4);
 		
-		houghLblProp = new SimpleObjectProperty<>();
-		this.houghLbl.textProperty().bind(houghLblProp);
+		cameraFeeds[0] = new CameraFeedDisplay(imgOut1, selFeedBtn1, feedList1, Direction.NORTH);
+		cameraFeeds[1] = new CameraFeedDisplay(imgOut2, selFeedBtn2, feedList2, Direction.SOUTH);
+		cameraFeeds[2] = new CameraFeedDisplay(imgOut3, selFeedBtn3, feedList3, Direction.EAST);
+		cameraFeeds[3] = new CameraFeedDisplay(imgOut4, selFeedBtn4, feedList4, Direction.WEST);
 
-		// create a new tracker for the detected objects
-		tracker = new Tracker((float)TrackerConfig._dt,
+		// create trackers for each camera feed
+		// the direction is the heading that an oncoming vehicle would have,
+		// so if the camera is facing north, the direction would be south etc.
+		tracker[0] = new Tracker((float)TrackerConfig._dt,
 				(float)TrackerConfig._Accel_noise_mag,
 				TrackerConfig._dist_thres,
 				TrackerConfig._maximum_allowed_skipped_frames,
 				TrackerConfig._max_trace_length,
-				TrackerConfig._max_sec_before_stale);
+				TrackerConfig._max_sec_before_stale,
+				Direction.SOUTH);
+		tracker[1] = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale,
+				Direction.NORTH);
+		tracker[2] = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale,
+				Direction.WEST);
+		tracker[3] = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale,
+				Direction.EAST);
 		
 		
-
 		// load the darknet yolo network
 		if (useVocYolo)
 		{
@@ -151,156 +247,228 @@ public class SystemUIController {
 		trafficObserver = new UITrackObserver();
 		TrackUpdateObservable.getInstance().addObserver(trafficObserver);
 		
-		
-		// try the caffe
-		if (testCaffe)
-		{
-			try {
-				DetectedObject.loadClassNames("caffe/synset_words.txt");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			caffe = Dnn.readNetFromCaffe(
-					"caffe/bvlc_googlenet.prototxt.txt", 
-					"caffe/bvlc_googlenet.caffemodel");
-		}
+		frameGrabber.start();
 	}
 
 	@FXML
-	private void startFeed()
+	private void startFeed(ActionEvent event)
 	{
-		// get the current feed name
-		String feedName = feedListCbx.getValue();
-
-		if (feedName.equals(""))
+		String btnId = ((Button)event.getSource()).getId();
+		
+		switch (btnId)
 		{
-			return;
+			case "selFeedBtn1":
+				cameraFeeds[0].selectNewFeed();
+				break;
+			case "selFeedBtn2":
+				cameraFeeds[1].selectNewFeed();
+				break;
+			case "selFeedBtn3":
+				cameraFeeds[2].selectNewFeed();
+				break;
+			case "selFeedBtn4":
+				cameraFeeds[3].selectNewFeed();
+				break;
+			default:
+				break;
 		}
-
-		// if the feed has changed, get the newly selected one
-		if (!videoFeed.getCurrentFeed().equals(feedName))
-		{
-			videoFeed.selectCameraFeed(feedName);
-		}
-
-		// is the video stream available?
-		if (this.videoFeed.isOpened())
-		{
-			
-			Runnable frameGrabber = new Runnable() {
-
-				@Override
-				public void run()
-				{
-					// effectively grab and process a single frame
-					Mat frame = new Mat();
-
-					try {
-						
-						logMsg("Grabbing frame");
-						
-						frame = videoFeed.grabFrame();
-						
-						logMsg("Grabbed frame");
-						
-						if (frame.empty() || frame.width() <= 0 || frame.height() <= 0)
-						{
-							logMsg("Got an empty frame!");
-							videoFeed.release();
-							videoFeed.selectCameraFeed(feedName);
-							frame = videoFeed.grabFrame();
-						}
-						
-						//System.out.println(frame.size().height);
-						//System.out.println(frame.size().width);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					
-					
-					
-					if (saveFramesToFile)
-					{
-						
-						if (firstRun)
-						{
-							Path dir = FileSystems.getDefault().getPath("H:\\CarImages");
-							DirectoryStream<Path> stream;
-							long maxFileCount = 0;
-							try {
-								stream = Files.newDirectoryStream( dir );
-							
-							String fileName;
-						      for (Path path : stream) {
-						    	  fileName = path.getFileName().toString();
-						    	  fileName = fileName.substring(fileName.indexOf('_')+1, fileName.indexOf('.'));  
-						    	  maxFileCount = Math.max(maxFileCount, Integer.parseInt(fileName));
-						      }
-						      stream.close();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-							frameCounter = ++maxFileCount;
-							firstRun = false;
-						}
-						
-						if (++frameCounter % 10 == 0)
-						{
-							
-							try {
-								BufferedImage bi = Utils.matToBufferedImage(frame);
-								ImageIO.write(bi, "jpg", new File("H:\\CarImages\\img_" + frameCounter + ".jpg"));
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					}
-					
-					if (recordVideo)
-					{
-						if (firstRun)
-						{
-							vwriter.open("C:\\Temp\\intersection_17.avi", VideoWriter.fourcc('D', 'I', 'V', 'X'), 15, frame.size(), true);
-							firstRun = false;
-						}
-						
-						if (frame.width() > 0 && frame.height() > 0)
-						{
-							Mat f = new Mat();
-							Imgproc.resize(frame, f, new Size(frame.width(), frame.height()));
-							if (f.channels() == 4)
-								Imgproc.cvtColor(f, f, Imgproc.COLOR_BGRA2BGR);
-							
-							vwriter.write(f);
-						}
-
-					}
-
-					frame = processFrame(frame);
-
-					// convert and show the frame
-					Image imageToShow = Utils.mat2Image(frame);
-					updateImageView(imageOutputImgvw, imageToShow);
-				}
-			};
-
-			// grab a frame every 100 ms (~30 frames/sec)
-			this.timer = Executors.newSingleThreadScheduledExecutor();
-			this.timer.scheduleAtFixedRate(frameGrabber, 0, 50, TimeUnit.MILLISECONDS);
-
-			// update the button content
-			this.selFeedBtn.setText("Select Video Feed");
-		}
-		else
-		{
-			// log the error
-			System.err.println("Failed to open the camera connection...");
-		}
+		
+		
+//		String btnId = ((Button)event.getSource()).getId();
+//		final VideoInput vin;
+//		final String feedName;
+//		final ImageView imgOut;
+//		Runnable feedRunnable;
+//		Thread timer;
+//		
+//		switch (btnId)
+//		{
+//			case "selFeedBtn1":
+//				vin = videoFeed1;
+//				feedName = feedList1.getValue();
+//				imgOut = imgOut1;
+//				feedRunnable = feedRunner1;
+//				timer = timer1;
+//				break;
+//			case "selFeedBtn2":
+//				vin = videoFeed2;
+//				feedName = feedList2.getValue();
+//				imgOut = imgOut2;
+//				feedRunnable = feedRunner2;
+//				timer = timer2;
+//				break;
+//			case "selFeedBtn3":
+//				vin = videoFeed3;
+//				feedName = feedList3.getValue();
+//				imgOut = imgOut3;
+//				feedRunnable = feedRunner3;
+//				timer = timer3;
+//				break;
+//			case "selFeedBtn4":
+//				vin = videoFeed4;
+//				feedName = feedList4.getValue();
+//				imgOut = imgOut4;
+//				feedRunnable = feedRunner4;
+//				timer = timer4;
+//				break;
+//			default:
+//				feedName = "";
+//				vin = null;
+//				imgOut = null;
+//				feedRunnable = null;
+//				timer = null;
+//				break;
+//		}
+//		
+//		// get the current feed name
+//		
+//
+//		if (feedName.equals(""))
+//		{
+//			return;
+//		}
+//
+//		// if the feed has changed, get the newly selected one
+//		if (!vin.getCurrentFeed().equals(feedName))
+//		{
+//			vin.selectCameraFeed(feedName);
+//		}
+//
+//		// is the video stream available?
+//		if (vin.isOpened())
+//		{
+//
+//			if (timer.isAlive())
+//			{
+//				timer.stop();
+//			}
+//			
+//			timer = new Thread() {
+//
+//				private VideoInput videoInput = vin;
+//				
+//				@Override
+//				public void run()
+//				{
+//					while (true)
+//					{
+//						// effectively grab and process a single frame
+//						Mat frame = new Mat();
+//	
+//						try {
+//							
+//							logMsg("Grabbing frame");
+//							
+//							frame = videoInput.grabFrame();
+//							
+//							logMsg("Grabbed frame");
+//							
+//							if (frame.empty() || frame.width() <= 0 || frame.height() <= 0)
+//							{
+//								logMsg("Got an empty frame!");
+//								videoInput.release();
+//								videoInput.selectCameraFeed(feedName);
+//								frame = videoInput.grabFrame();
+//							}
+//							
+//							//System.out.println(frame.size().height);
+//							//System.out.println(frame.size().width);
+//						} catch (Exception e) {
+//							e.printStackTrace();
+//						}
+//						
+//						
+//						
+//						if (saveFramesToFile)
+//						{
+//							
+//							if (firstRun)
+//							{
+//								Path dir = FileSystems.getDefault().getPath("H:\\CarImages");
+//								DirectoryStream<Path> stream;
+//								long maxFileCount = 0;
+//								try {
+//									stream = Files.newDirectoryStream( dir );
+//								
+//								String fileName;
+//							      for (Path path : stream) {
+//							    	  fileName = path.getFileName().toString();
+//							    	  fileName = fileName.substring(fileName.indexOf('_')+1, fileName.indexOf('.'));  
+//							    	  maxFileCount = Math.max(maxFileCount, Integer.parseInt(fileName));
+//							      }
+//							      stream.close();
+//								} catch (IOException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//	
+//								frameCounter = ++maxFileCount;
+//								firstRun = false;
+//							}
+//							
+//							if (++frameCounter % 10 == 0)
+//							{
+//								
+//								try {
+//									BufferedImage bi = Utils.matToBufferedImage(frame);
+//									ImageIO.write(bi, "jpg", new File("H:\\CarImages\\img_" + frameCounter + ".jpg"));
+//								} catch (IOException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//							}
+//						}
+//						
+//						if (recordVideo)
+//						{
+//							if (firstRun)
+//							{
+//								vwriter.open("C:\\Temp\\intersection_17.avi", VideoWriter.fourcc('D', 'I', 'V', 'X'), 15, frame.size(), true);
+//								firstRun = false;
+//							}
+//							
+//							if (frame.width() > 0 && frame.height() > 0)
+//							{
+//								Mat f = new Mat();
+//								Imgproc.resize(frame, f, new Size(frame.width(), frame.height()));
+//								if (f.channels() == 4)
+//									Imgproc.cvtColor(f, f, Imgproc.COLOR_BGRA2BGR);
+//								
+//								vwriter.write(f);
+//							}
+//	
+//						}
+//	
+//						frame = processFrame(frame);
+//	
+//						// convert and show the frame
+//						Image imageToShow = Utils.mat2Image(frame);
+//						updateImageView(imgOut, imageToShow);
+//						
+//						try {
+//							// grab a frame every 50 ms
+//							sleep(50);
+//						} catch (InterruptedException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//					}
+//				}
+//			};
+//
+//			// grab a frame every 100 ms (~30 frames/sec)
+//			//timer = Executors.newSingleThreadScheduledExecutor();
+//			// timer.scheduleAtFixedRate(feedRunnable, 0, 50, TimeUnit.MILLISECONDS);
+//			timer.start();
+//
+//			// update the button content
+//			this.selFeedBtn1.setText("Select Video Feed");
+//		}
+//		else
+//		{
+//			// log the error
+//			System.err.println("Failed to open the camera connection...");
+//		}
 	}
 
 
@@ -309,7 +477,7 @@ public class SystemUIController {
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat processFrame(Mat frame)
+	private Mat processFrame(Mat frame, Tracker tracker)
 	{
 		Mat curFrame = new Mat();
 
@@ -329,37 +497,7 @@ public class SystemUIController {
 		
 		//detectLanes(imag);
 		
-		// try caffe
-		if (testCaffe)
-		{
-			// get blobs
-			Mat inputBlob = Dnn.blobFromImage(imag, 1.0, new Size(224,224), new Scalar(104,117,123), true, true);
-			caffe.setInput(inputBlob, "data");
-			Mat prob = caffe.forward("prob");
-			
-			updateImageView(img1vb, Utils.mat2Image(inputBlob));
-			
-			for (int i = 0; i < 5; i++)
-			{
-				caffe.setInput(inputBlob, "data");
-				prob = caffe.forward("prob");
-			}
-			
-			Mat probMat = prob.reshape(1, 1);
-			MinMaxLocResult res = Core.minMaxLoc(prob);
-			
-			double classProb = res.maxVal;
-			double classId = res.maxLoc.x;
-			
-			System.out.printf("Prob %.0f: %s\n",
-					classProb * 100,
-					DetectedObject.classes.get((int)classId));
-		}
-		
-		
-if (!testCaffe)
-{
-	
+
 	// Tracker code
 			// https://github.com/Franciscodesign/Moving-Target-Tracking-with-OpenCV/blob/master/src/sonkd/Main.java
 			Vector<DetectedObject> rects = detectObjectYolo(curFrame);
@@ -523,8 +661,6 @@ if (!testCaffe)
 
 		// update the tracks in the traffic observer
 		//TrafficUpdateObservable.getInstance().updateTracks(tracker.tracks);
-
-	}
 		
 		return imag;
 
@@ -673,14 +809,6 @@ if (!testCaffe)
 //				Math.ceil(minLineLength_s.getValue()), 
 //				Math.ceil(maxLineGap_s.getValue()));
 		
-		String str = String.format(
-				"rho: %f\nthreshold: %f\nminLineLength: %f\nmaxLineGap: %f",
-				Math.ceil(rho_s.getValue()),
-				Math.ceil(threshold_s.getValue()),
-				Math.ceil(minLineLength_s.getValue()),
-				Math.ceil(maxLineGap_s.getValue()));
-		
-		Utils.onFXThread(SystemUIController.houghLblProp, str);
 				
 		Imgproc.HoughLinesP(
 				grayFrame, 
@@ -703,8 +831,6 @@ if (!testCaffe)
 //				
 		drawLines(imag, lines);
 		
-		// show the canny image
-		updateImageView(img1vb, Utils.mat2Image(grayFrame));
 	}
 	
 	// http://jeffwen.com/2017/02/23/lane_finding
@@ -718,17 +844,11 @@ if (!testCaffe)
 		Mat whiteColor = new Mat();
 		Core.inRange(frame, new Scalar(220,220,220), new Scalar(255,255,255), whiteColor);
 		
-		updateImageView(img2vb, Utils.mat2Image(whiteColor));
-		
 		Mat yellowColorRgb = new Mat();
 		Core.inRange(frame, new Scalar(225,180,0), new Scalar(255,255,170), yellowColorRgb);
 		
-		updateImageView(img3vb, Utils.mat2Image(yellowColorRgb));
-		
 		Mat yellowColorHls = new Mat();
 		Core.inRange(hlsImg, new Scalar(20,120,80), new Scalar(45,200,255), yellowColorHls);
-		
-		updateImageView(img4vb, Utils.mat2Image(yellowColorHls));
 		
 		//Mat combined = new Mat();
 		//Core.bitwise_or(whiteColor, yellowColor, combined);
@@ -795,39 +915,26 @@ if (!testCaffe)
 	 */
 	private void stopAcquisition()
 	{
-		if (this.timer!=null && !this.timer.isShutdown())
-		{
-			try
-			{
-				// stop the timer
-				this.timer.shutdown();
-				this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
-			}
-			catch (InterruptedException e)
-			{
-				// log any exception
-				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
-			}
-		}
+//		if (this.timer1!=null && !this.timer1.isShutdown())
+//		{
+//			try
+//			{
+//				// stop the timer
+//				this.timer1.shutdown();
+//				this.timer1.awaitTermination(33, TimeUnit.MILLISECONDS);
+//			}
+//			catch (InterruptedException e)
+//			{
+//				// log any exception
+//				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
+//			}
+//		}
 
-		if (this.videoFeed.isOpened())
+		if (this.videoFeed1.isOpened())
 		{
 			// release the video feed
-			this.videoFeed.release();
+			this.videoFeed1.release();
 		}
-	}
-
-	/**
-	 * Update the {@link ImageView} in the JavaFX main thread
-	 * 
-	 * @param view
-	 *            the {@link ImageView} to update
-	 * @param image
-	 *            the {@link Image} to show
-	 */
-	private void updateImageView(ImageView view, Image image)
-	{
-		Utils.onFXThread(view.imageProperty(), image);
 	}
 
 	/**

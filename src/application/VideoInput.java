@@ -30,7 +30,8 @@ public class VideoInput extends VideoCapture{
 		"video/cars.mp4",
 		"video/dog_people.mp4",
 		"https://itsvideo.arlingtonva.us:8012/live/cam136.stream/playlist.m3u8",
-		"https://itsvideo.arlingtonva.us:8011/live/cam74.stream/playlist.m3u8"
+		"https://itsvideo.arlingtonva.us:8011/live/cam74.stream/playlist.m3u8",
+		"C:\\Temp\\intersection_long.avi"
 	};
 	
 	/**
@@ -46,7 +47,8 @@ public class VideoInput extends VideoCapture{
 		"RAW VIDEO",
 		"Dog and People",
 		"Intersection",
-		"Crashes"
+		"Crashes",
+		"Recorded"
 	};
 	
 	private static long counter = 0;
@@ -142,6 +144,13 @@ public class VideoInput extends VideoCapture{
 			// bubble the error up
 			throw e;
 		}
+	}
+	
+	
+	public void refresh()
+	{
+		release();
+		selectCameraFeed(currentFeed);
 	}
 	
 }

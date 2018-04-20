@@ -13,6 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import observer.TrafficLightObservable;
 import observer.TrafficLightObserver;
+import simulator.Constants.Direction;
 
 public class TrafficLight implements TrafficLightObservable {
 	//public enum SignalColor { Green, Yellow, Red }
@@ -24,10 +25,10 @@ public class TrafficLight implements TrafficLightObservable {
 	private int id = 0;
 	public int getID() { return this.id; }
 	
-	private Direction forTravelDirection = Direction.North;
+	private Direction forTravelDirection = Direction.NORTH;
 	public Direction getTravelDirection() { return forTravelDirection; }
 	
-	private Direction facingDirection = Direction.North;
+	private Direction facingDirection = Direction.NORTH;
 	public Direction getFacingDirection() { return facingDirection; }
 	
 	private BulbColor color = BulbColor.Red;
@@ -43,10 +44,10 @@ public class TrafficLight implements TrafficLightObservable {
 		this.color = BulbColor.Red;
 		this.forTravelDirection = forTravelDirection;
 		this.facingDirection = 
-			  this.forTravelDirection == Direction.North	? Direction.South
-			: this.forTravelDirection == Direction.South	? Direction.North
-			: this.forTravelDirection == Direction.East	? Direction.West
-			: Direction.East;
+			  this.forTravelDirection == Direction.NORTH	? Direction.SOUTH
+			: this.forTravelDirection == Direction.SOUTH	? Direction.NORTH
+			: this.forTravelDirection == Direction.EAST	? Direction.WEST
+			: Direction.EAST;
 		
 		//create simulator light
 		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());

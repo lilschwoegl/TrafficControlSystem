@@ -9,8 +9,8 @@ import application.BulbColor;
 import application.DetectedObject;
 import application.TrafficController;
 import application.TrafficLight;
+import simulator.Constants.Direction;
 import simulator.MotorVehicle;
-import simulator.MotorVehicle.Direction;
 import simulator.SimulatorManager;
 
 public class SimulatedTrack extends Track{

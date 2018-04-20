@@ -7,6 +7,7 @@ import org.opencv.core.Point;
 
 import javafx.scene.text.Font;
 import observer.TrafficUpdateObservable;
+import simulator.Constants.Direction;
 import tracking.SimulatedTrack;
 import tracking.Track;
 
@@ -16,7 +17,6 @@ public abstract class MotorVehicle {
 	protected int lane;
 	protected double speed = 0.08f;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
-	public enum Direction {NORTH, SOUTH, EAST, WEST};
 	protected Direction direction;
 	Track track;
 
