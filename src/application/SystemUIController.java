@@ -1,10 +1,19 @@
 package application;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
 
 import org.opencv.core.Core;
 import org.opencv.core.Core.MinMaxLocResult;
@@ -17,9 +26,11 @@ import org.opencv.core.Size;
 import org.opencv.dnn.Dnn;
 import org.opencv.dnn.Net;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoWriter;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -27,8 +38,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import observer.TrackUpdateObservable;
 import observer.UITrackObserver;
+import simulator.Constants.Direction;
 import tracking.TrackerConfig;
 import tracking.Tracker;
 
@@ -36,73 +49,161 @@ public class SystemUIController {
 
 	// setup the FXML control accessors
 	@FXML
-	private Button selFeedBtn;
+	private Button selFeedBtn1, selFeedBtn2, selFeedBtn3, selFeedBtn4;
 	@FXML
-	private ImageView imageOutputImgvw;
+	private ImageView imgOut1, imgOut2, imgOut3, imgOut4;
 	@FXML
-	private ComboBox<String> feedListCbx;
+	private ComboBox<String> feedList1, feedList2, feedList3, feedList4;
 	@FXML
-	private Label trackLbl;
-	public static ObjectProperty<String> trackLblProp;
-	@FXML
-	private ImageView img1vb, img2vb, img3vb, img4vb;
+	private Label trackLbl1, trackLbl2, trackLbl3, trackLbl4;
+	public static ObjectProperty<String> trackLblProp1, trackLblProp2, trackLblProp3, trackLblProp4;
 	
-	@FXML 
-	Slider rho_s, threshold_s, minLineLength_s, maxLineGap_s;
-	@FXML
-	private Label houghLbl;
-	public static ObjectProperty<String> houghLblProp;
-
-	private VideoInput videoFeed = new VideoInput();
-
-	private ScheduledExecutorService timer;
-
+	private CameraFeedDisplay[] cameraFeeds = new CameraFeedDisplay[4];
 	boolean useVocYolo = true;
 
 	static Net yolo;
 
-	Tracker tracker;
+	Tracker tracker[] = new Tracker[4];
 	static Mat imag;
 	static Mat orgin;
 	static Mat kalman;
 	
+	boolean saveFramesToFile = false;
+	boolean firstRun = true;
+	long frameCounter = 0;
 
 	UITrackObserver trafficObserver;
 	
-	float confidenceThreshold  = (float)0.1;	
-	float probabilityThreshold = (float)0.2;
-	boolean drawTrace = true;
+	float confidenceThreshold  = (float)0.3;	
+	float probabilityThreshold = (float)0.3;
+	boolean drawTrace = false;
 	boolean extrapDetects = true;
 	
-	boolean testCaffe = false;
-	static Net caffe;
+	VideoWriter vwriter = new VideoWriter();
+	boolean recordVideo = true;
+	
+	private Thread frameGrabber = new Thread()
+	{
+		int counter = 0;
+		public void run()
+		{
+			while(true)
+			{
+				if (cameraFeeds[counter].isAlive())
+				{
+					boolean staleFrame = cameraFeeds[counter].isFrameStale();
+					Mat frame = cameraFeeds[counter].getLastFrame();
+					
+					if (!frame.empty() && frame.width() > 0 && frame.height() > 0)
+					{
+						if (!staleFrame)
+							saveFrame(frame);
+						
+						frame = processFrame(frame, tracker[counter], cameraFeeds[counter].getRoadLines());
+					}
+					
+					cameraFeeds[counter].showImage(frame);
+	
+					try {
+						sleep(25);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				counter = (++counter % 4);
+			}
+		}
+	};
+	
+	private void saveFrame(Mat frame)
+	{
+		if (recordVideo)
+			{
+				if (firstRun)
+				{
+					vwriter.open("C:\\Temp\\intersection_18.avi", VideoWriter.fourcc('D', 'I', 'V', 'X'), 15, frame.size(), true);
+					firstRun = false;
+				}
+				
+				if (frame.width() > 0 && frame.height() > 0)
+				{
+					Mat f = new Mat();
+					Imgproc.resize(frame, f, new Size(frame.width(), frame.height()));
+					if (f.channels() == 4)
+						Imgproc.cvtColor(f, f, Imgproc.COLOR_BGRA2BGR);
+					
+					vwriter.write(f);
+				}
+
+			}
+	}
 
 	public void initialize()
 	{
 		// load the feed names
-		feedListCbx.getItems().addAll(VideoInput.feedNames);
+		feedList1.getItems().addAll(VideoInput.feedNames);
+		feedList2.getItems().addAll(VideoInput.feedNames);
+		feedList3.getItems().addAll(VideoInput.feedNames);
+		feedList4.getItems().addAll(VideoInput.feedNames);
 
 		// bind labels from the UI
-		trackLblProp = new SimpleObjectProperty<>();
-		this.trackLbl.textProperty().bind(trackLblProp);
+		trackLblProp1 = new SimpleObjectProperty<>();
+		this.trackLbl1.textProperty().bind(trackLblProp1);
+		trackLblProp2 = new SimpleObjectProperty<>();
+		this.trackLbl2.textProperty().bind(trackLblProp2);
+		trackLblProp3 = new SimpleObjectProperty<>();
+		this.trackLbl3.textProperty().bind(trackLblProp3);
+		trackLblProp4 = new SimpleObjectProperty<>();
+		this.trackLbl4.textProperty().bind(trackLblProp4);
 		
-		houghLblProp = new SimpleObjectProperty<>();
-		this.houghLbl.textProperty().bind(houghLblProp);
+		cameraFeeds[0] = new CameraFeedDisplay(imgOut1, selFeedBtn1, feedList1, Direction.NORTH);
+		cameraFeeds[1] = new CameraFeedDisplay(imgOut2, selFeedBtn2, feedList2, Direction.SOUTH);
+		cameraFeeds[2] = new CameraFeedDisplay(imgOut3, selFeedBtn3, feedList3, Direction.EAST);
+		cameraFeeds[3] = new CameraFeedDisplay(imgOut4, selFeedBtn4, feedList4, Direction.WEST);
 
-		// create a new tracker for the detected objects
-		tracker = new Tracker((float)TrackerConfig._dt,
+		// create trackers for each camera feed
+		// the direction is the heading that an oncoming vehicle would have,
+		// so if the camera is facing north, the direction would be south etc.
+		tracker[0] = new Tracker((float)TrackerConfig._dt,
 				(float)TrackerConfig._Accel_noise_mag,
 				TrackerConfig._dist_thres,
 				TrackerConfig._maximum_allowed_skipped_frames,
 				TrackerConfig._max_trace_length,
-				TrackerConfig._max_sec_before_stale);
-
+				TrackerConfig._max_sec_before_stale,
+				Direction.SOUTH);
+		tracker[1] = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale,
+				Direction.NORTH);
+		tracker[2] = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale,
+				Direction.WEST);
+		tracker[3] = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale,
+				Direction.EAST);
+		
+		
 		// load the darknet yolo network
 		if (useVocYolo)
 		{
 			yolo = Dnn.readNetFromDarknet(
-					"yolo/cfg/tiny-yolo-voc.cfg",
-					"yolo/weights/tiny-yolo-voc.weights");
+					//"yolo/cfg/tiny-yolo-voc.cfg",
+					"yolo/cfg/yolov2-custom.cfg",
+					//"yolo/weights/tiny-yolo-voc.weights");
+					"yolo/weights/yolov2-tiny-obj_10500.weights");
 		}
 		else
 		{
@@ -115,7 +216,8 @@ public class SystemUIController {
 			// load the yolo class names
 			if (useVocYolo)
 			{
-				DetectedObject.loadClassNames("yolo/classes/voc.names");
+//				DetectedObject.loadClassNames("yolo/classes/voc.names");
+				DetectedObject.loadClassNames("yolo/classes/custom-training.names");
 			}
 			else
 			{
@@ -130,80 +232,30 @@ public class SystemUIController {
 		trafficObserver = new UITrackObserver();
 		TrackUpdateObservable.getInstance().addObserver(trafficObserver);
 		
-		
-		// try the caffe
-		if (testCaffe)
-		{
-			try {
-				DetectedObject.loadClassNames("caffe/synset_words.txt");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			caffe = Dnn.readNetFromCaffe(
-					"caffe/bvlc_googlenet.prototxt.txt", 
-					"caffe/bvlc_googlenet.caffemodel");
-		}
+		frameGrabber.start();
 	}
 
 	@FXML
-	private void startFeed()
+	private void startFeed(ActionEvent event)
 	{
-		// get the current feed name
-		String feedName = feedListCbx.getValue();
-
-		if (feedName.equals(""))
+		String btnId = ((Button)event.getSource()).getId();
+		
+		switch (btnId)
 		{
-			return;
-		}
-
-		// if the feed has changed, get the newly selected one
-		if (!videoFeed.getCurrentFeed().equals(feedName))
-		{
-			videoFeed.selectCameraFeed(feedName);
-		}
-
-		// is the video stream available?
-		if (this.videoFeed.isOpened())
-		{
-			
-			Runnable frameGrabber = new Runnable() {
-
-				@Override
-				public void run()
-				{
-					// effectively grab and process a single frame
-					Mat frame = new Mat();
-
-					try {
-						frame = videoFeed.grabFrame();
-						
-						//System.out.println(frame.size().height);
-						//System.out.println(frame.size().width);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					frame = processFrame(frame);
-
-					// convert and show the frame
-					Image imageToShow = Utils.mat2Image(frame);
-					updateImageView(imageOutputImgvw, imageToShow);
-				}
-			};
-
-			// grab a frame every 100 ms (~30 frames/sec)
-			this.timer = Executors.newSingleThreadScheduledExecutor();
-			this.timer.scheduleAtFixedRate(frameGrabber, 0, 50, TimeUnit.MILLISECONDS);
-
-			// update the button content
-			this.selFeedBtn.setText("Select Video Feed");
-		}
-		else
-		{
-			// log the error
-			System.err.println("Failed to open the camera connection...");
+			case "selFeedBtn1":
+				cameraFeeds[0].selectNewFeed();
+				break;
+			case "selFeedBtn2":
+				cameraFeeds[1].selectNewFeed();
+				break;
+			case "selFeedBtn3":
+				cameraFeeds[2].selectNewFeed();
+				break;
+			case "selFeedBtn4":
+				cameraFeeds[3].selectNewFeed();
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -213,7 +265,7 @@ public class SystemUIController {
 	 * 
 	 * @return the {@link Image} to show
 	 */
-	private Mat processFrame(Mat frame)
+	private Mat processFrame(Mat frame, Tracker tracker, RoadLinesCollection roadLines)
 	{
 		Mat curFrame = new Mat();
 
@@ -225,48 +277,18 @@ public class SystemUIController {
 
 		Mat output = new Mat();
 
-		
+		logMsg("Processing frame");
 
 		imag = curFrame.clone();
 		orgin = curFrame.clone();
 		kalman = curFrame.clone();
 		
-		detectLanes(imag);
+
+		// Tracker code
+		// https://github.com/Franciscodesign/Moving-Target-Tracking-with-OpenCV/blob/master/src/sonkd/Main.java
+		Vector<DetectedObject> rects = detectObjectYolo(curFrame);
 		
-		// try caffe
-		if (testCaffe)
-		{
-			// get blobs
-			Mat inputBlob = Dnn.blobFromImage(imag, 1.0, new Size(224,224), new Scalar(104,117,123), true, true);
-			caffe.setInput(inputBlob, "data");
-			Mat prob = caffe.forward("prob");
-			
-			updateImageView(img1vb, Utils.mat2Image(inputBlob));
-			
-			for (int i = 0; i < 5; i++)
-			{
-				caffe.setInput(inputBlob, "data");
-				prob = caffe.forward("prob");
-			}
-			
-			Mat probMat = prob.reshape(1, 1);
-			MinMaxLocResult res = Core.minMaxLoc(prob);
-			
-			double classProb = res.maxVal;
-			double classId = res.maxLoc.x;
-			
-			System.out.printf("Prob %.0f: %s\n",
-					classProb * 100,
-					DetectedObject.classes.get((int)classId));
-		}
-		
-		
-if (!testCaffe)
-{
-	
-	// Tracker code
-			// https://github.com/Franciscodesign/Moving-Target-Tracking-with-OpenCV/blob/master/src/sonkd/Main.java
-			Vector<DetectedObject> rects = detectObjectYolo(curFrame);
+		logMsg("Updating tracker");
 			
 		// update the tracker if there are detected objects,
 		// otherwise update the kalman filter
@@ -280,6 +302,8 @@ if (!testCaffe)
 			tracker.checkForStaleTracks();
 		}
 
+		logMsg("Drawing detects");
+		
 		for (int i = 0; i < tracker.tracks.size(); i++)
 		{
 			// if there is a trace available, draw it on the image
@@ -295,7 +319,7 @@ if (!testCaffe)
 								tracker.tracks.get(i).trace.get(jt - 1), 
 								tracker.tracks.get(i).trace.get(jt), 
 								TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
-								5, 4, 0);
+								2, 4, 0);
 	
 					}
 				}
@@ -334,67 +358,95 @@ if (!testCaffe)
 					}
 				}
 
-				// draw the bounding box around the detect
-				Imgproc.rectangle(
-						imag,
-						lb,
-						rt, 
-						TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
-						5);
+				Scalar fontColor = new Scalar(255,255,255);
+				Scalar boxColor = new Scalar(0,0,0);
+				int boxThickness = 2;
+				double fontScale = .3;
+				int thickness = 1;
+				int xPixelStep = 20;
+				int[] baseline = new int[] {0};
+				Size fontSize = Imgproc.getTextSize(tracker.tracks.get(i).getDirectionToString(), 
+						Core.FONT_HERSHEY_SIMPLEX, fontScale, thickness, baseline);
+				Size boxSize = new Size(fontSize.width + 20, fontSize.height * 4);
 				
-				// draw the box to put info in
-				Imgproc.rectangle(
-						imag,
-						lb,
-						new Point(lb.x + 200, lb.y - 80),
-						//CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
-						new Scalar(0,0,0),
-						Core.FILLED
-						);
+				boolean drawBox = true;
+				boolean drawDetectInfo = false;
 				
-				// draw the class and probability of the detect
-				Imgproc.putText(
-						imag, 
-						String.format("%s - %.0f%%", detect.getClassName(), detect.classProb * 100), 
-						new Point(lb.x, lb.y - 60), 
-						Core.FONT_HERSHEY_SIMPLEX, 
-						1, 
-						new Scalar(255,255,255),
-						3);
+				if (drawBox) 
+				{
+					// draw the bounding box around the detect
+					Imgproc.rectangle(
+							imag,
+							lb,
+							rt, 
+							TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
+							boxThickness);
+				}
 				
-				// draw the direction the detected object is traveling
-				Imgproc.putText(
-						imag, 
-						String.format("%s", tracker.tracks.get(i).getDirectionToString()), 
-						new Point(lb.x, lb.y-30), 
-						Core.FONT_HERSHEY_SIMPLEX, 
-						1, 
-						new Scalar(255,255,255),
-						3);
+				if (drawDetectInfo)
+				{
+					// draw the box to put info in
+					Imgproc.rectangle(
+							imag,
+							lb,
+							new Point(lb.x + boxSize.width, lb.y - boxSize.height),
+							//CONFIG.Colors[tracker.tracks.get(i).track_id % 9],
+							boxColor,
+							Core.FILLED
+							);
+					
+					// draw the class and probability of the detect
+					Imgproc.putText(
+							imag, 
+							String.format("%s - %.0f%%", detect.getClassName(), detect.classProb * 100), 
+							new Point(lb.x, lb.y - fontSize.height * 3), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+					
+					// draw the direction the detected object is traveling
+					Imgproc.putText(
+							imag, 
+							String.format("%s", tracker.tracks.get(i).getDirectionToString()), 
+							new Point(lb.x, lb.y-fontSize.height * 2), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+					
+					// draw the lane the car is in
+					Imgproc.putText(
+							imag, 
+							String.format("Lane: %d", tracker.tracks.get(i).lane), 
+							new Point(lb.x, lb.y-fontSize.height * 1), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+					
+					// draw the track ID
+					Imgproc.putText(
+							imag, 
+							String.format("ID: %d", tracker.tracks.get(i).track_id), 
+							new Point(lb.x, lb.y), 
+							Core.FONT_HERSHEY_SIMPLEX, 
+							fontScale, 
+							fontColor,
+							thickness);
+				}
 				
-				// determine teh lane that the car is in
-				tracker.tracks.get(i).lane = rlc.isInLane(tracker.tracks.get(i).getBestPositionCenter());
+				// determine the lane that the car is in
+				tracker.tracks.get(i).lane = roadLines.isInLane(tracker.tracks.get(i).getBestPositionCenter());
 				
-				// draw the lane the car is in
-				Imgproc.putText(
-						imag, 
-						String.format("Lane: %d", tracker.tracks.get(i).lane), 
-						new Point(lb.x, lb.y), 
-						Core.FONT_HERSHEY_SIMPLEX, 
-						1, 
-						new Scalar(255,255,255),
-						3);
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 			}
 		}
-
-		// update the tracks in the traffic observer
-		//TrafficUpdateObservable.getInstance().updateTracks(tracker.tracks);
-
-	}
+		
+		roadLines.drawLanes(imag);
 		
 		return imag;
 
@@ -403,6 +455,8 @@ if (!testCaffe)
 	private Vector<DetectedObject> detectObjectYolo(Mat inputMat)
 	{
 		Vector<DetectedObject> rects = new Vector<DetectedObject>();
+		
+		logMsg("Detecting objects with YOLO");
 
 		Mat m = new Mat();
 		inputMat.copyTo(m);
@@ -433,7 +487,9 @@ if (!testCaffe)
 			classProb = res.maxVal;
 			classId = (int)res.maxLoc.x;
 
-			if (classProb > probabilityThreshold)
+			if (classProb > probabilityThreshold &&
+				confidence > confidenceThreshold &&
+				DetectedObject.isClassAllowed(classId))
 			{
 
 				/* outputs from network are:
@@ -482,6 +538,8 @@ if (!testCaffe)
 
 			}
 		}
+		
+		logMsg("Done with YOLO");
 
 		return rects;
 	}
@@ -537,14 +595,6 @@ if (!testCaffe)
 //				Math.ceil(minLineLength_s.getValue()), 
 //				Math.ceil(maxLineGap_s.getValue()));
 		
-		String str = String.format(
-				"rho: %f\nthreshold: %f\nminLineLength: %f\nmaxLineGap: %f",
-				Math.ceil(rho_s.getValue()),
-				Math.ceil(threshold_s.getValue()),
-				Math.ceil(minLineLength_s.getValue()),
-				Math.ceil(maxLineGap_s.getValue()));
-		
-		Utils.onFXThread(SystemUIController.houghLblProp, str);
 				
 		Imgproc.HoughLinesP(
 				grayFrame, 
@@ -567,8 +617,6 @@ if (!testCaffe)
 //				
 		drawLines(imag, lines);
 		
-		// show the canny image
-		updateImageView(img1vb, Utils.mat2Image(grayFrame));
 	}
 	
 	// http://jeffwen.com/2017/02/23/lane_finding
@@ -582,17 +630,11 @@ if (!testCaffe)
 		Mat whiteColor = new Mat();
 		Core.inRange(frame, new Scalar(220,220,220), new Scalar(255,255,255), whiteColor);
 		
-		updateImageView(img2vb, Utils.mat2Image(whiteColor));
-		
 		Mat yellowColorRgb = new Mat();
 		Core.inRange(frame, new Scalar(225,180,0), new Scalar(255,255,170), yellowColorRgb);
 		
-		updateImageView(img3vb, Utils.mat2Image(yellowColorRgb));
-		
 		Mat yellowColorHls = new Mat();
 		Core.inRange(hlsImg, new Scalar(20,120,80), new Scalar(45,200,255), yellowColorHls);
-		
-		updateImageView(img4vb, Utils.mat2Image(yellowColorHls));
 		
 		//Mat combined = new Mat();
 		//Core.bitwise_or(whiteColor, yellowColor, combined);
@@ -634,22 +676,8 @@ if (!testCaffe)
 			{
 				continue;
 			}
-			
-//			Imgproc.putText(
-//					frame, 
-//					String.format("%.2f", line.getSlope()), 
-//					new Point(data[0], data[1]),
-//					Core.FONT_HERSHEY_SIMPLEX, 
-//					1, 
-//					new Scalar(0,255,0),
-//					3);
-			//Imgproc.line(frame, new Point(data[0], data[1]), new Point(data[2], data[3]), new Scalar(255,0,0), 20);
-		
-			rlc.coorelateLine(line);
 		
 		}
-		
-		rlc.drawLanes(frame);
 		
 	}
 
@@ -659,39 +687,26 @@ if (!testCaffe)
 	 */
 	private void stopAcquisition()
 	{
-		if (this.timer!=null && !this.timer.isShutdown())
-		{
-			try
-			{
-				// stop the timer
-				this.timer.shutdown();
-				this.timer.awaitTermination(33, TimeUnit.MILLISECONDS);
-			}
-			catch (InterruptedException e)
-			{
-				// log any exception
-				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
-			}
-		}
+//		if (this.timer1!=null && !this.timer1.isShutdown())
+//		{
+//			try
+//			{
+//				// stop the timer
+//				this.timer1.shutdown();
+//				this.timer1.awaitTermination(33, TimeUnit.MILLISECONDS);
+//			}
+//			catch (InterruptedException e)
+//			{
+//				// log any exception
+//				System.err.println("Exception in stopping the frame capture, trying to release the camera now... " + e);
+//			}
+//		}
 
-		if (this.videoFeed.isOpened())
-		{
+		//if (this.videoFeed1.isOpened())
+		//{
 			// release the video feed
-			this.videoFeed.release();
-		}
-	}
-
-	/**
-	 * Update the {@link ImageView} in the JavaFX main thread
-	 * 
-	 * @param view
-	 *            the {@link ImageView} to update
-	 * @param image
-	 *            the {@link Image} to show
-	 */
-	private void updateImageView(ImageView view, Image image)
-	{
-		Utils.onFXThread(view.imageProperty(), image);
+		//	this.videoFeed1.release();
+		//}
 	}
 
 	/**
@@ -700,6 +715,103 @@ if (!testCaffe)
 	protected void setClosed()
 	{
 		this.stopAcquisition();
+		vwriter.release();
+	}
+	
+	private boolean printLogs = false;
+	private void logMsg(String format, String ... args)
+	{
+		if (printLogs)
+			System.out.printf(format + "\n", args);
 	}
 
+
+	private Point mouseDownPt = new Point();
+	private Point mouseUpPt = new Point();
+	private boolean primaryButtonDown = false;
+	@FXML
+	private void imgViewMouseDown(MouseEvent event)
+	{
+		if (event.getSource().getClass() != ImageView.class)
+		{
+			System.out.printf("Mouse down on type %s, expecting %s",
+					event.getSource().getClass().getSimpleName(),
+					ImageView.class.getClass().getSimpleName());
+			return;
+		}
+			
+		String id = ((ImageView)event.getSource()).getId();
+		
+		if (event.isPrimaryButtonDown())
+		{
+			mouseDownPt.x = event.getX();
+			mouseDownPt.y = event.getY();
+			
+			primaryButtonDown = true;
+			
+			System.out.printf("Mouse down on %s at (%f, %f)\n",
+					id, mouseDownPt.x, mouseDownPt.y);
+		}
+	}
+	
+	@FXML
+	private void imgViewMouseUp(MouseEvent event)
+	{
+		if (event.getSource().getClass() != ImageView.class)
+		{
+			System.out.printf("Mouse up on type %s, expecting %s",
+					event.getSource().getClass().getSimpleName(),
+					ImageView.class.getClass().getSimpleName());
+			return;
+		}
+			
+		String id = ((ImageView)event.getSource()).getId();
+		
+		if (primaryButtonDown)
+		{
+				mouseUpPt.x = event.getX();
+			mouseUpPt.y = event.getY();
+			
+			System.out.printf("Mouse down on %s at (%f, %f)\n",
+					id, mouseUpPt.x, mouseUpPt.y);
+			
+			switch (id)
+			{
+				case "imgOut1":
+					cameraFeeds[0].getRoadLines().addLane(mouseDownPt, mouseUpPt);
+					break;
+				case "imgOut2":
+					cameraFeeds[1].getRoadLines().addLane(mouseDownPt, mouseUpPt);
+					break;
+				case "imgOut3":
+					cameraFeeds[2].getRoadLines().addLane(mouseDownPt, mouseUpPt);
+					break;
+				case "imgOut4":
+					cameraFeeds[3].getRoadLines().addLane(mouseDownPt, mouseUpPt);
+					break;
+			}
+			
+			primaryButtonDown = false;
+		}
+		else
+		{
+			// other than the primary button, delete the last line
+			switch (id)
+			{
+				case "imgOut1":
+					cameraFeeds[0].getRoadLines().removeLastLane();
+					break;
+				case "imgOut2":
+					cameraFeeds[1].getRoadLines().removeLastLane();
+					break;
+				case "imgOut3":
+					cameraFeeds[2].getRoadLines().removeLastLane();
+					break;
+				case "imgOut4":
+					cameraFeeds[3].getRoadLines().removeLastLane();
+					break;
+			}
+		}
+	}
+	
 }

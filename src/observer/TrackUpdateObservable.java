@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
+import simulator.Constants.Direction;
 import tracking.Track;
-import tracking.Track.Aspect;
+import tracking.Track.MOVEMENT_TYPE;
 
 public class TrackUpdateObservable implements TrackObservable {
 
@@ -62,31 +63,31 @@ public class TrackUpdateObservable implements TrackObservable {
 		observers.remove(o);
 	}
 	
-	public void notifyObserver(Track track, TrackUpdate updateType)
+	public void notifyObserver(Track track, TrackUpdate updateType, Direction heading)
 	{
 		for (TrackObserver observer : observers)
 		{
-			observer.update(track, updateType);
+			observer.update(track, updateType, heading);
 		}
 	}
 	
-	public void trackAdded(Track track)
+	public void trackAdded(Track track, Direction heading)
 	{
 		tracks.put(track.track_id, track);
-		notifyObserver(track, TrackUpdate.ADDED);
+		notifyObserver(track, TrackUpdate.ADDED, heading);
 	}
 	
-	public void trackRemoved(Track track)
+	public void trackRemoved(Track track, Direction heading)
 	{
 		tracks.remove(track.track_id);
-		notifyObserver(track, TrackUpdate.REMOVED);
+		notifyObserver(track, TrackUpdate.REMOVED, heading);
 	}
 	
-	public void trackUpdated(Track track)
+	public void trackUpdated(Track track, Direction heading)
 	{
 		tracks.remove(track.track_id);
 		tracks.put(track.track_id, track);
-		notifyObserver(track, TrackUpdate.UPDATED);
+		notifyObserver(track, TrackUpdate.UPDATED, heading);
 	}
 	
 	public static String getUpdateToString(TrackUpdate type)

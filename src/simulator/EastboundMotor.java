@@ -3,6 +3,7 @@ package simulator;
 import java.awt.Color;
 import java.awt.Graphics;
 
+import simulator.Constants.Direction;
 import tracking.Track;
 
 public class EastboundMotor extends MotorVehicle{
@@ -25,12 +26,12 @@ public class EastboundMotor extends MotorVehicle{
 		// TODO Auto-generated method stub
 
 		if(lane == 1){
-			x = Config.eastBoundLane1.x;
-			y = Config.eastBoundLane1.y;
+			//x = Config.eastBoundLane1.x;
+			//y = Config.eastBoundLane1.y;
 		}
 		if(lane == 2){
-			x = Config.eastBoundLane2.x;
-			y = Config.eastBoundLane2.y;
+			//x = Config.eastBoundLane2.x;
+			//y = Config.eastBoundLane2.y;
 		}
 	}
 
@@ -48,7 +49,7 @@ public class EastboundMotor extends MotorVehicle{
 	@Override
 	public void updateTrackPosition() {
 		// TODO Auto-generated method stub
-		x = (track.getBestPositionCenter().x * Config.roadStripRatio);
+		x = (track.getBestPositionCenter().x * SimConfig.roadStripRatio);
 	}
 	
 	/*public void render(Graphics g){

@@ -2,6 +2,7 @@ package application;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.util.Date;
 
 import org.opencv.core.Mat;
 
@@ -9,6 +10,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public final class Utils
 {
@@ -76,4 +78,24 @@ public final class Utils
 		
 		return image;
 	}
+	
+	
+	private static long getCurrentTimeMs()
+	{
+		return System.currentTimeMillis();
+	}
+	
+	/**
+	 * Update the {@link ImageView} in the JavaFX main thread
+	 * 
+	 * @param view
+	 *            the {@link ImageView} to update
+	 * @param image
+	 *            the {@link Image} to show
+	 */
+	public static void updateImageView(ImageView view, Image image)
+	{
+		Utils.onFXThread(view.imageProperty(), image);
+	}
+	
 }

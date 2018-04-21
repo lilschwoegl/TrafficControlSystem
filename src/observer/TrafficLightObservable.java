@@ -1,7 +1,6 @@
 package observer;
 
-import application.Color;
-import application.Direction;
+import application.BulbColor;
 import application.TrafficLight;
 
 public interface TrafficLightObservable {

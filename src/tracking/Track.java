@@ -19,11 +19,13 @@ import application.DetectedObject;
 
 public class Track {
 
-	public enum Aspect
+	public enum MOVEMENT_TYPE
 	{
 		ONCOMING,
 		OUTGOING,
-		UNCERTAIN
+		STATIONARY,
+		UNCERTAIN,
+		NUM_VALUES
 	};
 	
 	public Vector<Point> trace;
@@ -34,9 +36,10 @@ public class Track {
 	public Point prediction;
 	public Kalman KF;
 	public LocalDateTime lastUpdateTime;
+	public boolean sentToSim = false;
 	
 	// aspect to the viewer
-	public Aspect direction;
+	public MOVEMENT_TYPE direction;
 
 	// last successful detection
 	public DetectedObject lastDetect;
@@ -66,7 +69,7 @@ public class Track {
 
 		lastDetect = lastUpdate;
 		
-		direction = Aspect.UNCERTAIN;
+		direction = MOVEMENT_TYPE.UNCERTAIN;
 		
 		lastUpdateTime = LocalDateTime.now();
 	}
@@ -79,6 +82,8 @@ public class Track {
 				return "ONCOMING";
 			case OUTGOING:
 				return "OUTGOING";
+			case STATIONARY:
+				return "STATIONARY";
 			case UNCERTAIN:
 			default:
 				return "UNCERTAIN";

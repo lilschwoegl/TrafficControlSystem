@@ -5,15 +5,16 @@ import java.util.HashMap;
 import application.SystemUIController;
 import application.Utils;
 import observer.TrackUpdateObservable.TrackUpdate;
+import simulator.Constants.Direction;
 import tracking.Track;
-import tracking.Track.Aspect;
+import tracking.Track.MOVEMENT_TYPE;
 
 public class UITrackObserver implements TrackObserver{
 
 	HashMap<Integer,Track> tracks = new HashMap<Integer,Track>();
 
 	@Override
-	public void update(Track track, TrackUpdate updateType) {
+	public void update(Track track, TrackUpdate updateType, Direction heading) {
 		// TODO Auto-generated method stub
 		
 		switch (updateType)
@@ -30,7 +31,7 @@ public class UITrackObserver implements TrackObserver{
 				break;
 		}
 		
-		int[] directions = new int[3];
+		int[] directions = new int[MOVEMENT_TYPE.NUM_VALUES.ordinal()];
 		
 		for (Track t : tracks.values())
 		{
@@ -40,11 +41,11 @@ public class UITrackObserver implements TrackObserver{
 		String str = String.format(
 				"%d tracks, %d oncoming, %d outgoing, %d uncertain\n",
 				tracks.size(),
-				directions[Aspect.ONCOMING.ordinal()],
-				directions[Aspect.OUTGOING.ordinal()],
-				directions[Aspect.UNCERTAIN.ordinal()]);
+				directions[MOVEMENT_TYPE.ONCOMING.ordinal()],
+				directions[MOVEMENT_TYPE.OUTGOING.ordinal()],
+				directions[MOVEMENT_TYPE.UNCERTAIN.ordinal()]);
 		
-		Utils.onFXThread(SystemUIController.trackLblProp, str);
+		Utils.onFXThread(SystemUIController.trackLblProp1, str);
 	}
 
 }

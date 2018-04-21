@@ -22,14 +22,14 @@ public class VideoInput extends VideoCapture{
 	 * URLs that will be referenced when a feedName below is selected
 	 */
 	private static String[] videoUrls = {
-		"http://170.93.143.139:1935/rtplive/cf013c5801f700d700437a45351f0214/playlist.m3u8",
-		"http://170.93.143.139:1935/rtplive/d6009a3500e50039004606363d235daa/playlist.m3u8",
-		"http://170.93.143.139:1935/rtplive/dbff12ba0057008d004be2369e235daa/playlist.m3u8",
-		"http://170.93.143.139:1935/rtplive/6001ce5800f700d700437a45351f0214/playlist.m3u8",
-		"video/cars.mp4",
-		"video/dog_people.mp4",
-		"video/Autonomous Intersection in Action.mp4",
-		"https://itsvideo.arlingtonva.us:8011/live/cam74.stream/playlist.m3u8"
+		"https://itsvideo.arlingtonva.us:8012/live/cam136.stream/playlist.m3u8",
+		"https://itsvideo.arlingtonva.us:8011/live/cam74.stream/playlist.m3u8",
+		"https://itsvideo.arlingtonva.us:8012/live/cam120.stream/playlist.m3u8",
+		"https://itsvideo.arlingtonva.us:8011/live/cam66.stream/playlist.m3u8",
+		"https://itsvideo.arlingtonva.us:8011/live/cam77.stream/playlist.m3u8",
+		"C:\\Temp\\intersection_recorded_1.avi",
+		"C:\\Temp\\intersection_recorded_2.avi",
+		"C:\\Temp\\intersection_recorded_3.avi"
 	};
 	
 	/**
@@ -37,15 +37,17 @@ public class VideoInput extends VideoCapture{
 	 * in the combobox on the mani form
 	 */
 	public static String[] feedNames = {
-		"I-695 AT PULASKI HWY",
-		"I-695 E of I-95",
-		"I-695 AT PUTTY HILL AVE",
-		"I-695 AT HARFORD RD",
-		"RAW VIDEO",
-		"Dog and People",
 		"Intersection",
-		"Crashes"
+		"10E",
+		"EADS ST AT 15TH",
+		"COL PK AT COURTHOUSE RD",
+		"COL PK AT HIGHLAND",
+		"Recorded 1",
+		"Recorded 2",
+		"Recorded 3"
 	};
+	
+	private static long counter = 0;
 	
 	private static Hashtable<String, String> videoFeeds;
 	
@@ -118,19 +120,33 @@ public class VideoInput extends VideoCapture{
 	{
 		Mat frame = new Mat();
 		
+		//System.out.printf("Img Counter: %d\n", counter);
+		
 		try {
 			// read the current frame
 			this.read(frame);
 			
+			//System.out.printf("Reading image: %d\n", counter-1);
+			
+			counter++;
+			
 			return frame;
 		} catch (Exception e) {
 			// log the (full) error
-			System.err.print("Exception during the image elaboration...");
+			//System.err.print("Exception during the image elaboration...");
+			
 			e.printStackTrace();
 			
 			// bubble the error up
 			throw e;
 		}
+	}
+	
+	
+	public void refresh()
+	{
+		release();
+		selectCameraFeed(currentFeed);
 	}
 	
 }

@@ -2,11 +2,16 @@ package simulator;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Rect2d;
 
 import javafx.scene.text.Font;
 import observer.TrafficUpdateObservable;
+import simulator.Constants.Direction;
 import tracking.SimulatedTrack;
 import tracking.Track;
 
@@ -14,28 +19,50 @@ public abstract class MotorVehicle {
 	protected double x = -100;
 	protected double y = -100;
 	protected int lane;
-	protected double speed = 0.08f;
+	protected double speed = SimConfig.speed;
 	public enum Route {STRAIGHT, LEFT, RIGHT};
-	public enum Direction {NORTH, SOUTH, EAST, WEST};
 	protected Direction direction;
 	Track track;
+	BufferedImage vehicleImage;
+	int imageWidth, imageHeight;
 
 	//constructor
 	public MotorVehicle(int lane, Direction dir, Track track){
 		this.lane = lane;
 		this.direction = dir;
 		this.track = track;
-
-		((SimulatedTrack)track).setSpeed(speed);
+		
+		loadImage();
 	}
 	
 	//methods
+	
+	private void loadImage()
+	{
+		if (direction == Direction.NORTH) {
+			vehicleImage = loadImage.upCarImage;
+			imageWidth = 30;
+			imageHeight = 45;
+		} else if (direction == Direction.SOUTH) {
+			vehicleImage = loadImage.downCarImage;
+			imageWidth = 30;
+			imageHeight = 45;
+		} else if (direction == Direction.EAST) {
+			vehicleImage = loadImage.rightCarImage;
+			imageWidth = 45;
+			imageHeight = 30;
+		} else if (direction == Direction.WEST) {
+			vehicleImage = loadImage.leftCarImage;
+			imageWidth = 45;
+			imageHeight = 30;
+		}
+	}
 	
 	public void updateTrack(Track track)
 	{
 		this.track = track;
 		
-		updateLane(track.lane);
+		updateLane(this.track.lane);
 		
 		updateTrackPosition();
 	}
@@ -47,6 +74,7 @@ public abstract class MotorVehicle {
 	
 	public abstract void updateTrackPosition();
 	
+
 	public int getLane(){
 		//return lane;	
 		return lane;
@@ -63,6 +91,8 @@ public abstract class MotorVehicle {
 		return new Point(x, y);
 	}
 	
+	
+	
 	public abstract void initLane(int lane);
 	
 	public abstract void updateLane(int lane);
@@ -72,13 +102,13 @@ public abstract class MotorVehicle {
 		switch (direction)
 		{
 			case NORTH:
-				return y - (Config.simDisplayHeight - Config.roadStripLength + 10);
+				return y - (SimConfig.simDisplayHeight - SimConfig.roadStripLength + 10);
 			case SOUTH:
-				return Config.roadStripLength - y - 55;
+				return SimConfig.roadStripLength - y - 55;
 			case EAST:
-				return Config.roadStripLength - x - 55;
+				return SimConfig.roadStripLength - x - 55;
 			case WEST:
-				return x - (Config.simDisplayWidth - Config.roadStripLength + 10);
+				return x - (SimConfig.simDisplayWidth - SimConfig.roadStripLength + 10);
 		}
 		
 		return -99999;
@@ -112,22 +142,36 @@ public abstract class MotorVehicle {
 	
 	public void render(Graphics g){
 		//if else statement to render the appropriate car per direction driving
-		if (direction == Direction.NORTH) {
-			g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);
-		} else if (direction == Direction.SOUTH) {
-			g.drawImage(loadImage.downCarImage, (int)x, (int)y, 30, 45, null);
-		} else if (direction == Direction.EAST) {
-			g.drawImage(loadImage.rightCarImage, (int)x, (int)y, 45, 30, null);
-		} else if (direction == Direction.WEST) {
-			g.drawImage(loadImage.leftCarImage, (int)x, (int)y, 45, 30, null);
-		}
+		
+		g.drawImage(vehicleImage, (int)x, (int)y, imageWidth, imageHeight, null);
 
 		g.setColor(Color.WHITE);
-		g.drawString(String.format("%.0f", distToIntersection()), (int)x+5, (int)y+30);
+		//g.drawString(String.format("%.0f", distToIntersection()), (int)x+5, (int)y+30);
+		g.drawString(String.format("%d", track.track_id), (int)x+5, (int)y+30);
 	}
 	
 	protected Point getLaneStartPoint()
 	{
-		return Config.laneStartPoints[direction.ordinal()][lane];
+		Point p = new Point();// = SimConfig.laneStartPoints[direction.ordinal()][lane];
+		
+		p.x = SimConfig.laneStartPoints[direction.ordinal()][lane].x;
+		p.y = SimConfig.laneStartPoints[direction.ordinal()][lane].y;	
+		
+		System.out.printf("11111 Setting Track %d Y: %f\n", track.track_id, p.y);
+		
+		return p;
+	}
+	
+	public Rectangle getBoundingBox()
+	{
+		return new Rectangle((int)x, (int)y, imageWidth, imageHeight);
+	}
+	
+	public boolean collisionDetected(MotorVehicle mv)
+	{
+		Rectangle myBB = getBoundingBox();
+		Rectangle theirBB = mv.getBoundingBox();
+
+		return myBB.intersects(theirBB);
 	}
 }

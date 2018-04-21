@@ -3,42 +3,30 @@ package application;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.concurrent.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 //import java.util.*;
 //import java.lang.Runnable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import application.Direction;
-import application.Config.SignalConfigurationType;
-import application.Color;
-
-import observer.SimulatorObserver;
-import observer.TrackUpdateObservable;
 import observer.TrafficLightObservable;
 import observer.TrafficLightObserver;
-import observer.TrafficObserver;
-import observer.TrafficUpdateObservable;
-
-import simulator.MotorVehicle;
+import simulator.Constants.Direction;
 
 public class TrafficLight implements TrafficLightObservable {
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	
 	private static int lightCounter = 0; // increment for each TrafficLight object created, 1st gets id of 1
 	private int id = 0;
 	public int getID() { return this.id; }
 	
-	private Direction forTravelDirection = Direction.North;
+	private Direction forTravelDirection = Direction.NORTH;
 	public Direction getTravelDirection() { return forTravelDirection; }
 	
-	private Direction facingDirection = Direction.North;
+	private Direction facingDirection = Direction.NORTH;
 	public Direction getFacingDirection() { return facingDirection; }
 	
-	private Color color = Color.Red;
-	public Color GetColor() { return this.color; }
+	private BulbColor color = BulbColor.Red;
+	public BulbColor GetColor() { return this.color; }
 	
 	private Instant lastChanged = Instant.now();
 	public Instant getLastChanged() { return lastChanged; }
@@ -47,13 +35,13 @@ public class TrafficLight implements TrafficLightObservable {
 	
 	public TrafficLight(Direction forTravelDirection) {
 		this.id = ++lightCounter;
-		this.color = Color.Red;
+		this.color = BulbColor.Red;
 		this.forTravelDirection = forTravelDirection;
 		this.facingDirection = 
-			  this.forTravelDirection == Direction.North	? Direction.South
-			: this.forTravelDirection == Direction.South	? Direction.North
-			: this.forTravelDirection == Direction.East	? Direction.West
-			: Direction.East;
+			  this.forTravelDirection == Direction.NORTH	? Direction.SOUTH
+			: this.forTravelDirection == Direction.SOUTH	? Direction.NORTH
+			: this.forTravelDirection == Direction.EAST	? Direction.WEST
+			: Direction.EAST;
 		
 		//create simulator light
 		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
@@ -82,10 +70,10 @@ public class TrafficLight implements TrafficLightObservable {
 		
 	// change the light to green only if it's red
 	public void TurnGreen() {
-		if (this.color == Color.Red) {
+		if (this.color == BulbColor.Red) {
 			try {
 				rwLock.writeLock().lock();
-				this.color = Color.Green;
+				this.color = BulbColor.Green;
 				logColorState();
 				this.lastChanged = Instant.now();
 			}
@@ -101,11 +89,11 @@ public class TrafficLight implements TrafficLightObservable {
 	/*TODO (DONE): downgrade writelock to readlock to allow clients to query yellow status. Because you can't upgrade a lock from read to write, would
 	 * need to release read lock grab new write lock, change to red, then unlock.*/
 	public void TurnRed() {
-		if (this.color == Color.Green) {
+		if (this.color == BulbColor.Green) {
 			try {
 				// grab writelock for light change
 				rwLock.writeLock().lock();
-				this.color = Color.Yellow;
+				this.color = BulbColor.Yellow;
 				logColorState();
 				this.lastChanged = Instant.now();
 				// downgrade to readlock, lets clients view signal color change
@@ -119,7 +107,7 @@ public class TrafficLight implements TrafficLightObservable {
 				// upgrade to writelock for light change
 				rwLock.readLock().unlock();
 				rwLock.writeLock().lock();
-				this.color = Color.Red;
+				this.color = BulbColor.Red;
 				logColorState();
 				this.lastChanged = Instant.now();
 			}

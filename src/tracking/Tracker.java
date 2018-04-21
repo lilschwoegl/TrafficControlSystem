@@ -13,7 +13,8 @@ import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
 import observer.TrackUpdateObservable;
-import tracking.Track.Aspect;
+import simulator.Constants.Direction;
+import tracking.Track.MOVEMENT_TYPE;
 
 /**
  * Tracker.java TODO:
@@ -24,10 +25,11 @@ import tracking.Track.Aspect;
 public class Tracker extends JTracker {
 	int nextTractID = 0;
 	Vector<Integer> assignment = new Vector<>();
+	private Direction oncomingHeading;
 
 	public Tracker(float _dt, float _Accel_noise_mag, double _dist_thres,
 			int _maximum_allowed_skipped_frames, int _max_trace_length, 
-			int _max_sec_before_stale) {
+			int _max_sec_before_stale, Direction oncomingHeading) {
 		tracks = new Vector<>();
 		dt = _dt;
 		Accel_noise_mag = _Accel_noise_mag;
@@ -36,6 +38,7 @@ public class Tracker extends JTracker {
 		max_trace_length = _max_trace_length;
 		max_sec_before_stale = _max_sec_before_stale;
 		track_removed = 0;
+		this.oncomingHeading = oncomingHeading;
 	}
 
 	static Scalar Colors[] = { new Scalar(255, 0, 0), new Scalar(0, 255, 0),
@@ -57,7 +60,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));		
 				tracks.add(tr);
 				
-				TrackUpdateObservable.getInstance().trackAdded(tr);
+				//TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
 			}
 		}
 
@@ -140,7 +143,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));
 				tracks.add(tr);
 				
-				TrackUpdateObservable.getInstance().trackAdded(tr);
+				//TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
 			}
 		}
 
@@ -176,7 +179,7 @@ public class Tracker extends JTracker {
 		}
 	}
 	
-	public void checkForStaleTracks()
+	public synchronized void checkForStaleTracks()
 	{
 		// -----------------------------------
 		// If track didn't get detects long time, remove it.
@@ -185,12 +188,19 @@ public class Tracker extends JTracker {
 		for (int i = 0; i < tracks.size(); i++) {
 			if (tracks.get(i).isTrackStale()) {	
 				
-				TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i));
+				TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i), oncomingHeading);
 				
-				tracks.remove(i);
-				assignment.remove(i);
-				track_removed++;
-				i--;
+				try
+				{
+					tracks.remove(i);
+					assignment.remove(i);
+					track_removed++;
+					i--;
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 				
 			}
 		}
@@ -237,22 +247,39 @@ public class Tracker extends JTracker {
 			// update track direction
 			if (tracks.get(i).trace.size() > 1)
 			{
-				if (tracks.get(i).trace.get(tracks.get(i).trace.size() - 1).y > 
+				
+				Point p1 = tracks.get(i).trace.get(tracks.get(i).trace.size() - 1);
+				Point p2 = tracks.get(i).trace.get(0);
+				
+				double mag = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+				
+				if (mag < TrackerConfig._min_dist_change) 
+				{
+					tracks.get(i).direction = MOVEMENT_TYPE.STATIONARY;
+				}
+				else if (tracks.get(i).trace.get(tracks.get(i).trace.size() - 1).y > 
 					tracks.get(i).trace.get(0).y)
 				{
-					tracks.get(i).direction = Aspect.ONCOMING;
+					tracks.get(i).direction = MOVEMENT_TYPE.ONCOMING;
+					
+					if (!tracks.get(i).sentToSim)
+					{
+						// send to sim
+						TrackUpdateObservable.getInstance().trackAdded(tracks.get(i), oncomingHeading);
+						tracks.get(i).sentToSim = true;
+					}
 				}
 				else
 				{
-					tracks.get(i).direction = Aspect.OUTGOING;
+					tracks.get(i).direction = MOVEMENT_TYPE.OUTGOING;
 				}
 			}
 			else
 			{
-				tracks.get(i).direction = Aspect.UNCERTAIN;
+				tracks.get(i).direction = MOVEMENT_TYPE.UNCERTAIN;
 			}
 			
-			TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i));
+			TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i), oncomingHeading);
 		}
 	}
 }

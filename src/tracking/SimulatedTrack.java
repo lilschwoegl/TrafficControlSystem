@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import application.Color;
+import application.BulbColor;
 import application.DetectedObject;
 import application.TrafficController;
 import application.TrafficLight;
+import simulator.Constants.Direction;
 import simulator.MotorVehicle;
-import simulator.MotorVehicle.Direction;
 import simulator.SimulatorManager;
 
 public class SimulatedTrack extends Track{
@@ -77,14 +77,15 @@ public class SimulatedTrack extends Track{
 	public void setPosition(Point p)
 	{
 		newPosition = p;
-	}
-	
+		lastPosition = p;
 		
+		//System.out.printf("33333 Setting Track %d Y: %f\n", track_id, p.y);
+	}
 	
 	public void updateTrackPosition()
 	{
 		Point temp = newPosition;
-		
+	
 		switch (travelDirection)
 		{
 		case NORTH:
@@ -100,6 +101,9 @@ public class SimulatedTrack extends Track{
 			newPosition.x = lastPosition.x - (speed * getSecSinceUpdate());
 			break;
 		}
+		
+		//System.out.printf("Track %d new X=%f Y=%f, Sec=%d, Speed=%f\n", 
+		//		track_id, newPosition.x, newPosition.y, getSecSinceUpdate(), speed);
 		
 		lastPosition = temp;
 	}

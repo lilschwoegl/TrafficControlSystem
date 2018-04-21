@@ -2,8 +2,7 @@ package observer;
 
 import java.time.Instant;
 
-import application.Color;
-import application.Direction;
+import application.BulbColor;
 import application.TrafficLight;
 
 public interface TrafficLightObserver {

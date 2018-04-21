@@ -1,6 +1,7 @@
 package observer;
 
 import observer.TrackUpdateObservable.TrackUpdate;
+import simulator.Constants.Direction;
 import tracking.Track;
 
 public interface TrackObservable {
@@ -17,6 +18,6 @@ public interface TrackObservable {
 	 */
 	public void removeObserver(TrackObserver o);
 	
-	public void notifyObserver(Track track, TrackUpdate updateType);
+	public void notifyObserver(Track track, TrackUpdate updateType, Direction heading);
 	
 }

@@ -32,6 +32,11 @@ public class Line {
 		this(coords[0], coords[1], coords[2], coords[3]);
 	}
 	
+	public Line(Point p1, Point p2)
+	{
+		this(p1.x, p1.y, p2.x, p2.y);
+	}
+	
 	/**
 	 * Constructor
 	 */
