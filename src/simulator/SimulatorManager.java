@@ -162,7 +162,7 @@ public class SimulatorManager implements TrafficLightObserver {
 			
 			switch (l) {
 			case Red:
-				if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+				if (m.distToIntersection() > 150 && !trackClear(m.lane,m.direction,m.track.track_id)) {
 					continue;
 				} else if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
 					continue;
@@ -170,7 +170,7 @@ public class SimulatorManager implements TrafficLightObserver {
 					break;
 				}
 			case Yellow:
-				if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+				if (m.distToIntersection() > 150 && !trackClear(m.lane,m.direction,m.track.track_id)) {
 					continue;				
 				} else if (m.distToIntersection() < 0) {
 					break;
@@ -180,7 +180,7 @@ public class SimulatorManager implements TrafficLightObserver {
 				}
 				break; }
 			default:
-				if (m.distToIntersection() > 150 && trackClear(m.lane,m.direction,m.track.track_id) != true) {
+				if (m.distToIntersection() > 150 && !trackClear(m.lane,m.direction,m.track.track_id)) {
 					continue;
 				} else {
 					m.setSpeed(SimConfig.speed);
@@ -193,7 +193,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		}
 	}
 	
-	public void addCar(int lane, Direction dir, Track track, boolean simulated)
+	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
 
 //		if (simulated)
@@ -249,8 +249,8 @@ public class SimulatorManager implements TrafficLightObserver {
 		}
 	}
 	
-	public Boolean trackClear(int lane, Direction dir, int id) {
-		Boolean trackClear = true;
+	public boolean trackClear(int lane, Direction dir, int id) {
+		boolean trackClear = true;
 		
 		for (MotorVehicle m : motors.values())
 		{
@@ -268,7 +268,7 @@ public class SimulatorManager implements TrafficLightObserver {
 			}
 		}
 		
-		return trackClear;
+		return true;
 	}
 	
 	

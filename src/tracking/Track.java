@@ -36,6 +36,7 @@ public class Track {
 	public Point prediction;
 	public Kalman KF;
 	public LocalDateTime lastUpdateTime;
+	public boolean sentToSim = false;
 	
 	// aspect to the viewer
 	public MOVEMENT_TYPE direction;

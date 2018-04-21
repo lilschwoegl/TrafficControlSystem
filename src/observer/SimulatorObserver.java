@@ -9,6 +9,7 @@ import simulator.Constants.Direction;
 import simulator.MotorVehicle;
 import tracking.SimulatedTrack;
 import tracking.Track;
+import tracking.Track.MOVEMENT_TYPE;
 
 
 public class SimulatorObserver implements TrackObserver{
@@ -37,6 +38,7 @@ public class SimulatorObserver implements TrackObserver{
 		switch (updateType)
 		{
 			case ADDED:
+				
 				strack = new SimulatedTrack(  
 						new Point(0,0),
 						simulatedCarsCounter++,

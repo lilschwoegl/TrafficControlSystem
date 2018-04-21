@@ -77,6 +77,7 @@ public class SimulatedTrack extends Track{
 	public void setPosition(Point p)
 	{
 		newPosition = p;
+		lastPosition = p;
 		
 		System.out.printf("33333 Setting Track %d Y: %f\n", track_id, p.y);
 	}

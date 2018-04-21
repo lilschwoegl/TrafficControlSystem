@@ -60,7 +60,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));		
 				tracks.add(tr);
 				
-				TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
+				//TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
 			}
 		}
 
@@ -143,7 +143,7 @@ public class Tracker extends JTracker {
 						Accel_noise_mag, nextTractID++, rectArray.get(i));
 				tracks.add(tr);
 				
-				TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
+				//TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
 			}
 		}
 
@@ -254,6 +254,13 @@ public class Tracker extends JTracker {
 					tracks.get(i).trace.get(0).y)
 				{
 					tracks.get(i).direction = MOVEMENT_TYPE.ONCOMING;
+					
+					if (!tracks.get(i).sentToSim)
+					{
+						// send to sim
+						TrackUpdateObservable.getInstance().trackAdded(tracks.get(i), oncomingHeading);
+						tracks.get(i).sentToSim = true;
+					}
 				}
 				else
 				{

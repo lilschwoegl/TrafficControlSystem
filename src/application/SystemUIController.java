@@ -74,8 +74,8 @@ public class SystemUIController {
 
 	UITrackObserver trafficObserver;
 	
-	float confidenceThreshold  = (float)0.2;	
-	float probabilityThreshold = (float)0.2;
+	float confidenceThreshold  = (float)0.45;	
+	float probabilityThreshold = (float)0.45;
 	boolean drawTrace = false;
 	boolean extrapDetects = true;
 	
