@@ -79,7 +79,7 @@ public class SimulatedTrack extends Track{
 		newPosition = p;
 		lastPosition = p;
 		
-		System.out.printf("33333 Setting Track %d Y: %f\n", track_id, p.y);
+		//System.out.printf("33333 Setting Track %d Y: %f\n", track_id, p.y);
 	}
 	
 	public void updateTrackPosition()
@@ -102,8 +102,8 @@ public class SimulatedTrack extends Track{
 			break;
 		}
 		
-		System.out.printf("Track %d new X=%f Y=%f, Sec=%d, Speed=%f\n", 
-				track_id, newPosition.x, newPosition.y, getSecSinceUpdate(), speed);
+		//System.out.printf("Track %d new X=%f Y=%f, Sec=%d, Speed=%f\n", 
+		//		track_id, newPosition.x, newPosition.y, getSecSinceUpdate(), speed);
 		
 		lastPosition = temp;
 	}

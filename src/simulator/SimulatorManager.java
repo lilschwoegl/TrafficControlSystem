@@ -159,8 +159,26 @@ public class SimulatorManager implements TrafficLightObserver {
 			BulbColor l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
 			Double d = m.distToIntersection();
 			
+			switch (l)
+			{
+				case Red:
+					if ((m.distToIntersection() >= 0 && m.distToIntersection() < 5)) 
+						continue;
+					break;
+				case Yellow:
+					if (m.distToIntersection() > 0 && m.distToIntersection() < 5)
+						//if (m.speed > 0.002) 
+							m.setSpeed(0.005); 
+					break;
+				case Green:
+				default:
+					m.setSpeed(SimConfig.speed);
+					break;
+			}
 			
-			switch (l) {
+			
+			/*
+			 * switch (l) {
 			case Red:
 				if (m.distToIntersection() > 150 && !trackClear(m.lane,m.direction,m.track.track_id)) {
 					continue;
@@ -187,8 +205,15 @@ public class SimulatorManager implements TrafficLightObserver {
 					break;
 				}					
 			}			
+			 */
 				
-			m.tick();
+			// should the vehicle move?
+			if (trackClear(m))
+				m.tick();
+			else
+			{
+				System.out.printf("Track %d not ticking\n", m.track.track_id);
+			}
 			
 		}
 	}
@@ -196,33 +221,19 @@ public class SimulatorManager implements TrafficLightObserver {
 	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
 
-//		if (simulated)
-//		{
-//
-//			SimulatedTrack simTrack = (SimulatedTrack)track;
-//			
-//			System.out.printf("Added track %d, sim %d, lane %d, dir %d\n", 
-//					track.track_id,
-//					simTrack.track_id,
-//					lane,
-//					dir.ordinal());
-//			
-//			if (motors.containsKey(track.track_id))
-//			{
-//				System.out.println("Key already exists: " + track.track_id);
-//			}
-//			
-//			motors.put(simTrack.track_id, new SimulatedMotor(lane, dir, simTrack));
-//
-//			return;
-//			
-//		}
-		
-		while (trackClear(lane,dir,track.track_id)) {
+			System.out.printf("Added track %d, lane %d, dir %d\n", 
+					track.track_id,
+					lane,
+					dir.ordinal());
+			
 			if (simulated)
 			{
+				SimulatedMotor simMotor = new SimulatedMotor(lane, dir, (SimulatedTrack)track);
 				
-				motors.put(track.track_id, new SimulatedMotor(lane, dir, (SimulatedTrack)track));
+				if (trackClear(simMotor))
+				{
+					motors.put(track.track_id, simMotor);
+				}
 				
 				return;
 				
@@ -246,26 +257,18 @@ public class SimulatorManager implements TrafficLightObserver {
 				default:
 					break;
 			}
-		}
+		
 	}
 	
-	public boolean trackClear(int lane, Direction dir, int id) {
-		boolean trackClear = true;
+	public boolean trackClear(MotorVehicle mv) {
 		
 		for (MotorVehicle m : motors.values())
 		{
-			if (m.lane == lane && m.direction == dir && m.track.track_id != id){
-				if (m.distToIntersection() > 150) {
-					trackClear = false;
-					continue;
-				} else {
-					trackClear = true;
-					continue;
-				}
-			} else {
-					trackClear = true;
-					continue;
-			}
+			if (m.lane == mv.lane && m.direction == mv.direction && 
+					m.track.track_id != mv.track.track_id && mv.track.track_id > m.track.track_id){
+				if (mv.collisionDetected(m))
+					return false;
+			} 
 		}
 		
 		return true;

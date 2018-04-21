@@ -7,7 +7,7 @@ public class SimConfig {
 	public static boolean runSimulator = true;
 	public static boolean startSimulatedMotors = false;
 	
-	public static float speed = .1f;
+	public static float speed = .2f;
 	
 	public static double simDisplayWidth = 600;
 	public static double simDisplayHeight = 600;
@@ -35,8 +35,8 @@ public class SimConfig {
 	public final static Point westBoundLane1 = new Point(600, 245);
 	public final static Point westBoundLane2 = new Point(600, 210);
 	
-	public final static Point southBoundLane1 = new Point(250, 0);
-	public final static Point southBoundLane2 = new Point(210, 0);
+	public final static Point southBoundLane1 = new Point(210, 0);
+	public final static Point southBoundLane2 = new Point(250, 0);
 	
 	public final static Point northBoundLane1 = new Point(320, 600);
 	public final static Point northBoundLane2 = new Point(355, 600);
