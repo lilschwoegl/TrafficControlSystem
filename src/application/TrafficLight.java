@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import application.Direction;
+import application.Config.SignalConfigurationType;
 import application.Color;
 
 import observer.SimulatorObserver;
@@ -23,8 +24,6 @@ import observer.TrafficUpdateObservable;
 import simulator.MotorVehicle;
 
 public class TrafficLight implements TrafficLightObservable {
-	//public enum SignalColor { Green, Yellow, Red }
-	
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	
@@ -80,7 +79,7 @@ public class TrafficLight implements TrafficLightObservable {
 		}
 	}
 	/* end of observable methods */
-	
+		
 	// change the light to green only if it's red
 	public void TurnGreen() {
 		if (this.color == Color.Red) {
