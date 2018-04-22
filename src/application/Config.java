@@ -4,12 +4,11 @@ import java.util.ArrayList;
 
 public class Config {
 	// TrafficController settings
-	public enum SignalConfigurationType { Default, FixedTimers, OnDemand }	// Default = fail safe, all signals blink red in unison
 	public static boolean useSqlDatabase = true;						// true: use SQLite database; false: do not use database
 	public static double pixelsCameraRange = 360;						// max range vehicles will be tracked for its facing cameras
 	public static boolean doTrafficControllerLogging = false;			// if true, console text logging is enabled
 	public static boolean doTrafficControllerTrackEventLogging = false;	// if true, observer events are logged to console
-	public static boolean doMetricsLogging = false;						// set to true to record runtime metrics to persistent storage
+	public static boolean doMetricsLogging = true;						// set to true to record runtime metrics to persistent storage
 	public static int secondsMaxGreenLightDuration = 30;				// max duration a light may stay green if any are waiting on a green
 	public static long periodForFixedTimerConfiguration = 10;			// green light duration, normally this would be 30s - 120s in real life
 	public static long maxSecondsVehicleAgeToTrack = 20;					// if vehicles collection contains any objects that haven't been updated in this amount of time, they're dropped

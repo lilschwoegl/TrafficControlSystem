@@ -5,6 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import application.TrafficController;
 
 public class ServerThread extends Thread{
 
@@ -37,7 +41,13 @@ public class ServerThread extends Thread{
 			{
 				if (line.equals("[data]"))
 				{
-					out.println("test!");
+					try {
+						ResultSet result = TrafficController.sql.executeQuery("select * from Metrics");
+						System.out.println(result.getString(1));
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				else if(line.equals("[bye]"))
 				{

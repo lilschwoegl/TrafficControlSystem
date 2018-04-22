@@ -3,16 +3,22 @@ package application;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 //import java.util.*;
 //import java.lang.Runnable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import observer.TrafficLightObservable;
 import observer.TrafficLightObserver;
 import simulator.Constants.Direction;
 
 public class TrafficLight implements TrafficLightObservable {
+	//public enum SignalColor { Green, Yellow, Red }
+	
+	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	
 	private static int lightCounter = 0; // increment for each TrafficLight object created, 1st gets id of 1
@@ -67,7 +73,7 @@ public class TrafficLight implements TrafficLightObservable {
 		}
 	}
 	/* end of observable methods */
-		
+	
 	// change the light to green only if it's red
 	public void TurnGreen() {
 		if (this.color == BulbColor.Red) {

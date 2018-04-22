@@ -33,6 +33,17 @@ public class DetectedObject {
 	public float xRightTop;
 	public float yRightTop;
 	
+	public DetectedObject()
+	{
+		
+	}
+	
+	public DetectedObject(int classId)
+	{
+		this();
+		this.classId = classId;
+	}
+	
 	/**
 	 * Loads the class names from the file at the given path
 	 * @param path Path to the class name file
