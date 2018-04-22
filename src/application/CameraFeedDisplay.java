@@ -27,6 +27,7 @@ public class CameraFeedDisplay extends Thread {
 	private Mat lastFrame = new Mat();
 	private boolean staleFrame = true;
 	private Direction facingDirection;
+	private RoadLinesCollection roadLines;
 	
 	@FXML
 	private Button feedSelBtn;
@@ -42,6 +43,7 @@ public class CameraFeedDisplay extends Thread {
 		this.feedSelBtn = feedSelBtn;
 		videoFeed = new VideoInput();
 		this.facingDirection = facingDirection;
+		roadLines = new RoadLinesCollection();
 	}
 	
 	public void showImage(Mat frame)
@@ -119,12 +121,17 @@ public class CameraFeedDisplay extends Thread {
 
 			try {
 				// grab a frame every 50 ms
-				sleep(25);
+				sleep(50);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public RoadLinesCollection getRoadLines()
+	{
+		return roadLines;
 	}
 	
 }

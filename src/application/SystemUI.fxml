@@ -14,7 +14,7 @@
         <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="0" GridPane.rowIndex="0">
           <children>
             <Label text="Facing: NORTH" />
-            <ImageView id="imageOutputImgvw" fx:id="imgOut1" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="imgOut1" fitHeight="275.20263671875" fitWidth="446.2214139014666" onMousePressed="#imgViewMouseDown" onMouseReleased="#imgViewMouseUp" pickOnBounds="true" preserveRatio="true" />
             <Label id="trackLbl" fx:id="trackLbl1" alignment="CENTER" text="Label" textAlignment="LEFT" />
             <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
               <children>
@@ -27,7 +27,7 @@
         <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="1" GridPane.rowIndex="0">
           <children>
             <Label text="Facing: SOUTH" />
-            <ImageView id="imageOutputImgvw" fx:id="imgOut2" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="imgOut2" fitHeight="275.20263671875" fitWidth="446.2214139014666" onMousePressed="#imgViewMouseDown" onMouseReleased="#imgViewMouseUp" pickOnBounds="true" preserveRatio="true" />
             <Label id="trackLbl" fx:id="trackLbl2" alignment="CENTER" text="Label" textAlignment="LEFT" />
             <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
               <children>
@@ -40,7 +40,7 @@
         <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
           <children>
             <Label text="Facing: EAST" />
-            <ImageView id="imageOutputImgvw" fx:id="imgOut3" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="imgOut3" fitHeight="275.20263671875" fitWidth="446.2214139014666" onMousePressed="#imgViewMouseDown" onMouseReleased="#imgViewMouseUp" pickOnBounds="true" preserveRatio="true" />
             <Label id="trackLbl" fx:id="trackLbl3" alignment="CENTER" text="Label" textAlignment="LEFT" />
             <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
               <children>
@@ -53,7 +53,7 @@
         <VBox alignment="CENTER" minHeight="269.0" minWidth="490.0" prefHeight="269.0" prefWidth="490.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
           <children>
             <Label text="Facing: WEST" />
-            <ImageView id="imageOutputImgvw" fx:id="imgOut4" fitHeight="275.20263671875" fitWidth="446.2214139014666" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="imgOut4" fitHeight="275.20263671875" fitWidth="446.2214139014666" onMousePressed="#imgViewMouseDown" onMouseReleased="#imgViewMouseUp" pickOnBounds="true" preserveRatio="true" />
             <Label id="trackLbl" fx:id="trackLbl4" alignment="CENTER" text="Label" textAlignment="LEFT" />
             <VBox alignment="TOP_CENTER" prefHeight="94.0" prefWidth="493.0">
               <children>

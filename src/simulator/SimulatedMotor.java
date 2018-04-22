@@ -11,7 +11,7 @@ public class SimulatedMotor extends MotorVehicle{
 	public SimulatedMotor(int lane, Direction dir, SimulatedTrack track) {
 		super(lane, dir, track);
 		// TODO Auto-generated constructor stub
-		System.out.printf("Calling init lane Track %d\n", track.track_id);
+		//System.out.printf("Calling init lane Track %d\n", track.track_id);
 		
 		setSpeed(speed);
 		initLane(lane);
@@ -24,14 +24,14 @@ public class SimulatedMotor extends MotorVehicle{
 		x = ((SimulatedTrack)track).getBestPositionCenter().x;
 		y = ((SimulatedTrack)track).getBestPositionCenter().y;
 		
-		System.out.printf("Track %d new Y = %f\n", track.track_id, y);
+		//System.out.printf("Track %d new Y = %f\n", track.track_id, y);
 	}
 
 	@Override
 	public void initLane(int lane) {
 		// TODO Auto-generated method stub
 		Point p = getLaneStartPoint();
-		System.out.printf("22222 Setting Track %d Y: %f\n", track.track_id, p.y);
+		//System.out.printf("22222 Setting Track %d Y: %f\n", track.track_id, p.y);
 		((SimulatedTrack)track).setPosition(p);
 	}
 

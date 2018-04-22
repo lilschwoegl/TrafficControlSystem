@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Config {
 	// TrafficController settings
+	public enum SignalConfigurationType { Default, FixedTimers, OnDemand }	// Default = fail safe, all signals blink red in unison
 	public static boolean useSqlDatabase = true;						// true: use SQLite database; false: do not use database
 	public static double pixelsCameraRange = 360;						// max range vehicles will be tracked for its facing cameras
 	public static boolean doTrafficControllerLogging = false;			// if true, console text logging is enabled

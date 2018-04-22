@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import application.Config.SignalConfigurationType;
 import simulator.Constants.Direction;
 import javafx.util.Pair;
 import observer.TrafficObserver;
@@ -43,9 +44,6 @@ public class TrafficController implements TrafficObserver {
 		}
 	}
 	
-	// types of controller configurations, default = FixedTimers
-	public enum SignalLogicConfiguration { FixedTimers, OnDemand }
-	
 	// thread pool
 	private ScheduledExecutorService  taskExecutor = Executors.newScheduledThreadPool(10);
 	
@@ -53,7 +51,7 @@ public class TrafficController implements TrafficObserver {
 	private SQLite sql = null;
 	
 	// intersection dimensions
-	private SignalLogicConfiguration signalLogicConfiguration = SignalLogicConfiguration.FixedTimers;
+	private SignalConfigurationType signalConfiguration = SignalConfigurationType.FixedTimers;			
 	private double intersectionWidthNS = 0;
 	private double intersectionWidthEW = 0;
 	private int numLanesNS = 0;
@@ -62,6 +60,8 @@ public class TrafficController implements TrafficObserver {
 	private double laneWidthEW = 0;
 	
 	private boolean isEmergencyVehicleControlled = false; // set to true while emergency vehicle takes control of intersection, set back to false when done
+	public boolean IsEmergencyVehicleControlled() { return isEmergencyVehicleControlled; } // a public getter to get the emergency-control state 
+	private Instant timeSignalsLastChanged = Instant.MIN;
 	
 	// settings for fixed-timer signal logic
 	private static TimeUnit timeUnitForFixedTimerConfiguration = TimeUnit.SECONDS;
@@ -104,18 +104,21 @@ public class TrafficController implements TrafficObserver {
 				+ "\n  Camera Range  %f (pixels)",
 				this.numLanesNS, this.laneWidthNS, this.numLanesEW, this.laneWidthEW, Config.pixelsCameraRange);
 		
-		log("Logic configuration: %s", signalLogicConfiguration.toString());
-		if (signalLogicConfiguration == SignalLogicConfiguration.FixedTimers) {
-			log("Starting SignalLogicConfiguration scheduled task");
-			taskExecutor.scheduleAtFixedRate(() -> {
-				if (!this.isEmergencyVehicleControlled) {
-					log("Calling ToggleTrafficLightsForFixedTimerConfig...");
+		log("Logic configuration: %s", signalConfiguration.toString());
+		log("Starting SignalLogicConfiguration scheduled task");
+		taskExecutor.scheduleAtFixedRate(() -> {
+			if (this.isEmergencyVehicleControlled) {
+				log("Signal Emergency Override in effect (EmergencyVehicleControlled = true)");
+			} else {
+				if (signalConfiguration == SignalConfigurationType.FixedTimers) {
+					// check if signals need changing
 					ToggleTrafficLightsForFixedTimerConfig();
-				} else {
-					log("Skip calling ToggleTrafficLightsForFixedTimerConfig due to EmergencyVehicleControlled = true");
+				} else if (signalConfiguration == SignalConfigurationType.OnDemand) {
+					// check if signals need changing
+					CheckForOnDemandSignalChange();
 				}
-			}, 0, Config.periodForFixedTimerConfiguration, timeUnitForFixedTimerConfiguration);
-		}
+			}
+		}, 0, Config.periodForFixedTimerConfiguration, timeUnitForFixedTimerConfiguration);
 		
 		// add requested traffic lights
 		if (numLanesNS > 0) {
@@ -272,6 +275,58 @@ public class TrafficController implements TrafficObserver {
 			}
 		}
 	}
+
+	// get a text representation of the status of all traffic lights
+	public String GetStatusForAllLights() {
+		StringBuilder sb = new StringBuilder();
+		
+		//sb.append("TrafficLights Status: ");
+		int numLights = 0;
+		for (TrafficLight light : trafficLights) {
+			if (++numLights > 1)
+				sb.append(String.format("\t"));
+			sb.append(String.format("%04d=%s", light.getID(), light.GetColor()));
+		}
+		
+		return sb.toString();
+	}
+	
+	// change the traffic light controller method to a new type
+	public void ChangeSignalConfiguration(SignalConfigurationType newType) {
+		if (signalConfiguration != newType) {
+			Instant now = Instant.now();
+			
+			// change any green lights to red
+			//log("ToggleTrafficLightsForFixedTimerConfig: triggering all green lights to change to red");
+			for (TrafficLight light : trafficLights) {
+				if (light.GetColor() == BulbColor.Green) {
+					taskExecutor.submit(() -> {
+						light.TurnRed();
+					});
+				}
+			}
+			
+			timeSignalsLastChanged = now;
+			signalConfiguration = newType;
+			
+			if (signalConfiguration == SignalConfigurationType.FixedTimers) {
+				// change signals in sets, simple version is 2 sets, toggling, seeding with North-South lights
+				//log("ToggleTrafficLightsForFixedTimerConfig: triggering lights for new direction to change to green, isNS=%s", isNS);
+				ArrayList<TrafficLight> lights = isNS ? GetTrafficLights(Direction.NORTH) : GetTrafficLights(Direction.EAST);
+				lights.addAll(isNS ? GetTrafficLights(Direction.SOUTH) : GetTrafficLights(Direction.WEST));
+				for (TrafficLight light : lights) {
+					if (light.GetColor() != BulbColor.Green) {
+						taskExecutor.submit(() -> {
+							light.TurnGreen();
+						});
+					}
+				}
+			}
+			else if (signalConfiguration == SignalConfigurationType.OnDemand) {
+				CheckAllLightSForWaitingTraffic();
+			}
+		}
+	}
 		
 	
 	/****************************** PRIVATE METHODS *******************************/
@@ -361,20 +416,6 @@ public class TrafficController implements TrafficObserver {
 		return false;
 	}
 	
-	public String GetStatusForAllLights() {
-		StringBuilder sb = new StringBuilder();
-		
-		//sb.append("TrafficLights Status: ");
-		int numLights = 0;
-		for (TrafficLight light : trafficLights) {
-			if (++numLights > 1)
-				sb.append(String.format("\t"));
-			sb.append(String.format("%04d=%s", light.getID(), light.GetColor()));
-		}
-		
-		return sb.toString();
-	}
-		
 	// usage: emergency vehicles needing all lights to go red except theirs (optionally)
 	private void SetEmergencyVehicleControlled(Direction exceptForTravelDirection) {
 		this.isEmergencyVehicleControlled = true;
@@ -411,10 +452,21 @@ public class TrafficController implements TrafficObserver {
 		}
 		this.isEmergencyVehicleControlled = false;
 	}
+
+	// check to see if on-demand signal change is needed (i.e. cars waiting) 
+	private void CheckForOnDemandSignalChange() {
+		Instant now = Instant.now();
+		
+		
+		// record when signals last changed state
+		//timeSignalsLastChanged = now;
+	}
 	
-	// toggle traffic lights	
+	// check if need to toggle traffic lights (IFF period since last change is greater than configured for
 	private void ToggleTrafficLightsForFixedTimerConfig() {
-		if (signalLogicConfiguration != SignalLogicConfiguration.FixedTimers)
+		Instant now = Instant.now();
+		long secondsSinceLastChange = ChronoUnit.SECONDS.between(timeSignalsLastChanged, now);
+		if (secondsSinceLastChange < Config.periodForFixedTimerConfiguration)
 			return;
 		
 		try {
@@ -461,6 +513,9 @@ public class TrafficController implements TrafficObserver {
 					});
 				}
 			}
+			
+			// record when signals last changed state
+			timeSignalsLastChanged = now;
 		}
 		catch (Exception ex) { ex.printStackTrace(); }
 		finally {

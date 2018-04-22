@@ -2,8 +2,12 @@ package simulator;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Rect2d;
 
 import javafx.scene.text.Font;
 import observer.TrafficUpdateObservable;
@@ -19,15 +23,40 @@ public abstract class MotorVehicle {
 	public enum Route {STRAIGHT, LEFT, RIGHT};
 	protected Direction direction;
 	Track track;
+	BufferedImage vehicleImage;
+	int imageWidth, imageHeight;
 
 	//constructor
 	public MotorVehicle(int lane, Direction dir, Track track){
 		this.lane = lane;
 		this.direction = dir;
 		this.track = track;
+		
+		loadImage();
 	}
 	
 	//methods
+	
+	private void loadImage()
+	{
+		if (direction == Direction.NORTH) {
+			vehicleImage = loadImage.upCarImage;
+			imageWidth = 30;
+			imageHeight = 45;
+		} else if (direction == Direction.SOUTH) {
+			vehicleImage = loadImage.downCarImage;
+			imageWidth = 30;
+			imageHeight = 45;
+		} else if (direction == Direction.EAST) {
+			vehicleImage = loadImage.rightCarImage;
+			imageWidth = 45;
+			imageHeight = 30;
+		} else if (direction == Direction.WEST) {
+			vehicleImage = loadImage.leftCarImage;
+			imageWidth = 45;
+			imageHeight = 30;
+		}
+	}
 	
 	public void updateTrack(Track track)
 	{
@@ -113,15 +142,8 @@ public abstract class MotorVehicle {
 	
 	public void render(Graphics g){
 		//if else statement to render the appropriate car per direction driving
-		if (direction == Direction.NORTH) {
-			g.drawImage(loadImage.upCarImage, (int)x, (int)y, 30, 45, null);
-		} else if (direction == Direction.SOUTH) {
-			g.drawImage(loadImage.downCarImage, (int)x, (int)y, 30, 45, null);
-		} else if (direction == Direction.EAST) {
-			g.drawImage(loadImage.rightCarImage, (int)x, (int)y, 45, 30, null);
-		} else if (direction == Direction.WEST) {
-			g.drawImage(loadImage.leftCarImage, (int)x, (int)y, 45, 30, null);
-		}
+		
+		g.drawImage(vehicleImage, (int)x, (int)y, imageWidth, imageHeight, null);
 
 		g.setColor(Color.WHITE);
 		//g.drawString(String.format("%.0f", distToIntersection()), (int)x+5, (int)y+30);
@@ -138,5 +160,18 @@ public abstract class MotorVehicle {
 		System.out.printf("11111 Setting Track %d Y: %f\n", track.track_id, p.y);
 		
 		return p;
+	}
+	
+	public Rectangle getBoundingBox()
+	{
+		return new Rectangle((int)x, (int)y, imageWidth, imageHeight);
+	}
+	
+	public boolean collisionDetected(MotorVehicle mv)
+	{
+		Rectangle myBB = getBoundingBox();
+		Rectangle theirBB = mv.getBoundingBox();
+
+		return myBB.intersects(theirBB);
 	}
 }

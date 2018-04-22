@@ -179,7 +179,7 @@ public class Tracker extends JTracker {
 		}
 	}
 	
-	public void checkForStaleTracks()
+	public synchronized void checkForStaleTracks()
 	{
 		// -----------------------------------
 		// If track didn't get detects long time, remove it.
@@ -190,10 +190,17 @@ public class Tracker extends JTracker {
 				
 				TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i), oncomingHeading);
 				
-				tracks.remove(i);
-				assignment.remove(i);
-				track_removed++;
-				i--;
+				try
+				{
+					tracks.remove(i);
+					assignment.remove(i);
+					track_removed++;
+					i--;
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 				
 			}
 		}
