@@ -29,14 +29,14 @@ public class SimConfig {
 	public static double roadStripRatio = roadStripFudged / frameHeight;
 	
 	// lane information on intersection image
-	public final static Point eastBoundLane1 = new Point(0, 320);
-	public final static Point eastBoundLane2 = new Point(0, 355);
+	public final static Point eastBoundLane1 = new Point(-50, 320);
+	public final static Point eastBoundLane2 = new Point(-50, 355);
 	
 	public final static Point westBoundLane1 = new Point(600, 245);
 	public final static Point westBoundLane2 = new Point(600, 210);
 	
-	public final static Point southBoundLane1 = new Point(210, 0);
-	public final static Point southBoundLane2 = new Point(250, 0);
+	public final static Point southBoundLane1 = new Point(210, -50);
+	public final static Point southBoundLane2 = new Point(250, -50);
 	
 	public final static Point northBoundLane1 = new Point(320, 600);
 	public final static Point northBoundLane2 = new Point(355, 600);
