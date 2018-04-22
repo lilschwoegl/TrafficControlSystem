@@ -80,7 +80,7 @@ public final class Utils
 	}
 	
 	
-	private static long getCurrentTimeMs()
+	public static long getCurrentTimeMs()
 	{
 		return System.currentTimeMillis();
 	}

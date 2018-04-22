@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.opencv.core.Point;
 
@@ -31,7 +32,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	
 	static int simulatedCarsCounter = 5000;
 	
-	public static HashMap<Integer,MotorVehicle> motors;
+	public static ConcurrentHashMap <Integer,MotorVehicle> motors;
 	public ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	public HashMap<Integer,simulator.TrafficLightDisplay> lights;
 	
@@ -39,7 +40,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	
 	//constructor
 	public SimulatorManager(){
-		motors = new HashMap<Integer,MotorVehicle>();
+		motors = new ConcurrentHashMap <Integer,MotorVehicle>();
 		lights = new HashMap<Integer, simulator.TrafficLightDisplay>();
 		
 		
