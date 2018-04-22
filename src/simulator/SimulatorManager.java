@@ -1,6 +1,7 @@
 package simulator;
 
 import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -25,20 +26,21 @@ public class SimulatorManager implements TrafficLightObserver {
 	private SimulatorObserver observer;
 	Graphics g;
 	private int bulbID = 900;
+	private static BufferedImage intersectionImage;
 	
 	
 	static int simulatedCarsCounter = 5000;
 	
 	public static HashMap<Integer,MotorVehicle> motors;
 	public ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
-	public HashMap<Integer,simulator.TrafficLight> lights;
+	public HashMap<Integer,simulator.TrafficLightDisplay> lights;
 	
 	public static TrafficController trafficController;
 	
 	//constructor
 	public SimulatorManager(){
 		motors = new HashMap<Integer,MotorVehicle>();
-		lights = new HashMap<Integer, simulator.TrafficLight>();
+		lights = new HashMap<Integer, simulator.TrafficLightDisplay>();
 		
 		
 		// delay = to 2secs
@@ -55,7 +57,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		for (TrafficLight light : trafficLights) {
 			light.addObserver(this);
 			//add simulator traffic lights to hashmap
-			lights.put(light.getID(), new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor()));
+			lights.put(light.getID(), new simulator.TrafficLightDisplay(light.getID(), light.getTravelDirection(), light.GetColor()));
 		}
 		
 		TrafficUpdateObservable.getInstance().addObserver(trafficController);
@@ -67,13 +69,15 @@ public class SimulatorManager implements TrafficLightObserver {
 			light.getID(), light.getTravelDirection().toString(), light.GetColor().toString(), light.getLastChanged().toString()
 			));
 		//updates lights in hashmap if same ID
-		lights.put(light.getID(), new simulator.TrafficLight(light.getID(), light.getTravelDirection(), light.GetColor()));		
+		lights.put(light.getID(), new simulator.TrafficLightDisplay(light.getID(), light.getTravelDirection(), light.GetColor()));		
 	}
 	
 	//methods
 	//method init to initialize 
 	public void init(){
-		loadImage.init();	
+		ImageLoader.init();	
+	    TrafficLightDisplay.init();
+		intersectionImage = ImageLoader.getIntersectionImage();
 		// TODO: Clean this up...
 		//------------------------------------------------------------
 		//START SIMULATED CARS
@@ -288,7 +292,7 @@ public class SimulatorManager implements TrafficLightObserver {
 	public void render(Graphics g){
 		
 		//render background image
-		g.drawImage(loadImage.fullImage,0,0,600,600,null);
+		g.drawImage(intersectionImage,0,0,600,600,null);
 		
 		//renders initial traffic light bulbs
 
@@ -308,7 +312,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		synchronized(this){
 			//simulator.TrafficLight.init(g);
 
-			for (simulator.TrafficLight tl : lights.values())
+			for (simulator.TrafficLightDisplay tl : lights.values())
 			{
 				tl.render(g);
 			}

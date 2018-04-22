@@ -14,6 +14,7 @@ import observer.TrafficUpdateObservable;
 import simulator.Constants.Direction;
 import tracking.SimulatedTrack;
 import tracking.Track;
+import simulator.ImageLoader.Orientation;
 
 public abstract class MotorVehicle {
 	protected double x = -100;
@@ -40,20 +41,32 @@ public abstract class MotorVehicle {
 	
 	private void loadImage()
 	{
+		String type = "";
+		
+		switch (track.lastDetect.classId)
+		{
+			case 3:
+				type = "emergencyVehicle";
+				break;
+			default:
+				type = "normalVehicle";
+				break;
+		}
+		
 		if (direction == Direction.NORTH) {
-			vehicleImage = loadImage.upCarImage;
+			vehicleImage = ImageLoader.getVehicleImage(type, Orientation.UP);
 			imageWidth = 30;
 			imageHeight = 45;
 		} else if (direction == Direction.SOUTH) {
-			vehicleImage = loadImage.downCarImage;
+			vehicleImage = ImageLoader.getVehicleImage(type, Orientation.DOWN);
 			imageWidth = 30;
 			imageHeight = 45;
 		} else if (direction == Direction.EAST) {
-			vehicleImage = loadImage.rightCarImage;
+			vehicleImage = ImageLoader.getVehicleImage(type, Orientation.RIGHT);
 			imageWidth = 45;
 			imageHeight = 30;
 		} else if (direction == Direction.WEST) {
-			vehicleImage = loadImage.leftCarImage;
+			vehicleImage = ImageLoader.getVehicleImage(type, Orientation.LEFT);
 			imageWidth = 45;
 			imageHeight = 30;
 		}
