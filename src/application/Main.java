@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 
 import org.opencv.core.Core;
 
+import clientserver.ServerManager;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
@@ -64,6 +65,16 @@ public class Main extends Application {
 				// start the simulator
 				simulator.start();
 			}
+			
+			// start the server for the database
+			Thread serverThread = new Thread()
+					{
+						public void run()
+						{
+							ServerManager.getInstance().run();
+						}
+					};
+			serverThread.start();
 			
 			
 			// set the proper behavior on closing the application

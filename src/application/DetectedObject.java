@@ -11,7 +11,7 @@ import org.opencv.core.Rect;
 
 public class DetectedObject {
 	
-	static List<String> classes = new ArrayList<String>();
+	static List<String> classes;
 	static List<String> allowedClasses = new ArrayList<String>() {{
 		//add("car");
 		//add("person");
@@ -32,6 +32,17 @@ public class DetectedObject {
 	public float yLeftBot;
 	public float xRightTop;
 	public float yRightTop;
+	
+	public DetectedObject()
+	{
+		classes = new ArrayList<String>();
+	}
+	
+	public DetectedObject(int classId)
+	{
+		this();
+		this.classId = classId;
+	}
 	
 	/**
 	 * Loads the class names from the file at the given path

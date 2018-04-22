@@ -50,7 +50,7 @@ public class TrafficController implements TrafficObserver {
 	private ScheduledExecutorService  taskExecutor = Executors.newScheduledThreadPool(10);
 	
 	// SQLite database connection for persistent metric storage
-	private SQLite sql = null;
+	public static SQLite sql = null;
 	
 	// intersection dimensions
 	private SignalLogicConfiguration signalLogicConfiguration = SignalLogicConfiguration.FixedTimers;

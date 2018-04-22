@@ -210,21 +210,16 @@ public class SimulatorManager implements TrafficLightObserver {
 			// should the vehicle move?
 			if (trackClear(m))
 				m.tick();
-			else
-			{
-				System.out.printf("Track %d not ticking\n", m.track.track_id);
-			}
-			
 		}
 	}
 	
 	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
 
-			System.out.printf("Added track %d, lane %d, dir %d\n", 
-					track.track_id,
-					lane,
-					dir.ordinal());
+//			System.out.printf("Added track %d, lane %d, dir %d\n", 
+//					track.track_id,
+//					lane,
+//					dir.ordinal());
 			
 			if (simulated)
 			{
@@ -236,8 +231,6 @@ public class SimulatorManager implements TrafficLightObserver {
 				}
 				
 				return;
-				
-				
 			}
 			
 			switch (dir)
