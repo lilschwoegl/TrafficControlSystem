@@ -32,6 +32,7 @@ public abstract class MotorVehicle {
 		this.direction = dir;
 		this.track = track;
 		
+		setSpeed(speed);
 		loadImage();
 	}
 	

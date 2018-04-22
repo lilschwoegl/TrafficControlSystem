@@ -27,9 +27,9 @@ public class SimulatorManager implements TrafficLightObserver {
 	private int bulbID = 900;
 	
 	
-	int simulatedCarsCounter = 5000;
+	static int simulatedCarsCounter = 5000;
 	
-	public HashMap<Integer,MotorVehicle> motors;
+	public static HashMap<Integer,MotorVehicle> motors;
 	public ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	public HashMap<Integer,simulator.TrafficLight> lights;
 	
@@ -88,7 +88,7 @@ public class SimulatorManager implements TrafficLightObserver {
 							new Point(SimConfig.simDisplayWidth,0), 
 							simulatedCarsCounter++, 
 							Direction.WEST,
-							.01),
+							SimConfig.speed),
 					true);
 			
 			addCar(
@@ -98,7 +98,7 @@ public class SimulatorManager implements TrafficLightObserver {
 							new Point(SimConfig.simDisplayWidth,0), 
 							simulatedCarsCounter++, 
 							Direction.WEST,
-							.05),
+							SimConfig.speed),
 					true);
 			
 			addCar(
@@ -108,7 +108,7 @@ public class SimulatorManager implements TrafficLightObserver {
 							new Point(0,0), 
 							simulatedCarsCounter++, 
 							Direction.EAST,
-							.05),
+							SimConfig.speed),
 					true);
 			
 			addCar(
@@ -118,7 +118,7 @@ public class SimulatorManager implements TrafficLightObserver {
 							new Point(0,SimConfig.simDisplayHeight), 
 							simulatedCarsCounter++, 
 							Direction.NORTH,
-							.05),
+							SimConfig.speed),
 					true);
 			
 			addCar(
@@ -128,7 +128,7 @@ public class SimulatorManager implements TrafficLightObserver {
 							new Point(0,SimConfig.simDisplayHeight), 
 							simulatedCarsCounter++, 
 							Direction.NORTH,
-							.05),
+							SimConfig.speed),
 					true);
 			
 			addCar(
@@ -138,7 +138,7 @@ public class SimulatorManager implements TrafficLightObserver {
 							new Point(0,0), 
 							simulatedCarsCounter++, 
 							Direction.SOUTH,
-							.05),
+							SimConfig.speed),
 					true);
 		}
 		//END SIMULATED CARS
@@ -213,7 +213,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		}
 	}
 	
-	public synchronized void addCar(int lane, Direction dir, Track track, boolean simulated)
+	public synchronized static void addCar(int lane, Direction dir, Track track, boolean simulated)
 	{
 
 //			System.out.printf("Added track %d, lane %d, dir %d\n", 
@@ -253,7 +253,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		
 	}
 	
-	public boolean trackClear(MotorVehicle mv) {
+	public static boolean trackClear(MotorVehicle mv) {
 		
 		for (MotorVehicle m : motors.values())
 		{
