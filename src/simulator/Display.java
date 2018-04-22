@@ -110,7 +110,8 @@ public class Display implements ActionListener{
 							new Point(0,SimConfig.simDisplayHeight), 
 							SimulatorManager.simulatedCarsCounter++, 
 							Direction.NORTH,
-							SimConfig.speed),
+							SimConfig.speed,
+							3),
 					true);
 		} else if (e.getSource() == addS1Car){
 			SimulatorManager.addCar(
@@ -130,7 +131,8 @@ public class Display implements ActionListener{
 							new Point(0,0), 
 							SimulatorManager.simulatedCarsCounter++, 
 							Direction.SOUTH,
-							SimConfig.speed),
+							SimConfig.speed,
+							3),
 					true);
 		} else if (e.getSource() == addE1Car) {
 			SimulatorManager.addCar(
@@ -150,7 +152,8 @@ public class Display implements ActionListener{
 							new Point(0,0), 
 							SimulatorManager.simulatedCarsCounter++, 
 							Direction.EAST,
-							SimConfig.speed),
+							SimConfig.speed,
+							3),
 					true);
 		} else if (e.getSource() == addW1Car) {
 			SimulatorManager.addCar(
@@ -170,7 +173,8 @@ public class Display implements ActionListener{
 							new Point(SimConfig.simDisplayWidth,0), 
 							SimulatorManager.simulatedCarsCounter++, 
 							Direction.WEST,
-							SimConfig.speed),
+							SimConfig.speed,
+							3),
 					true);
 		}
 		

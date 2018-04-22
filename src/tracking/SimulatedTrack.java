@@ -29,7 +29,12 @@ public class SimulatedTrack extends Track{
 	
 	public SimulatedTrack(Point pt, int id, Direction direction, double speed)
 	{
-		super(pt, 0, 0, 0, new DetectedObject(0));
+		this(pt, 0, 0, 0, new DetectedObject(0));		
+	}
+	
+	public SimulatedTrack(Point pt, int id, Direction direction, double speed, int classId)
+	{
+		super(pt, 0, 0, 0, new DetectedObject(classId));
 		
 		track_id = id;
 		travelDirection = direction;
