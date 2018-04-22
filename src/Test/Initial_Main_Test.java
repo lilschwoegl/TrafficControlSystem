@@ -16,6 +16,7 @@ import application.BulbColor;
 import application.Config;
 import application.SQLite;
 import application.TrafficController;
+import application.TrafficController.SignalLogicConfiguration;
 import application.TrafficLight;
 import simulator.Constants.Direction;
 
@@ -38,7 +39,7 @@ public class Initial_Main_Test {
 		//String nowShort = now.toString().substring(0, now.toString().length() - 5); //strip off milliseconds
 		int numResults = 0;
 		
-		TrafficController tc = new TrafficController(1, 60, 1, 60);
+		TrafficController tc = new TrafficController(SignalLogicConfiguration.FailSafe, 1, 60, 1, 60);
 		SQLite sql = new SQLite(Config.databaseName, Config.databaseSchema);		
 		try {
 			String stmt = "select * from Events where name like '%Creation' and timestamp >= '" + now + "'";
@@ -117,7 +118,7 @@ public class Initial_Main_Test {
 	
 	@Test
 	public void testControllerCreatesLights() {
-		TrafficController tc = new TrafficController(3, 60, 3, 60); // sample settings from simulator
+		TrafficController tc = new TrafficController(SignalLogicConfiguration.FailSafe, 3, 60, 3, 60); // sample settings from simulator
 		int numLights = tc.GetTrafficLights().size();
 		assertTrue("More than 1 TrafficLight is created, count=" + numLights, numLights > 0);
 	}

@@ -11,6 +11,7 @@ public class Config {
 	public static boolean doMetricsLogging = true;						// set to true to record runtime metrics to persistent storage
 	public static int secondsMaxGreenLightDuration = 30;				// max duration a light may stay green if any are waiting on a green
 	public static long periodForFixedTimerConfiguration = 10;			// green light duration, normally this would be 30s - 120s in real life
+	public static long periodForOnDemandConfiguration = 10;				// green light duration, probably something like 30s in real life
 	public static long maxSecondsVehicleAgeToTrack = 20;					// if vehicles collection contains any objects that haven't been updated in this amount of time, they're dropped
 	public static long maxSecondsToWaitForEmergencyVehicles = 15;		// let emergency vehicles take control of intersection a max of this many seconds (NOTE: typically, this will be a longer wait time)
 	

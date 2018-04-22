@@ -18,7 +18,7 @@ import simulator.Constants.Direction;
 public class TrafficLight implements TrafficLightObservable {
 	//public enum SignalColor { Green, Yellow, Red }
 	
-	private ExecutorService executor = Executors.newSingleThreadExecutor();
+	//private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private ReadWriteLock rwLock = new ReentrantReadWriteLock();
 	
 	private static int lightCounter = 0; // increment for each TrafficLight object created, 1st gets id of 1

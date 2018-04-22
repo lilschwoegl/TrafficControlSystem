@@ -10,6 +10,7 @@ import org.opencv.core.Point;
 import application.BulbColor;
 import application.TrafficController;
 import application.TrafficLight;
+import application.TrafficController.SignalLogicConfiguration;
 import observer.SimulatorObserver;
 import observer.TrackUpdateObservable;
 import observer.TrafficLightObserver;
@@ -49,7 +50,7 @@ public class SimulatorManager implements TrafficLightObserver {
 		observer = new SimulatorObserver(this);
 		TrackUpdateObservable.getInstance().addObserver(observer);
 		
-		trafficController = new TrafficController(3, 60, 3, 60); // 3 N-S lanes, 3 E-W lanes, 60 pixel lane width everywhere (based on calculations from simulator config file)
+		trafficController = new TrafficController(SimConfig.defaultTrafficControllerLogicConfiguration, 3, 60, 3, 60); // 3 N-S lanes, 3 E-W lanes, 60 pixel lane width everywhere (based on calculations from simulator config file)
 		trafficLights = trafficController.GetTrafficLights();
 		
 		System.out.println(String.format("SimulatorManager: %d Traffic Lights", trafficLights.size()));
