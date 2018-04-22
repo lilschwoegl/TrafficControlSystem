@@ -11,7 +11,7 @@ import org.opencv.core.Rect;
 
 public class DetectedObject {
 	
-	static List<String> classes;
+	static List<String> classes = new ArrayList<String>();
 	static List<String> allowedClasses = new ArrayList<String>() {{
 		//add("car");
 		//add("person");
@@ -35,7 +35,7 @@ public class DetectedObject {
 	
 	public DetectedObject()
 	{
-		classes = new ArrayList<String>();
+		
 	}
 	
 	public DetectedObject(int classId)
