@@ -40,14 +40,30 @@ public class Display {
 		addN1Car = new JButton("add N1 Car");
 		addN1Car.setBounds(100, 500, 100, 50);
 		addN2Car = new JButton("add N2 Car");
+		addN2Car.setBounds(100, 500, 100, 50);
 		addS1Car = new JButton("add S1 Car");
+		addS1Car.setBounds(100, 500, 100, 50);
 		addS2Car = new JButton("add S2 Car");
+		addS2Car.setBounds(100, 500, 100, 50);
 		addE1Car = new JButton("add E1 Car");
-		addE2Car = new JButton("add E2 Car");
+		addE1Car.setBounds(100, 500, 100, 50);
+		addE2Car = new JButton("add E2 Car");		
+		addE2Car.setBounds(100, 500, 100, 50);
 		addW1Car = new JButton("add W1 Car");
+		addW1Car.setBounds(100, 500, 100, 50);
 		addW2Car = new JButton("add W2 Car");
+		addW2Car.setBounds(100, 500, 100, 50);
+
 		
 		frame.add(addN1Car);
+		frame.add(addN2Car);
+		frame.add(addS1Car);
+		frame.add(addS2Car);
+		frame.add(addE1Car);
+		frame.add(addE2Car);
+		frame.add(addW1Car);
+		frame.add(addW2Car);
+		
 		canvas = new Canvas();
 		canvas.setPreferredSize(new Dimension(width,height));
 		//canvas.setBackground(Color.blue);
