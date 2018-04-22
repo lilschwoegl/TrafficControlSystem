@@ -5,7 +5,7 @@ import org.opencv.core.Point;
 public class SimConfig {
 
 	public static boolean runSimulator = true;
-	public static boolean startSimulatedMotors = false;
+	public static boolean startSimulatedMotors = true;
 	
 	public static float speed = .1f;
 	
