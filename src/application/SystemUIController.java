@@ -85,6 +85,11 @@ public class SystemUIController {
 	private Thread frameGrabber = new Thread()
 	{
 		int counter = 0;
+		long startTime = Utils.getCurrentTimeMs();;
+		long endTime = 0;
+		long totalTime = 0;
+		long sleepTime = 25;
+		
 		public void run()
 		{
 			while(true)
@@ -93,6 +98,7 @@ public class SystemUIController {
 				{
 					boolean staleFrame = cameraFeeds[counter].isFrameStale();
 					Mat frame = cameraFeeds[counter].getLastFrame();
+					cameraFeeds[counter].setSleepTime(totalTime);
 					
 					if (!frame.empty() && frame.width() > 0 && frame.height() > 0)
 					{
@@ -103,16 +109,35 @@ public class SystemUIController {
 					}
 					
 					cameraFeeds[counter].showImage(frame);
+					
 	
 					try {
-						sleep(25);
+						sleep(sleepTime);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 				
-				counter = (++counter % 4);
+				if (counter >= 3)
+				{
+					counter = 0;
+					endTime = Utils.getCurrentTimeMs();
+					totalTime = (endTime - startTime);
+					startTime = Utils.getCurrentTimeMs();
+					Utils.onFXThread(SystemUIController.trackLblProp1, "Total time: " + totalTime + " ms, Frame Time: " + sleepTime + " ms");
+					
+					try {
+						sleep(2);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else
+				{
+					counter++;
+				}
 			}
 		}
 	};
@@ -744,8 +769,8 @@ public class SystemUIController {
 		
 		if (event.isPrimaryButtonDown())
 		{
-			mouseDownPt.x = event.getX();
-			mouseDownPt.y = event.getY();
+			mouseDownPt.x = event.getX() + 10;
+			mouseDownPt.y = event.getY() + 10;
 			
 			primaryButtonDown = true;
 			
@@ -769,8 +794,8 @@ public class SystemUIController {
 		
 		if (primaryButtonDown)
 		{
-				mouseUpPt.x = event.getX();
-			mouseUpPt.y = event.getY();
+			mouseUpPt.x = event.getX() + 10;
+			mouseUpPt.y = event.getY() + 10;
 			
 			System.out.printf("Mouse down on %s at (%f, %f)\n",
 					id, mouseUpPt.x, mouseUpPt.y);

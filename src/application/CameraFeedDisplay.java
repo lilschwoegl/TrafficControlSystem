@@ -28,6 +28,7 @@ public class CameraFeedDisplay extends Thread {
 	private boolean staleFrame = true;
 	private Direction facingDirection;
 	private RoadLinesCollection roadLines;
+	private long sleepTime = 25;
 	
 	@FXML
 	private Button feedSelBtn;
@@ -86,6 +87,11 @@ public class CameraFeedDisplay extends Thread {
 		}
 	}
 	
+	public void setSleepTime(long ms)
+	{
+		this.sleepTime = ms;
+	}
+	
 	@Override
 	public void run()
 	{
@@ -121,7 +127,7 @@ public class CameraFeedDisplay extends Thread {
 
 			try {
 				// grab a frame every 50 ms
-				sleep(50);
+				sleep(sleepTime);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

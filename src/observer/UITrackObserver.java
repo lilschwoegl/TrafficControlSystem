@@ -37,15 +37,6 @@ public class UITrackObserver implements TrackObserver{
 		{
 			directions[t.direction.ordinal()]++;
 		}
-		
-		String str = String.format(
-				"%d tracks, %d oncoming, %d outgoing, %d uncertain\n",
-				tracks.size(),
-				directions[MOVEMENT_TYPE.ONCOMING.ordinal()],
-				directions[MOVEMENT_TYPE.OUTGOING.ordinal()],
-				directions[MOVEMENT_TYPE.UNCERTAIN.ordinal()]);
-		
-		Utils.onFXThread(SystemUIController.trackLblProp1, str);
 	}
 
 }

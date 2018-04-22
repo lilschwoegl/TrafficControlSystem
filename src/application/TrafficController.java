@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.lang.Double;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -80,7 +81,7 @@ public class TrafficController implements TrafficObserver {
 	private ArrayList<TrafficLight> trafficLights = new ArrayList<TrafficLight>();
 	
 	// collection tracking vehicles currently using the intersection
-	private HashMap<Integer,Vehicle> vehicles = new HashMap<Integer,Vehicle>();
+	private ConcurrentHashMap<Integer,Vehicle> vehicles = new ConcurrentHashMap<Integer,Vehicle>();
 	
 	private String statusOfAllLights = null; // defined globally because Java doesn't permit lambdas modifying non-class properties (it's an "effective final" thing, grrr)
 		

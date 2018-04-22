@@ -27,9 +27,10 @@ public class VideoInput extends VideoCapture{
 		"https://itsvideo.arlingtonva.us:8012/live/cam120.stream/playlist.m3u8",
 		"https://itsvideo.arlingtonva.us:8011/live/cam66.stream/playlist.m3u8",
 		"https://itsvideo.arlingtonva.us:8011/live/cam77.stream/playlist.m3u8",
-		"C:\\Temp\\intersection_recorded_1.avi",
-		"C:\\Temp\\intersection_recorded_2.avi",
-		"C:\\Temp\\intersection_recorded_3.avi"
+		"video/intersection_recorded_1.avi",
+		"video/intersection_recorded_2.avi",
+		"video/intersection_recorded_3.avi",
+		"video/intersection_recorded_4.avi"
 	};
 	
 	/**
@@ -44,7 +45,8 @@ public class VideoInput extends VideoCapture{
 		"COL PK AT HIGHLAND",
 		"Recorded 1",
 		"Recorded 2",
-		"Recorded 3"
+		"Recorded 3",
+		"Recorded 4"
 	};
 	
 	private static long counter = 0;
