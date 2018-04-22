@@ -40,7 +40,7 @@ public class TrafficLight implements TrafficLightObservable {
 		this.facingDirection = 
 			  this.forTravelDirection == Direction.NORTH	? Direction.SOUTH
 			: this.forTravelDirection == Direction.SOUTH	? Direction.NORTH
-			: this.forTravelDirection == Direction.EAST	? Direction.WEST
+			: this.forTravelDirection == Direction.EAST		? Direction.WEST
 			: Direction.EAST;
 		
 		//create simulator light
