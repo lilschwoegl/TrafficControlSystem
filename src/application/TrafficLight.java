@@ -107,7 +107,7 @@ public class TrafficLight implements TrafficLightObservable {
 				rwLock.writeLock().unlock();
 				notifyObservers();
 				try {
-					TimeUnit.SECONDS.sleep((long)Config.secondsYellowLightDuration);
+					TimeUnit.SECONDS.sleep((long)TrafficControllerConfig.secondsYellowLightDuration);
 				}
 				catch (Exception ex2) { ex2.printStackTrace(); }
 				// upgrade to writelock for light change
@@ -141,7 +141,7 @@ public class TrafficLight implements TrafficLightObservable {
 	}
 	
 	private void log(String format, Object ... args) {
-		if (Config.doTrafficLightLogging) {
+		if (TrafficControllerConfig.doTrafficLightLogging) {
 			System.out.println(String.format("%s %04d: %s %s", "TrafficLight", this.id, Instant.now().toString(), String.format(format, args)));
 		}
 	}

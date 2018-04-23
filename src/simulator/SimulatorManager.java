@@ -227,35 +227,17 @@ public class SimulatorManager implements TrafficLightObserver {
 //					lane,
 //					dir.ordinal());
 			
-			if (simulated)
+		if (simulated)
+		{
+			SimulatedMotor simMotor = new SimulatedMotor(lane, dir, (SimulatedTrack)track);
+			
+			if (trackClear(simMotor))
 			{
-				SimulatedMotor simMotor = new SimulatedMotor(lane, dir, (SimulatedTrack)track);
-				
-				if (trackClear(simMotor))
-				{
-					motors.put(track.track_id, simMotor);
-				}
-				
-				return;
+				motors.put(track.track_id, simMotor);
 			}
 			
-			switch (dir)
-			{
-				case NORTH:
-					motors.put(track.track_id, new NorthboundMotor(lane, track));
-					break;
-				case SOUTH:
-					motors.put(track.track_id, new SouthboundMotor(lane, track));
-					break;
-				case EAST:
-					motors.put(track.track_id, new EastboundMotor(lane, track));
-					break;
-				case WEST:
-					motors.put(track.track_id, new WestboundMotor(lane, track));
-					break;
-				default:
-					break;
-			}
+			return;
+		}
 		
 	}
 	

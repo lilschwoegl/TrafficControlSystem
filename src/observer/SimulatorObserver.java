@@ -41,7 +41,8 @@ public class SimulatorObserver implements TrackObserver{
 				
 				strack = new SimulatedTrack(  
 						new Point(0,0),
-						simulatedCarsCounter++,
+						//simulatedCarsCounter++,
+						track.track_id,
 						heading,
 						.05);
 				

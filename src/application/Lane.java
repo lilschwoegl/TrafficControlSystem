@@ -1,9 +1,5 @@
 package application;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
-
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -34,11 +30,6 @@ public class Lane {
 	public Point getEnd()
 	{
 		return line.getEndPoint();
-	}
-	
-	private void calculateCenter()
-	{		
-		centerPoint = this.line.getCenter();
 	}
 	
 	public void drawLane(Mat frame)
