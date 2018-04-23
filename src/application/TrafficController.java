@@ -25,6 +25,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
 import application.BulbColor;
+import config.TrafficControllerConfig;
 import simulator.MotorVehicle;
 
 public class TrafficController implements TrafficObserver {

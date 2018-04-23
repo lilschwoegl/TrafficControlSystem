@@ -13,7 +13,6 @@ public class CameraFeedDisplay extends Thread {
 	private VideoInput videoFeed;
 	private Mat lastFrame = new Mat();
 	private boolean staleFrame = true;
-	private Direction facingDirection;
 	private RoadLinesCollection roadLines;
 	private long sleepTime = 25;
 	private volatile boolean running = false;
@@ -25,13 +24,12 @@ public class CameraFeedDisplay extends Thread {
 	@FXML
 	private ImageView imgOut;
 	
-	public CameraFeedDisplay(ImageView imgOut, Button feedSelBtn, ComboBox<String> feedList, Direction facingDirection)
+	public CameraFeedDisplay(ImageView imgOut, Button feedSelBtn, ComboBox<String> feedList)
 	{
 		this.imgOut = imgOut;
 		this.feedList = feedList;
 		this.feedSelBtn = feedSelBtn;
 		videoFeed = new VideoInput();
-		this.facingDirection = facingDirection;
 		roadLines = new RoadLinesCollection();
 	}
 	

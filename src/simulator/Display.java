@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 
 import org.opencv.core.Point;
 
+import config.SimConfig;
 import simulator.Constants.Direction;
 import tracking.SimulatedTrack;
 

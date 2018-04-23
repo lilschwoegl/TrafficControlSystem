@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import application.BulbColor;
+import config.SimConfig;
 import simulator.Constants.Direction;
 
 public class TrafficLightDisplay {

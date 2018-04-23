@@ -12,6 +12,7 @@ import application.BulbColor;
 import application.TrafficController;
 import application.TrafficLight;
 import application.TrafficController.SignalLogicConfiguration;
+import config.SimConfig;
 import observer.SimulatorObserver;
 import observer.TrackUpdateObservable;
 import observer.TrafficLightObserver;
@@ -23,11 +24,8 @@ import tracking.Track;
 
 public class SimulatorManager implements TrafficLightObserver {
 	
-	private long time = System.nanoTime();
-	private long delay;
 	private SimulatorObserver observer;
 	Graphics g;
-	private int bulbID = 900;
 	private static BufferedImage intersectionImage;
 	
 	
@@ -44,9 +42,6 @@ public class SimulatorManager implements TrafficLightObserver {
 		motors = new ConcurrentHashMap <Integer,MotorVehicle>();
 		lights = new HashMap<Integer, simulator.TrafficLightDisplay>();
 		
-		
-		// delay = to 2secs
-		delay = 2000;
 		
 		observer = new SimulatorObserver(this);
 		TrackUpdateObservable.getInstance().addObserver(observer);
@@ -163,16 +158,16 @@ public class SimulatorManager implements TrafficLightObserver {
 		{
 
 			BulbColor l = trafficController.GetTrafficLight(m.getDirection()).GetColor();
-			Double d = m.distToIntersection();
+			Double dist = m.distToIntersection();
 			
 			switch (l)
 			{
 				case Red:
-					if ((m.distToIntersection() >= 0 && m.distToIntersection() < 5)) 
+					if ((dist >= 0 && dist < 5)) 
 						continue;
 					break;
 				case Yellow:
-					if (m.distToIntersection() > 0 && m.distToIntersection() < 5)
+					if (dist > 0 && dist < 5)
 						//if (m.speed > 0.005) 
 							m.setSpeed(0.005); 
 					break;
@@ -182,37 +177,6 @@ public class SimulatorManager implements TrafficLightObserver {
 					break;
 			}
 			
-			
-			/*
-			 * switch (l) {
-			case Red:
-				if (m.distToIntersection() > 150 && !trackClear(m.lane,m.direction,m.track.track_id)) {
-					continue;
-				} else if (m.distToIntersection() >= 0 && m.distToIntersection() < 5) {
-					continue;
-				} else {
-					break;
-				}
-			case Yellow:
-				if (m.distToIntersection() > 150 && !trackClear(m.lane,m.direction,m.track.track_id)) {
-					continue;				
-				} else if (m.distToIntersection() < 0) {
-					break;
-				} else {
-				while (m.speed > 0) {
-					m.setSpeed(m.speed-0.001); 
-				}
-				break; }
-			default:
-				if (m.distToIntersection() > 150 && !trackClear(m.lane,m.direction,m.track.track_id)) {
-					continue;
-				} else {
-					m.setSpeed(SimConfig.speed);
-					break;
-				}					
-			}			
-			 */
-				
 			// should the vehicle move?
 			if (trackClear(m))
 				m.tick();

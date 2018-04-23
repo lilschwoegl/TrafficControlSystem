@@ -1,4 +1,4 @@
-package tracking;
+package config;
 
 import org.opencv.core.Scalar;
 

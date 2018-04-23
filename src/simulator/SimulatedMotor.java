@@ -4,7 +4,6 @@ import org.opencv.core.Point;
 
 import simulator.Constants.Direction;
 import tracking.SimulatedTrack;
-import tracking.Track;
 
 public class SimulatedMotor extends MotorVehicle{
 

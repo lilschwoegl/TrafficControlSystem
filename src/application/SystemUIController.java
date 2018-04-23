@@ -11,6 +11,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoWriter;
 
+import config.TrackerConfig;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -26,7 +27,6 @@ import observer.UITrackObserver;
 import simulator.Constants.Direction;
 import tracking.Track;
 import tracking.Tracker;
-import tracking.TrackerConfig;
 
 public class SystemUIController {
 
@@ -46,24 +46,22 @@ public class SystemUIController {
 
 	//static Net yolo;
 
-	Tracker tracker[] = new Tracker[4];
-	static Mat imag;
-	static Mat orgin;
-	static Mat kalman;
+	private Tracker tracker[] = new Tracker[4];
+	private Mat imag;
 	
-	boolean saveFramesToFile = false;
-	boolean firstRun = true;
-	long frameCounter = 0;
+	private boolean saveFramesToFile = false;
+	private boolean firstRun = true;
+	private long frameCounter = 0;
 
-	UITrackObserver trafficObserver;
+	private UITrackObserver trafficObserver;
 	
-	boolean drawTrace = false;
-	boolean extrapDetects = true;
+	private boolean drawTrace = false;
+	private boolean extrapDetects = true;
+
+	private VideoWriter vwriter = new VideoWriter();
+	private boolean recordVideo = false;
 	
-	VideoWriter vwriter = new VideoWriter();
-	boolean recordVideo = true;
-	
-	YoloDetector yolo;
+	private YoloDetector yolo;
 	
 	private Thread frameGrabber = new Thread()
 	{
@@ -166,10 +164,11 @@ public class SystemUIController {
 		trackLblProp4 = new SimpleObjectProperty<>();
 		this.trackLbl4.textProperty().bind(trackLblProp4);
 		
-		cameraFeeds[0] = new CameraFeedDisplay(imgOut1, selFeedBtn1, feedList1, Direction.NORTH);
-		cameraFeeds[1] = new CameraFeedDisplay(imgOut2, selFeedBtn2, feedList2, Direction.SOUTH);
-		cameraFeeds[2] = new CameraFeedDisplay(imgOut3, selFeedBtn3, feedList3, Direction.EAST);
-		cameraFeeds[3] = new CameraFeedDisplay(imgOut4, selFeedBtn4, feedList4, Direction.WEST);
+		// initialize the camera feeds and bind with UI controls
+		cameraFeeds[0] = new CameraFeedDisplay(imgOut1, selFeedBtn1, feedList1);
+		cameraFeeds[1] = new CameraFeedDisplay(imgOut2, selFeedBtn2, feedList2);
+		cameraFeeds[2] = new CameraFeedDisplay(imgOut3, selFeedBtn3, feedList3);
+		cameraFeeds[3] = new CameraFeedDisplay(imgOut4, selFeedBtn4, feedList4);
 
 		// create trackers for each camera feed
 		// the direction is the heading that an oncoming vehicle would have,
@@ -221,6 +220,10 @@ public class SystemUIController {
 		frameGrabber.start();
 	}
 
+	/***
+	 * Event for "Select Feed" button press on UI
+	 * @param event
+	 */
 	@FXML
 	private void startFeed(ActionEvent event)
 	{
@@ -265,10 +268,7 @@ public class SystemUIController {
 
 		logMsg("Processing frame");
 
-		imag = curFrame.clone();
-		orgin = curFrame.clone();
-		kalman = curFrame.clone();
-		
+		imag = curFrame.clone();		
 
 		// Tracker code
 		// https://github.com/Franciscodesign/Moving-Target-Tracking-with-OpenCV/blob/master/src/sonkd/Main.java
@@ -290,42 +290,43 @@ public class SystemUIController {
 
 		logMsg("Drawing detects");
 		
+		Track track;
 		for (int i = 0; i < tracker.tracks.size(); i++)
 		{
+			track = tracker.tracks.get(i);
+			
 			// if there is a trace available, draw it on the image
 			if (drawTrace)
 			{
-				int traceNum = tracker.tracks.get(i).trace.size();
+				int traceNum = track.trace.size();
 				if (traceNum > 1)
 				{
-					for (int jt = 1; jt < tracker.tracks.get(i).trace.size(); jt++)
+					for (int jt = 1; jt < track.trace.size(); jt++)
 					{
 						Imgproc.line(
 								imag, 
-								tracker.tracks.get(i).trace.get(jt - 1), 
-								tracker.tracks.get(i).trace.get(jt), 
-								TrackerConfig.Colors[tracker.tracks.get(i).track_id % 9],
+								track.trace.get(jt - 1), 
+								track.trace.get(jt), 
+								TrackerConfig.Colors[track.track_id % 9],
 								2, 4, 0);
 	
 					}
 				}
 			}
-
-			tracker.tracks.get(i).drawDetect(imag, false, true, drawTrace);
 			
 			// determine the lane that the car is in
-			tracker.tracks.get(i).lane = roadLines.isInLane(tracker.tracks.get(i).getBestPositionCenter());
-			
+			track.lane = roadLines.isInLane(tracker.tracks.get(i).getBestPositionCenter());
+
+			// draw the detect on the frame
+			track.drawDetect(imag, false, true, drawTrace);
 		}
 		
+		// draw the lane lines on the frame
 		roadLines.drawLanes(imag);
 		
 		return imag;
 
 	}
-	
-	
-
 	
 	
 	/**
@@ -359,6 +360,11 @@ public class SystemUIController {
 	private Point mouseDownPt = new Point();
 	private Point mouseUpPt = new Point();
 	private boolean primaryButtonDown = false;
+	
+	/***
+	 * Event for Mouse Down event on ImageView controls on UI
+	 * @param event
+	 */
 	@FXML
 	private void imgViewMouseDown(MouseEvent event)
 	{
@@ -369,8 +375,6 @@ public class SystemUIController {
 					ImageView.class.getClass().getSimpleName());
 			return;
 		}
-			
-		String id = ((ImageView)event.getSource()).getId();
 		
 		if (event.isPrimaryButtonDown())
 		{
@@ -378,12 +382,13 @@ public class SystemUIController {
 			mouseDownPt.y = event.getY() + 10;
 			
 			primaryButtonDown = true;
-			
-			System.out.printf("Mouse down on %s at (%f, %f)\n",
-					id, mouseDownPt.x, mouseDownPt.y);
 		}
 	}
 	
+	/***
+	 * Event for Mouse Up event on ImageView controls on UI
+	 * @param event
+	 */
 	@FXML
 	private void imgViewMouseUp(MouseEvent event)
 	{
@@ -395,15 +400,13 @@ public class SystemUIController {
 			return;
 		}
 			
+		// get the id of the control 
 		String id = ((ImageView)event.getSource()).getId();
 		
 		if (primaryButtonDown)
 		{
 			mouseUpPt.x = event.getX() + 10;
 			mouseUpPt.y = event.getY() + 10;
-			
-			System.out.printf("Mouse down on %s at (%f, %f)\n",
-					id, mouseUpPt.x, mouseUpPt.y);
 			
 			switch (id)
 			{

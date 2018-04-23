@@ -20,8 +20,25 @@ public class ServerClient {
 			BufferedReader in = new BufferedReader(
 	                new InputStreamReader(socket.getInputStream()));
 
-			out.println("[data]");
-			System.out.println(in.readLine());
+			out.println("[METRICS]");
+			
+			String queryResult = in.readLine();
+			String[] queryParts = queryResult.split("\\[\\$\\]");
+			
+			for (String s : queryParts)
+			{
+				System.out.println(s);
+			}
+			
+			out.println("[EVENTS]");
+
+			queryResult = in.readLine();
+			queryParts = queryResult.split("\\[\\$\\]");
+			
+			for (String s : queryParts)
+			{
+				System.out.println(s);
+			}
 			
 			socket.close();
 			

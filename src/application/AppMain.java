@@ -6,11 +6,11 @@ import java.awt.Toolkit;
 import org.opencv.core.Core;
 
 import clientserver.ServerManager;
+import config.SimConfig;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import simulator.SimConfig;
 import simulator.SimulatorMain;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;

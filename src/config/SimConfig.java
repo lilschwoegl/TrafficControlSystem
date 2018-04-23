@@ -1,4 +1,4 @@
-package simulator;
+package config;
 
 import org.opencv.core.Point;
 

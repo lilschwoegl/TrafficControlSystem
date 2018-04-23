@@ -1,9 +1,7 @@
 package tracking;
 
-import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Vector;
 
 import org.opencv.core.Core;
@@ -15,6 +13,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
+import config.TrackerConfig;
 
 /**
  * Track.java TODO:

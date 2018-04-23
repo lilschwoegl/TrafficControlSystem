@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 //import java.lang.Runnable;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import config.TrafficControllerConfig;
 import observer.TrafficLightObservable;
 import observer.TrafficLightObserver;
 import simulator.Constants.Direction;

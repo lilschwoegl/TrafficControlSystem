@@ -10,6 +10,7 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
+import config.TrackerConfig;
 import observer.TrackUpdateObservable;
 import simulator.Constants.Direction;
 import tracking.Track.MOVEMENT_TYPE;
@@ -21,7 +22,7 @@ import tracking.Track.MOVEMENT_TYPE;
  */
 
 public class Tracker extends JTracker {
-	int nextTractID = 0;
+	static int nextTractID = 0;
 	Vector<Integer> assignment = new Vector<>();
 	private Direction oncomingHeading;
 

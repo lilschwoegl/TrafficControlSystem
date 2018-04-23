@@ -13,10 +13,10 @@ import java.util.Date;
 import org.junit.Test;
 
 import application.BulbColor;
-import application.TrafficControllerConfig;
 import application.SQLite;
 import application.TrafficController;
 import application.TrafficController.SignalLogicConfiguration;
+import config.TrafficControllerConfig;
 import application.TrafficLight;
 import simulator.Constants.Direction;
 
