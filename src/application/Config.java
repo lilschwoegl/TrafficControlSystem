@@ -13,12 +13,12 @@ public class Config {
 	public static long periodForFixedTimerConfiguration = 10;			// green light duration, normally this would be 30s - 120s in real life
 	public static long periodForOnDemandConfiguration = 10;				// green light duration, probably something like 30s in real life
 	public static long maxSecondsVehicleAgeToTrack = 20;					// if vehicles collection contains any objects that haven't been updated in this amount of time, they're dropped
-	public static long maxSecondsToWaitForEmergencyVehicles = 15;		// let emergency vehicles take control of intersection a max of this many seconds (NOTE: typically, this will be a longer wait time)
+	public static long maxSecondsToWaitForEmergencyVehicles = 3;		// let emergency vehicles take control of intersection a max of this many seconds (NOTE: typically, this will be a longer wait time)
 	
 	// TrafficLight settings
 	public static boolean doTrafficLightLogging = false;					// if true, runtime metrics are logged to console
 	public static int secondsYellowLightDuration = 3;					// duration (seconds) for light to stay yellow when changing to red
-	public static int minSecondsOwnershipUntilChangeAllowed = 15;		// light cannot be taken from a direction of travel until ownership has exceeded this duration
+	//public static int minSecondsOwnershipUntilChangeAllowed = 15;		// light cannot be taken from a direction of travel until ownership has exceeded this duration
 	
 	// database schema
 	public static String databaseName = "trafficController.db";

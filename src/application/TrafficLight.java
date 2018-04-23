@@ -126,9 +126,9 @@ public class TrafficLight implements TrafficLightObservable {
 	}
 	
 	// return true if this light's color has remained unchanged (i.e. owned) for its min duration
-	public boolean IsMinOwnershipDurationElapsed() {
-		return secondsSinceLastChange() >= Config.minSecondsOwnershipUntilChangeAllowed;
-	}
+//	public boolean IsMinOwnershipDurationElapsed() {
+//		return secondsSinceLastChange() >= Config.minSecondsOwnershipUntilChangeAllowed;
+//	}
 	
 	// return number of seconds since the light last changed color
 	public long secondsSinceLastChange() {
