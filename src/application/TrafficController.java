@@ -101,7 +101,7 @@ public class TrafficController implements TrafficObserver {
 		
 		// record controller creation as event and metric entry
 		log("System timestamp: " + now.toString());
-		splat("TrafficController Creation: Timestamp: %s, Logic Configuration: $s", now, newLogicConfiguration);
+		//splat("TrafficController Creation: Timestamp: %s, Logic Configuration: $s", now, newLogicConfiguration);
 		RecordEvent("TrafficController Creation", String.format("Timestamp: %s, Logic Configuration: $s", now, newLogicConfiguration));
 		RecordMetric("TrafficController", "Creation", String.format("Timestamp: %s, Logic Configuration: $s", now, newLogicConfiguration));
 		
@@ -123,7 +123,7 @@ public class TrafficController implements TrafficObserver {
 				this.numLanesNS, this.laneWidthNS, this.numLanesEW, this.laneWidthEW, Config.pixelsCameraRange);
 		
 		log("Logic configuration: %s", signalLogicConfiguration.toString());
-		splat("Starting SignalLogicConfiguration scheduled task");
+		//splat("Starting SignalLogicConfiguration scheduled task");
 		taskExecutor.scheduleAtFixedRate(() -> {
 			CheckSignalStatusForChange();
 		}, 0, 1, TimeUnit.SECONDS);
@@ -475,29 +475,116 @@ public class TrafficController implements TrafficObserver {
 		return list;
 	}
 	
+	// get a list of vehicles for the requested travel direction
+	private ArrayList<Vehicle> GetVehiclesForDirectionAndOpposingDirection(Direction direction) {
+		ArrayList<Vehicle> list = new ArrayList<Vehicle>();
+		
+		Direction oppDirection = GetOppositeDirection(direction);
+		
+		for (Vehicle v : vehicles.values()) {
+			if (v.direction == direction || v.direction == oppDirection)
+				list.add(v);
+		}
+		
+		return list;
+	}
+	
+	// get a count of vehicles for the requested travel direction
+	private int CountVehiclesForDirection(Direction direction) {
+		int count = 0;
+		
+		for (Vehicle v : vehicles.values()) {
+			if (v.direction == direction)
+				count++;
+		}
+		
+		return count;
+	}
+	
+	// get a count of vehicles for the requested travel direction or its opposite
+	private int CountVehiclesForDirectionAndOpposingDirection(Direction direction) {
+		int count = 0;
+		
+		Direction oppDirection = GetOppositeDirection(direction);
+		
+		for (Vehicle v : vehicles.values()) {
+			if (v.direction == direction || v.direction == oppDirection)
+				count++;
+		}
+		
+		return count;
+	}
+	
+	// get a count of vehicles for all directions EXCEPT the requested travel direction and its opposite
+	private int CountVehiclesForAllExceptDirectionAndOpposingDirection(Direction direction) {
+		int count = 0;
+		
+		Direction oppDirection = GetOppositeDirection(direction);
+		
+		for (Vehicle v : vehicles.values()) {
+			if (v.direction != direction && v.direction != oppDirection)
+				count++;
+		}
+		
+		return count;
+	}
+	
+	// get a count of vehicles at all green lights
+	private int CountVehiclesAtGreenLights() {
+		int count = 0;
+		
+		ArrayList<Direction> dirs = new ArrayList<Direction>();
+		for (TrafficLight light : trafficLights) {
+			if (light.GetColor() == BulbColor.Green && !dirs.contains(light.getTravelDirection()))
+				dirs.add(light.getTravelDirection());
+		}
+		
+		for (Vehicle v : vehicles.values()) {
+			if (dirs.contains(v.direction))
+				count++;
+		}
+		
+		return count;
+	}
+	
 	private void ChangeLightsIfObjectsAreWaiting() {
-		splat("ChangeLightsIfObjectsAreWaiting ENTER, new type? %s", prevSignalLogicConfiguration != SignalLogicConfiguration.OnDemand);
+		//splat("ChangeLightsIfObjectsAreWaiting ENTER, new type? %s", prevSignalLogicConfiguration != SignalLogicConfiguration.OnDemand);
 		TrafficLight lightWithLongestWaitingObject = GetRedLightWithLongestWaitingObject();
-		splat("lightWithLongestWaitingObject? %s", lightWithLongestWaitingObject != null ? lightWithLongestWaitingObject.getID() : "null");
-		// if same signal type and no objects waiting for a green light, return immediately
-		if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && lightWithLongestWaitingObject == null) {
-			splat("ChangeLightsIfObjectsAreWaiting: return early 1");
-			return;
-		}
+		//splat("lightWithLongestWaitingObject? %s", lightWithLongestWaitingObject != null ? lightWithLongestWaitingObject.getID() : "null");
 		
-		if (lightWithLongestWaitingObject == null) {
-			splat("ChangeLightsIfObjectsAreWaiting: lightWithLongestWaitingObject is null, return early 2");
-			return;
-		}
-		
-		long oldestForRedLight = GetSecondsForOldestObjectAtLight(BulbColor.Red);
-		long oldestForGreenLight = GetSecondsForOldestObjectAtLight(BulbColor.Green);
-		// if same signal type and no valid objects waiting for a green light, no change possible, so return immediately
-		if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && (oldestForRedLight == 0 || oldestForGreenLight < Config.periodForFixedTimerConfiguration)) {
-			if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && oldestForRedLight > 0)
-				log("ChangeLightsIfObjectsAreWaiting: Light change delayed, oldestForGreenLight = %d seconds", oldestForGreenLight);
-			splat("ChangeLightsIfObjectsAreWaiting: return early 3");
-			return;
+		boolean oldMethod = true;
+		if (oldMethod) {
+			// if same signal type and no objects waiting for a green light, return immediately
+			if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && lightWithLongestWaitingObject == null) {
+				//splat("ChangeLightsIfObjectsAreWaiting: return early 1");
+				return;
+			}
+			
+			if (lightWithLongestWaitingObject == null) {
+				//splat("ChangeLightsIfObjectsAreWaiting: lightWithLongestWaitingObject is null, return early 2");
+				return;
+			}
+			
+			long oldestForRedLight = GetSecondsForOldestObjectAtLight(BulbColor.Red);
+			long oldestForGreenLight = GetSecondsForOldestObjectAtLight(BulbColor.Green);
+			// if same signal type and no valid objects waiting for a green light, no change possible, so return immediately
+			if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && (oldestForRedLight == 0 || oldestForGreenLight < Config.periodForFixedTimerConfiguration)) {
+				if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && oldestForRedLight > 0)
+					log("ChangeLightsIfObjectsAreWaiting: Light change delayed, oldestForGreenLight = %d seconds", oldestForGreenLight);
+				//splat("ChangeLightsIfObjectsAreWaiting: return early 3");
+				return;
+			}
+		} else {
+			int countVehiclesAtGreenLights = CountVehiclesAtGreenLights();
+			splat("countVehiclesAtGreenLights = %d", countVehiclesAtGreenLights);
+			
+			if (lightWithLongestWaitingObject == null) {
+				splat("No waiting vehicles, returning early");
+				return;
+			}
+			Direction dirOfLongestWait = lightWithLongestWaitingObject.getTravelDirection();
+			Direction dirOppositeOfLogestWait = GetOppositeDirection(dirOfLongestWait);
+			int countOtherVehicles = CountVehiclesForAllExceptDirectionAndOpposingDirection(dirOfLongestWait); 
 		}
 		
 		try {
@@ -521,7 +608,7 @@ public class TrafficController implements TrafficObserver {
 		catch (Exception ex) { ex.printStackTrace(); }
 		finally {
 		}
-		splat("ChangeLightsIfObjectsAreWaiting LEAVE");
+		//splat("ChangeLightsIfObjectsAreWaiting LEAVE");
 	}
 	
 	// toggle traffic lights	
@@ -635,7 +722,7 @@ public class TrafficController implements TrafficObserver {
 	
 	// wait up to N seconds for any lights of the requested color to change to another color, checking every 1/10th of a second 
 	private void WaitForLightsToChangeFromColor(BulbColor color, long numSeconds) {
-		ArrayList<TrafficLight> lights= GetTrafficLightsForColor(color);
+		ArrayList<TrafficLight> lights = GetTrafficLightsForColor(color);
 		int numLights = lights.size();
 		if (numLights > 0) {
 			Instant loopStart = Instant.now();
@@ -652,6 +739,33 @@ public class TrafficController implements TrafficObserver {
 				log("Warning, WaitForLightsToChangeFromColor: wait time for change of %s lights exceeded, possible stuck signals!", color);
 		}
 	}
+	
+	// wait up to maxSeconds for all lights of a given travel direction to change to a new color
+	private void WaitForLightsToChangeToNewColor(Direction travelDirection, BulbColor color, long maxSeconds) {
+		Direction oppDirection = GetOppositeDirection(travelDirection);
+		ArrayList<TrafficLight> lights = new ArrayList<TrafficLight>();
+		for (TrafficLight light : trafficLights) {
+			if (light.getTravelDirection() == travelDirection || light.getTravelDirection() == oppDirection)
+				lights.add(light);
+		}
+		
+		// loop, counting lights not yet changed to the new color, up to maxSeconds
+		int numLightsNotReady = 0;
+		Instant loopStart = Instant.now();
+		while (numLightsNotReady > 0 && ChronoUnit.SECONDS.between(loopStart, Instant.now()) <= maxSeconds) {
+			try {
+				TimeUnit.MILLISECONDS.sleep((long)100);
+			} catch (InterruptedException e) { e.printStackTrace(); }
+			numLightsNotReady = 0;
+			for (TrafficLight light : lights)
+				if (light.GetColor() == color)
+					numLightsNotReady++;
+		}
+		if (numLightsNotReady > 0)
+			log("Warning, WaitForLightsToChangeToNewColor: wait time for change of %s lights exceeded, possible stuck signals!", color);
+	}
+	
+	
 	
 	// function to purge obsolete vehicles from the collection, either because they are out of range of traffic light cameras or they haven't been updated for a long time
 	private void DropOldVehiclesFromCollector() {
