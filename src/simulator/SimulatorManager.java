@@ -173,7 +173,7 @@ public class SimulatorManager implements TrafficLightObserver {
 					break;
 				case Yellow:
 					if (m.distToIntersection() > 0 && m.distToIntersection() < 5)
-						//if (m.speed > 0.002) 
+						//if (m.speed > 0.005) 
 							m.setSpeed(0.005); 
 					break;
 				case Green:
