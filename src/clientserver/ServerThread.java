@@ -3,9 +3,11 @@ package clientserver;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import application.TrafficController;
@@ -13,7 +15,7 @@ import application.TrafficController;
 public class ServerThread extends Thread{
 
 	protected Socket socket;
-	protected PrintWriter out;
+	protected ObjectOutputStream out;
 	protected BufferedReader in;
 
 	
@@ -22,7 +24,7 @@ public class ServerThread extends Thread{
 		this.socket = socket;
 		
 		try {
-			out = new PrintWriter(socket.getOutputStream(), true);
+			out = new ObjectOutputStream(socket.getOutputStream());
 			in = new BufferedReader(
 			            new InputStreamReader(
 			                socket.getInputStream()));
@@ -39,22 +41,21 @@ public class ServerThread extends Thread{
 		try {
 			while ((line = in.readLine()) != null)
 			{
+				
+				QueryMessage qm = new QueryMessage();
+				
 				if (line.equals("[METRICS]"))
 				{
 					try {
 						ResultSet result = TrafficController.sql.executeQuery("select * from Metrics");
 
-						String msg = "";
+						qm.setColumns("TIMESTAMP", "NAME", "DESCRIPTION", "VALUE");
 						
 						while (result.next())
 						{
-							msg += String.format("TIME: %s, NAME: %s, DESC: %s, VAL: %s[$]", 
-									result.getString("timestamp"), result.getString("name"), 
+							qm.addRow(result.getString("timestamp"), result.getString("name"), 
 									result.getString("description"), result.getString("value"));
-							// timestamp TEXT NOT NULL, name TEXT NOT NULL, description TEXT NULL, valueType TEXT NOT NULL, value BLOB NOT NULL
 						}
-						
-						out.println(msg);
 						
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
@@ -64,19 +65,31 @@ public class ServerThread extends Thread{
 				else if(line.equals("[EVENTS]"))
 				{
 					try {
-						ResultSet result = TrafficController.sql.executeQuery("select * from Events");
+						ResultSet result = TrafficController.sql.executeQuery("select * from Metrics");
 
-						String msg = "";
+						qm.setColumns("TIMESTAMP", "NAME", "VALUE");
 						
 						while (result.next())
 						{
-							msg += String.format("TIME: %s, NAME: %s, VAL: %s[$]", 
-									result.getString("timestamp"), result.getString("name"), 
-									result.getString("value"));
-							// timestamp TEXT NOT NULL, name TEXT NOT NULL, description TEXT NULL, valueType TEXT NOT NULL, value BLOB NOT NULL
+							qm.addRow(result.getString("timestamp"), result.getString("name"), result.getString("value"));
 						}
 						
-						out.println(msg);
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else if(line.equals("[TRAFFIC]"))
+				{
+					try {
+						ResultSet result = TrafficController.sql.executeQuery("select * from Traffic");
+
+						qm.setColumns("TIMESTAMP", "DIRECTION");
+						
+						while (result.next())
+						{
+							qm.addRow(result.getString("timestamp"), result.getString("direction"));
+						}
 						
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
@@ -87,6 +100,8 @@ public class ServerThread extends Thread{
 				{
 					break;
 				}
+				
+				out.writeObject(qm);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

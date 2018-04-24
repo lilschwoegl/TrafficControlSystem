@@ -1,44 +1,29 @@
 package clientserver;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class ServerClient {
 	
-	public static void main(String[] args)
+	private String hostName = "localhost";
+	private int port = 4444;
+	
+	public QueryMessage queryServer(String command)
 	{
-		String hostName = "localhost";
-		int port = 4444;
+		
+		QueryMessage qm = null;
 		
 		try {
 			Socket socket = new Socket(hostName, port);
 			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-			BufferedReader in = new BufferedReader(
-	                new InputStreamReader(socket.getInputStream()));
+			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-			out.println("[METRICS]");
+			out.println("[" + command + "]");
 			
-			String queryResult = in.readLine();
-			String[] queryParts = queryResult.split("\\[\\$\\]");
-			
-			for (String s : queryParts)
-			{
-				System.out.println(s);
-			}
-			
-			out.println("[EVENTS]");
-
-			queryResult = in.readLine();
-			queryParts = queryResult.split("\\[\\$\\]");
-			
-			for (String s : queryParts)
-			{
-				System.out.println(s);
-			}
+			qm = (QueryMessage)in.readObject();
 			
 			socket.close();
 			
@@ -48,8 +33,25 @@ public class ServerClient {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
+		return qm;
+		
+	}
+	
+	private String[] getHeader(String queryResult)
+	{
+		String header = queryResult.split("\\{H\\}")[0];
+		
+		return header.split("\\{C\\}");
+	}
+	
+	public static void main(String[] args)
+	{
+		ServerClient sc = new ServerClient();
 	}
 	
 }

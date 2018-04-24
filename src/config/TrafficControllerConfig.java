@@ -24,6 +24,7 @@ public class TrafficControllerConfig {
 	public static String databaseName = "trafficController.db";
 	public static String[] databaseSchema = {
 		"create table if not exists Events(timestamp TEXT NOT NULL, name TEXT NOT NULL, value TEXT NOT NULL)",
-		"create table if not exists Metrics(timestamp TEXT NOT NULL, name TEXT NOT NULL, description TEXT NULL, valueType TEXT NOT NULL, value BLOB NOT NULL)"
+		"create table if not exists Metrics(timestamp TEXT NOT NULL, name TEXT NOT NULL, description TEXT NULL, valueType TEXT NOT NULL, value BLOB NOT NULL)",
+		"create table if not exists Traffic(timestamp TEXT NOT NULL, direction TEXT NOT NULL)"
 	};
 }

@@ -22,7 +22,7 @@ import tracking.Track.MOVEMENT_TYPE;
  */
 
 public class Tracker extends JTracker {
-	static int nextTractID = 0;
+	static int nextTrackID = 0;
 	Vector<Integer> assignment = new Vector<>();
 	private Direction oncomingHeading;
 
@@ -56,7 +56,7 @@ public class Tracker extends JTracker {
 			// If no tracks yet
 			for (int i = 0; i < rectArray.size(); i++) {
 				Track tr = new Track(rectArray.get(i).getObjectCenter(), dt,
-						Accel_noise_mag, nextTractID++, rectArray.get(i));		
+						Accel_noise_mag, nextTrackID++, rectArray.get(i));		
 				tracks.add(tr);
 				
 				//TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
@@ -139,7 +139,7 @@ public class Tracker extends JTracker {
 		if (not_assigned_detections.size() > 0) {
 			for (int i = 0; i < not_assigned_detections.size(); i++) {
 				Track tr = new Track(rectArray.get(not_assigned_detections.get(i)).getObjectCenter(), dt,
-						Accel_noise_mag, nextTractID++, rectArray.get(i));
+						Accel_noise_mag, nextTrackID++, rectArray.get(i));
 				tracks.add(tr);
 				
 				//TrackUpdateObservable.getInstance().trackAdded(tr, oncomingHeading);
@@ -260,6 +260,7 @@ public class Tracker extends JTracker {
 					tracks.get(i).trace.get(0).y)
 				{
 					tracks.get(i).direction = MOVEMENT_TYPE.ONCOMING;
+					tracks.get(i).oncomingHeading = oncomingHeading;
 					
 					if (!tracks.get(i).sentToSim)
 					{

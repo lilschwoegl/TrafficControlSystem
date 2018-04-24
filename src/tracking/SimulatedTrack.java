@@ -30,6 +30,7 @@ public class SimulatedTrack extends Track{
 		
 		track_id = id;
 		travelDirection = direction;
+		oncomingHeading = direction;
 		
 		this.speed = speed;
 		
