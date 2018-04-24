@@ -3,8 +3,6 @@ package tracking;
 import java.util.Vector;
 
 import org.opencv.core.Mat;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
 
 import application.DetectedObject;
 

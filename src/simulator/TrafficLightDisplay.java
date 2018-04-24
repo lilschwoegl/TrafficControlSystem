@@ -1,11 +1,10 @@
 package simulator;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import application.BulbColor;
+import config.SimConfig;
 import simulator.Constants.Direction;
 
 public class TrafficLightDisplay {

@@ -6,10 +6,8 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Rect2d;
 
-import javafx.scene.text.Font;
+import config.SimConfig;
 import observer.TrafficUpdateObservable;
 import simulator.Constants.Direction;
 import tracking.SimulatedTrack;
@@ -171,7 +169,7 @@ public abstract class MotorVehicle {
 		p.x = SimConfig.laneStartPoints[direction.ordinal()][lane].x;
 		p.y = SimConfig.laneStartPoints[direction.ordinal()][lane].y;	
 		
-		System.out.printf("11111 Setting Track %d Y: %f\n", track.track_id, p.y);
+		// System.out.printf("11111 Setting Track %d Y: %f\n", track.track_id, p.y);
 		
 		return p;
 	}

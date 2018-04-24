@@ -39,11 +39,45 @@ public class ServerThread extends Thread{
 		try {
 			while ((line = in.readLine()) != null)
 			{
-				if (line.equals("[data]"))
+				if (line.equals("[METRICS]"))
 				{
 					try {
 						ResultSet result = TrafficController.sql.executeQuery("select * from Metrics");
-						System.out.println(result.getString(1));
+
+						String msg = "";
+						
+						while (result.next())
+						{
+							msg += String.format("TIME: %s, NAME: %s, DESC: %s, VAL: %s[$]", 
+									result.getString("timestamp"), result.getString("name"), 
+									result.getString("description"), result.getString("value"));
+							// timestamp TEXT NOT NULL, name TEXT NOT NULL, description TEXT NULL, valueType TEXT NOT NULL, value BLOB NOT NULL
+						}
+						
+						out.println(msg);
+						
+					} catch (SQLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else if(line.equals("[EVENTS]"))
+				{
+					try {
+						ResultSet result = TrafficController.sql.executeQuery("select * from Events");
+
+						String msg = "";
+						
+						while (result.next())
+						{
+							msg += String.format("TIME: %s, NAME: %s, VAL: %s[$]", 
+									result.getString("timestamp"), result.getString("name"), 
+									result.getString("value"));
+							// timestamp TEXT NOT NULL, name TEXT NOT NULL, description TEXT NULL, valueType TEXT NOT NULL, value BLOB NOT NULL
+						}
+						
+						out.println(msg);
+						
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

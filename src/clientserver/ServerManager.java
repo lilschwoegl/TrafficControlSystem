@@ -21,6 +21,8 @@ public class ServerManager {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		System.out.println("TrafficDatabaseServer successfully started!");
 	}
 	
 	public static ServerManager getInstance()

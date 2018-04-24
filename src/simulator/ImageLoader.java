@@ -13,7 +13,6 @@ public class ImageLoader {
 	private static BufferedImage emergencyVehicle[] = new BufferedImage[4];
 	private static BufferedImage intersection;
 	private static BufferedImage trafficLights[] = new BufferedImage[3];
-	private boolean initialized = false;
 	
 	public enum Orientation
 	{

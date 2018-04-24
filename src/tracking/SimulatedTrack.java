@@ -1,24 +1,16 @@
 package tracking;
 
-import java.util.ArrayList;
-
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 
-import application.BulbColor;
 import application.DetectedObject;
-import application.TrafficController;
-import application.TrafficLight;
 import simulator.Constants.Direction;
-import simulator.MotorVehicle;
-import simulator.SimulatorManager;
 
 public class SimulatedTrack extends Track{
 
 	private Point lastPosition;
 	private Point newPosition;
 	private double speed = 0.05;
-	private double elapsedTime = 0.0;
 	private Direction travelDirection;
 
 	

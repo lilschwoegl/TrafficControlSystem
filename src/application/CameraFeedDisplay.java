@@ -1,18 +1,5 @@
 package application;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import javax.imageio.ImageIO;
-
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoWriter;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -26,9 +13,9 @@ public class CameraFeedDisplay extends Thread {
 	private VideoInput videoFeed;
 	private Mat lastFrame = new Mat();
 	private boolean staleFrame = true;
-	private Direction facingDirection;
 	private RoadLinesCollection roadLines;
 	private long sleepTime = 25;
+	private volatile boolean running = false;
 	
 	@FXML
 	private Button feedSelBtn;
@@ -37,13 +24,12 @@ public class CameraFeedDisplay extends Thread {
 	@FXML
 	private ImageView imgOut;
 	
-	public CameraFeedDisplay(ImageView imgOut, Button feedSelBtn, ComboBox<String> feedList, Direction facingDirection)
+	public CameraFeedDisplay(ImageView imgOut, Button feedSelBtn, ComboBox<String> feedList)
 	{
 		this.imgOut = imgOut;
 		this.feedList = feedList;
 		this.feedSelBtn = feedSelBtn;
 		videoFeed = new VideoInput();
-		this.facingDirection = facingDirection;
 		roadLines = new RoadLinesCollection();
 	}
 	
@@ -83,7 +69,10 @@ public class CameraFeedDisplay extends Thread {
 		if (videoFeed.isOpened())
 		{
 			if (!isAlive())
+			{
 				start();
+				running = true;
+			}
 		}
 	}
 	
@@ -95,18 +84,14 @@ public class CameraFeedDisplay extends Thread {
 	@Override
 	public void run()
 	{
-		while (true)
+		while (running)
 		{
 			// effectively grab and process a single frame
 			Mat frame = new Mat();
 
 			try {
 				
-				// nlogMsg("Grabbing frame");
-				
 				frame = videoFeed.grabFrame();
-				
-				//logMsg("Grabbed frame");
 				
 				if (frame.empty() || frame.width() <= 0 || frame.height() <= 0)
 				{
@@ -138,6 +123,12 @@ public class CameraFeedDisplay extends Thread {
 	public RoadLinesCollection getRoadLines()
 	{
 		return roadLines;
+	}
+	
+	public void cleanup()
+	{
+		running = false;
+		videoFeed.release();
 	}
 	
 }

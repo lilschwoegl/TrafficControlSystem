@@ -13,10 +13,10 @@ import java.util.Date;
 import org.junit.Test;
 
 import application.BulbColor;
-import application.Config;
 import application.SQLite;
 import application.TrafficController;
 import application.TrafficController.SignalLogicConfiguration;
+import config.TrafficControllerConfig;
 import application.TrafficLight;
 import simulator.Constants.Direction;
 
@@ -40,7 +40,7 @@ public class Initial_Main_Test {
 		int numResults = 0;
 		
 		TrafficController tc = new TrafficController(SignalLogicConfiguration.FailSafe, 1, 60, 1, 60);
-		SQLite sql = new SQLite(Config.databaseName, Config.databaseSchema);		
+		SQLite sql = new SQLite(TrafficControllerConfig.databaseName, TrafficControllerConfig.databaseSchema);		
 		try {
 			String stmt = "select * from Events where name like '%Creation' and timestamp >= '" + now + "'";
 			System.out.println("stmt = '" + stmt + "'");
@@ -63,7 +63,7 @@ public class Initial_Main_Test {
 		Instant now = Instant.now();
 		System.out.println("testDatabaseWrite: now = " + now);
 		
-		SQLite sql = new SQLite("Test.db", Config.databaseSchema);
+		SQLite sql = new SQLite("Test.db", TrafficControllerConfig.databaseSchema);
 		int numRowsUpdated = 0;
 		try {
 			numRowsUpdated += sql.executeUpdate("insert into Events (timestamp,name,value) values ('" + Instant.now() + "', 'testDatabaseWrite', 'test data')");
@@ -82,7 +82,7 @@ public class Initial_Main_Test {
 		System.out.println("testDatabaseRead: now = " + now);
 		String nowShort = now.toString().substring(0, now.toString().length() - 5); //strip off milliseconds
 		
-		SQLite sql = new SQLite("Test.db", Config.databaseSchema);
+		SQLite sql = new SQLite("Test.db", TrafficControllerConfig.databaseSchema);
 		
 		// write a row to Events table
 		int numRowsUpdated = 0;
