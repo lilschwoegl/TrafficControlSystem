@@ -12,7 +12,7 @@
   </interface>  
   <interface id="2" language="java" name="observer.TrafficObserver" project="TrafficControlSystem" 
     file="/TrafficControlSystem/src/observer/TrafficObserver.java" binary="false" corner="BOTTOM_RIGHT">    
-    <position height="-1" width="-1" x="213" y="707"/>    
+    <position height="-1" width="-1" x="283" y="707"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
       <attributes public="true" package="true" protected="true" private="true" static="true"/>      
