@@ -14,6 +14,7 @@ import org.opencv.imgproc.Imgproc;
 
 import application.DetectedObject;
 import config.TrackerConfig;
+import simulator.Constants.Direction;
 
 /**
  * Track.java TODO:
@@ -44,6 +45,7 @@ public class Track {
 	
 	// aspect to the viewer
 	public MOVEMENT_TYPE direction;
+	public Direction oncomingHeading;
 
 	// last successful detection
 	public DetectedObject lastDetect;

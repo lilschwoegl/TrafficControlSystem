@@ -275,6 +275,7 @@ public class TrafficController implements TrafficObserver {
 				vehicles.put(vehicle.getTrack().track_id, new Vehicle(vehicle.getTrack().track_id, vehicle, Instant.now()));
 				RecordEvent("New Vehicle Tracked", String.format("ID: %d, direction: %s", vehicle.getTrack().track_id, vehicle.getTrack().direction).toString());
 				RecordMetric("New Vehicle", "New Track", vehicle.getTrack().track_id);
+				RecordTraffic(vehicle.getTrack().oncomingHeading.name());
 			}
 			
 			// emergency vehicle taking control of intersection?
@@ -842,6 +843,25 @@ public class TrafficController implements TrafficObserver {
 			catch (Exception ex) { ex.printStackTrace(); }
 		}
 	}
+	
+	// record a metric (as an Object) to the database 
+		private void RecordTraffic(String direction) {
+			if (TrafficControllerConfig.doMetricsLogging ) {
+				try {
+					Instant now = Instant.now();
+					
+					// value needs SQL quotes?
+					String text = String.format("insert into Traffic (timestamp, direction) values ('%s', '%s')",
+						now.toString(), direction).toString();
+					log("RecordTraffic: SQL = %s", text);
+					int result = sql.executeUpdate(text);
+					if (result < 1) {
+						log("RecordTraffic: Failed to store data in database");
+					}
+				}
+				catch (Exception ex) { ex.printStackTrace(); }
+			}
+		}
 	
 	private void log(String format, Object ... args) {
 		if (TrafficControllerConfig.doTrafficControllerLogging) {
