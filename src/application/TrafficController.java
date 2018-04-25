@@ -91,8 +91,7 @@ public class TrafficController implements TrafficObserver {
 		this.sql = new SQLite(TrafficControllerConfig.databaseName, TrafficControllerConfig.databaseSchema);
 		
 		// record controller creation as event and metric entry
-		log("System timestamp: " + now.toString());
-		//splat("TrafficController Creation: Timestamp: %s, Logic Configuration: $s", now, newLogicConfiguration);
+		log(0, "Creating TrafficController at timestamp %s", now);
 		RecordEvent("TrafficController Creation", String.format("Timestamp: %s, Logic Configuration: $s", now, newLogicConfiguration));
 		RecordMetric("TrafficController", "Creation", String.format("Timestamp: %s, Logic Configuration: $s", now, newLogicConfiguration));
 		
@@ -105,7 +104,7 @@ public class TrafficController implements TrafficObserver {
 		this.intersectionWidthEW = (double)this.numLanesNS * this.laneWidthNS;
 		this.intersectionWidthNS = (double)this.numLanesEW * this.laneWidthEW;
 		
-		log("Intersection Dimensions:"
+		log(0, "Intersection Dimensions:"
 				+ "\n  Lanes NS      %d"
 				+ "\n  Width NS      %f"
 				+ "\n  Lanes EW      %d"
@@ -113,8 +112,9 @@ public class TrafficController implements TrafficObserver {
 				+ "\n  Camera Range  %f (pixels)",
 				this.numLanesNS, this.laneWidthNS, this.numLanesEW, this.laneWidthEW, TrafficControllerConfig.pixelsCameraRange);
 		
-		log("Logic configuration: %s", signalLogicConfiguration.toString());
-		//splat("Starting SignalLogicConfiguration scheduled task");
+		log(0, "Logic configuration: %s", signalLogicConfiguration.toString());
+		
+		log(1, "Starting CheckSignalStatusForChange scheduled task");
 		taskExecutor.scheduleAtFixedRate(() -> {
 			CheckSignalStatusForChange();
 		}, 0, 1, TimeUnit.SECONDS);
@@ -130,21 +130,21 @@ public class TrafficController implements TrafficObserver {
 			AddTrafficLight(Direction.WEST);
 		}
 		
-		log("Starting DropOldVehiclesFromCollector scheduled task");
+		log(1, "Starting DropOldVehiclesFromCollector scheduled task");
 		taskExecutor.scheduleAtFixedRate(() -> {
 			try {
-				//log("Calling DropOldVehiclesFromCollector...");
+				log(6, "Calling DropOldVehiclesFromCollector...");
 				DropOldVehiclesFromCollector();
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
 		}, 0, 1, TimeUnit.SECONDS);
 		
 		// TODO: probably not needed any longer unless for event logging, in which case control it with a configuration setting
-		log("Starting TrafficLight monitor scheduled task");
+		log(1, "Starting TrafficLight monitor scheduled task");
 		taskExecutor.scheduleAtFixedRate(() -> {
 			try {
 				String status = GetStatusForAllLights();
-				log("TrafficLights Status: %s, statusOfAllLights: %s", status, statusOfAllLights);
+				log(6, "TrafficLights Status: %s, statusOfAllLights: %s", status, statusOfAllLights);
 				// record initial state and state changes only
 				if (statusOfAllLights == null || !statusOfAllLights.equals(status)) {
 					RecordEvent("Lights Changed", status);
@@ -158,39 +158,48 @@ public class TrafficController implements TrafficObserver {
 		// set the signal logic configuration to the desired type
 		if (newLogicConfiguration != null && newLogicConfiguration != signalLogicConfiguration)
 			ChangeSignalLogicConfiguration(newLogicConfiguration);
+		
+		log(0, "TrafficController creation finished at timestamp %s", Instant.now());
 	}
 	
 	/****************************** PUBLIC METHODS *******************************/
 	
 	public TrafficLight AddTrafficLight(Direction directionOfTravel) {
-		log("AddTrafficLight(%s)", directionOfTravel.toString());
+		log(5, "AddTrafficLight ENTER");
+		log(0, "AddTrafficLight(%s)", directionOfTravel.toString());
 		TrafficLight light = new TrafficLight(directionOfTravel); 
 		trafficLights.add(light);
+		log(5, "AddTrafficLight LEAVE");
 		return light;
 	}
 
 	
 	// returns all TrafficLight objects
 	public ArrayList<TrafficLight> GetTrafficLights() {
+		log(5, "GetTrafficLights ENTER");
 		ArrayList<TrafficLight> list = new ArrayList<TrafficLight>();
 		for (TrafficLight light : trafficLights) {
 			list.add(light);
 		}
+		log(5, "GetTrafficLights LEAVE");
 		return list;
 	}
 	
 	// returns all TrafficLight objects of the requested color
 	public ArrayList<TrafficLight> GetTrafficLightsForColor(BulbColor color) {
+		log(5, "GetTrafficLightsForColor ENTER");
 		ArrayList<TrafficLight> list = new ArrayList<TrafficLight>();
 		for (TrafficLight light : trafficLights) {
 			if (light.GetColor() == color)
 				list.add(light);
 		}
+		log(5, "GetTrafficLightsForColor LEAVE");
 		return list;
 	}
 	
 	// returns all TrafficLight objects which are opposite of the requested direction
 	private ArrayList<TrafficLight> GetTrafficLightsOfOppositeDirection(Direction forDirection) {
+		log(5, "GetTrafficLightsOfOppositeDirection ENTER");
 		Direction oppDirection = forDirection == Direction.NORTH ? Direction.SOUTH
 			: forDirection == Direction.WEST ? Direction.EAST
 			: forDirection == Direction.EAST ? Direction.WEST
@@ -200,35 +209,44 @@ public class TrafficController implements TrafficObserver {
 			if (light.getTravelDirection() == oppDirection)
 				list.add(light);
 		}
+		log(5, "GetTrafficLightsOfOppositeDirection LEAVE");
 		return list;
 	}
 	
 	// returns 1st TrafficLight for the requested travel direction, uses TrafficController.Direction enum
 	public TrafficLight GetTrafficLight(Direction forDirection) {
+		log(5, "GetTrafficLight ENTER");
 		for (TrafficLight light : trafficLights) {
-			if (light.getTravelDirection() == forDirection)
+			if (light.getTravelDirection() == forDirection) {
+				log(5, "GetTrafficLight RETURN");
 				return light;
+			}
 		}
+		log(5, "GetTrafficLight LEAVE");
 		return null;
 	}
 	
 	// returns all TrafficLight objects for the requested travel direction, uses TrafficController.Direction enum
 	public ArrayList<TrafficLight> GetTrafficLights(Direction forDirection) {
+		log(5, "GetTrafficLights ENTER");
 		ArrayList<TrafficLight> list = new ArrayList<TrafficLight>();
 		for (TrafficLight light : trafficLights) {
 			if (light.getTravelDirection() == forDirection)
 				list.add(light);
 		}
+		log(5, "GetTrafficLights LEAVE");
 		return list;
 	}
 	
 	// return true if a vehicle is in the effective range of a camera
+	// NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	public boolean IsInRangeOfCamera(MotorVehicle car) {
 		double dist = GetDistanceToCamera(car);
 		return dist > 0 && dist <= TrafficControllerConfig.pixelsCameraRange;
 	}
 	
 	// return distance of vehicle to its facing camera, considering vehicle's distance to intersection and intersection width
+	// NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	public double GetDistanceToCamera(MotorVehicle car) {
 		double distance = 0;
 		switch (GetCarDirectionOfTravel(car)) {
@@ -245,50 +263,60 @@ public class TrafficController implements TrafficObserver {
 	}
 	
 	// convert simulator vehicle direction into global application direction (for local calculations)
+	// NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	public Direction GetCarDirectionOfTravel(MotorVehicle car) {
 		return car.getDirection();
 	}
 	
 	public TrafficLight GetTrafficLightForVehicle(MotorVehicle car) {
+		log(5, "GetTrafficLightForVehicle ENTER");
 		for (TrafficLight light : trafficLights) {
-			if (light.getTravelDirection() == GetCarDirectionOfTravel(car))
+			if (light.getTravelDirection() == GetCarDirectionOfTravel(car)) {
+				log(5, "GetTrafficLightForVehicle RETURN");
 				return light;
+			}
 		}
-		
+		log(5, "GetTrafficLightForVehicle LEAVE");
 		return null;
 	}
 	
 	// record vehicle movement updates, ignore anything not in-range of cameras
 	@Override
 	public void update(MotorVehicle vehicle) {
+		int idVehicle = vehicle.getTrack().track_id;
+		log(5, "Tracking update ENTER, Vehicle %d", idVehicle);
 		Instant now = Instant.now();
 		boolean isInRange = IsInRangeOfCamera(vehicle);
 		double distToCamera = GetDistanceToCamera(vehicle);		
 		
 		if (isInRange) {
 			if (TrafficControllerConfig.doTrafficControllerTrackEventLogging)
-				log("Track %d is %f pixels from intersection, %f pixels from camera, inRange = %s", vehicle.getTrack().track_id, vehicle.distToIntersection(), distToCamera, isInRange);
-			if (vehicles.containsKey(vehicle.getTrack().track_id)) { //update
-				vehicles.get(vehicle.getTrack().track_id).timestampLastObserved = now;
+				log(1, "Track %d is %f pixels from intersection, %f pixels from camera, inRange = %s", idVehicle, vehicle.distToIntersection(), distToCamera, isInRange);
+			if (vehicles.containsKey(idVehicle)) { //update
+				log(6, "VEHICLE: OLD -> UPDATE");
+				vehicles.get(idVehicle).timestampLastObserved = now;
 			}
 			else { // insert
-				vehicles.put(vehicle.getTrack().track_id, new Vehicle(vehicle.getTrack().track_id, vehicle, Instant.now()));
-				RecordEvent("New Vehicle Tracked", String.format("ID: %d, direction: %s", vehicle.getTrack().track_id, vehicle.getTrack().direction).toString());
-				RecordMetric("New Vehicle", "New Track", vehicle.getTrack().track_id);
+				log(6, "VEHICLE: NEW -> RECORD");
+				vehicles.put(idVehicle, new Vehicle(idVehicle, vehicle, Instant.now()));
+				RecordEvent("New Vehicle Tracked", String.format("ID: %d, direction: %s", idVehicle, vehicle.getTrack().direction).toString());
+				RecordMetric("New Vehicle", "New Track", idVehicle);
 				RecordTraffic(vehicle.getTrack().oncomingHeading.name());
 			}
 			
 			// emergency vehicle taking control of intersection?
 			if (IsEmergencyVehicleWithActiveStrobe(vehicle) && !this.isEmergencyVehicleControlled) {
-				RecordEvent("Emergency Vehicle", String.format("Vehicle is an emergency responder, ID=%d", vehicle.getTrack().track_id));
-				RecordMetric("Emergency Vehicle", "Vehicle is an emergency responder", vehicle.getTrack().track_id);
-				log("update: Emergency Vehicle with active strobe detected! Giving intersection override...");
-				SetEmergencyVehicleControlled(vehicles.get(vehicle.getTrack().track_id).direction);
+				RecordEvent("Emergency Vehicle", String.format("Vehicle is an emergency responder, ID=%d", idVehicle));
+				RecordMetric("Emergency Vehicle", "Vehicle is an emergency responder", idVehicle);
+				log(0, "update: Emergency Vehicle with active strobe detected! Giving intersection override...");
+				SetEmergencyVehicleControlled(vehicles.get(idVehicle).direction);
 			}
 		}
+		log(5, "Tracking update LEAVE");
 	}
 		
 	public String GetStatusForAllLights() {
+		log(5, "GetStatusForAllLights ENTER");
 		StringBuilder sb = new StringBuilder();
 		
 		int numLights = 0;
@@ -297,11 +325,12 @@ public class TrafficController implements TrafficObserver {
 				sb.append(String.format("\t"));
 			sb.append(String.format("%04d=%s", light.getID(), light.GetColor()));
 		}
-		
+		log(5, "GetStatusForAllLights LEAVE");
 		return sb.toString();
 	}
 		
 	// translate the enum to the int value used by the yolo class
+	// NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	public int GetObservableObjectCode(ObservableObject e) {
 		switch (e) {
 		case Vehicle:
@@ -320,6 +349,7 @@ public class TrafficController implements TrafficObserver {
 	}
 	
 	// retrieve the enum by int value used by the yolo class
+	// NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	public ObservableObject GetObservableObjectValue (int value) {
 		switch (value) {
 		case 0:
@@ -339,6 +369,7 @@ public class TrafficController implements TrafficObserver {
 	
 	// change the signal logic configuration to a new type
 	public void ChangeSignalLogicConfiguration(SignalLogicConfiguration newConfiguration) {
+		log(5, "ChangeSignalLogicConfiguration ENTER");
 		if (prevSignalLogicConfiguration != newConfiguration) {
 			switch (newConfiguration) {
 			case FailSafe:
@@ -350,13 +381,14 @@ public class TrafficController implements TrafficObserver {
 				ChangeLightsIfObjectsAreWaiting();
 				break;
 			default:
-				log("ChangeSignalLogicConfiguration: Unknown configuration type: %s", newConfiguration);
+				log(0, "ChangeSignalLogicConfiguration: Unknown configuration type: %s", newConfiguration);
 				break;
 			}
 			prevSignalLogicConfiguration = newConfiguration;
 		} else {
-			log("Warning, ChangeSignalLogicConfiguration: old and new signal configuration are the same (so no change made): %s", prevSignalLogicConfiguration);
+			log(0, "Warning, ChangeSignalLogicConfiguration: old and new signal configuration are the same (so no change made): %s", prevSignalLogicConfiguration);
 		}
+		log(5, "ChangeSignalLogicConfiguration LEAVE");
 	}
 	
 	
@@ -365,12 +397,13 @@ public class TrafficController implements TrafficObserver {
 	
 	// check to see if signals need changing
 	private void CheckSignalStatusForChange() {
+		log(5, "CheckSignalStatusForChange ENTER");
 		Instant now = Instant.now();
 		if (this.isEmergencyVehicleControlled) {
 			long age = ChronoUnit.SECONDS.between(timestampEmergencyVehicleDetected, now);
-			log("CheckSignalStatusForChange: Signals in Emergency Vehicle mode, duration %d seconds", age);
+			log(1, "CheckSignalStatusForChange: Signals in Emergency Vehicle mode, duration %d seconds", age);
 			if (!IsEmergencyVehicleAtIntersection()) {
-				log("CheckSignalStatusForChange: Emergency vehicle no longer present at intersection, recovering from Emergency Vehicle mode");
+				log(1, "CheckSignalStatusForChange: Emergency vehicle no longer present at intersection, recovering from Emergency Vehicle mode");
 				ResetFromEmergencyVehicleControlled();
 			}
 		}
@@ -385,23 +418,26 @@ public class TrafficController implements TrafficObserver {
 				ChangeLightsIfObjectsAreWaiting();
 				break;
 			default:
-				log("CheckSignalStatusForChange: unknown traffic logic controller type: %s", this.signalLogicConfiguration);
+				log(0, "CheckSignalStatusForChange: unknown traffic logic controller type: %s", this.signalLogicConfiguration);
 			}
-		}		
+		}
+		log(5, "CheckSignalStatusForChange LEAVE");
 	}
 	
 	// return True if there are any emergency vehicles in range of any intersection traffic cameras
 	private boolean IsEmergencyVehicleAtIntersection() {
+		log(5, "IsEmergencyVehicleAtIntersection ENTER");
 		for (Vehicle vehicle : this.vehicles.values()) {
 			if (vehicle.IsEmergencyVehicle)
 				return true;
 		}
-		
+		log(5, "IsEmergencyVehicleAtIntersection LEAVE");
 		return false;
 	}
 	
 	// compute max number of seconds an object has been waiting at any red light
 	private long GetSecondsForOldestObjectAtLight(BulbColor color) {
+		log(5, "GetSecondsForOldestObjectAtLight ENTER");
 		long oldest = 0;
 		for (TrafficLight light : trafficLights) {
 			if (light.GetColor() == color) {
@@ -410,12 +446,13 @@ public class TrafficController implements TrafficObserver {
 					oldest = age;
 			}
 		}
-		
+		log(5, "GetSecondsForOldestObjectAtLight LEAVE");
 		return oldest;
 	}
 	
 	// return red light with oldest waiting object, else null
 	private TrafficLight GetRedLightWithLongestWaitingObject() {
+		log(5, "GetRedLightWithLongestWaitingObject ENTER");
 		long oldest = 0;
 		TrafficLight oldestLight = null;
 		for (TrafficLight light : trafficLights) {
@@ -429,24 +466,26 @@ public class TrafficController implements TrafficObserver {
 				}
 			}
 		}
-		
+		log(5, "GetRedLightWithLongestWaitingObject LEAVE");
 		return oldestLight;
 	}
 	
 	// get a list of vehicles for the requested travel direction
 	private ArrayList<Vehicle> GetVehiclesForDirection(Direction dir) {
+		log(5, "GetVehiclesForDirection ENTER");
 		ArrayList<Vehicle> list = new ArrayList<Vehicle>();
 		
 		for (Vehicle v : vehicles.values()) {
 			if (v.direction == dir)
 				list.add(v);
 		}
-		
+		log(5, "GetVehiclesForDirection LEAVE");
 		return list;
 	}
 	
 	// get a list of vehicles for the requested travel direction
 	private ArrayList<Vehicle> GetVehiclesForDirectionAndOpposingDirection(Direction direction) {
+		log(5, "GetVehiclesForDirectionAndOpposingDirection ENTER");
 		ArrayList<Vehicle> list = new ArrayList<Vehicle>();		
 		Direction oppDirection = GetOppositeDirection(direction);
 		
@@ -454,11 +493,12 @@ public class TrafficController implements TrafficObserver {
 			if (v.direction == direction || v.direction == oppDirection)
 				list.add(v);
 		}
-		
+		log(5, "GetVehiclesForDirectionAndOpposingDirection LEAVE");
 		return list;
 	}
 	
 	// get a count of vehicles for the requested travel direction
+	//NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	private int CountVehiclesForDirection(Direction direction) {
 		int count = 0;
 		
@@ -471,6 +511,7 @@ public class TrafficController implements TrafficObserver {
 	}
 	
 	// get a count of vehicles for the requested travel direction or its opposite
+	//NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	private int CountVehiclesForDirectionAndOpposingDirection(Direction direction) {
 		int count = 0;		
 		Direction oppDirection = GetOppositeDirection(direction);
@@ -484,6 +525,7 @@ public class TrafficController implements TrafficObserver {
 	}
 	
 	// get a count of vehicles for all directions EXCEPT the requested travel direction and its opposite
+	//NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	private int CountVehiclesForAllExceptDirectionAndOpposingDirection(Direction direction) {
 		int count = 0;
 		Direction oppDirection = GetOppositeDirection(direction);
@@ -497,6 +539,7 @@ public class TrafficController implements TrafficObserver {
 	}
 	
 	// get a count of vehicles at all green lights
+	//NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	private int CountVehiclesAtGreenLights() {
 		int count = 0;
 		
@@ -515,13 +558,14 @@ public class TrafficController implements TrafficObserver {
 	}
 	
 	private void ChangeLightsIfObjectsAreWaiting() {
+		log(5, "ChangeLightsIfObjectsAreWaiting ENTER");
 		TrafficLight lightWithLongestWaitingObject = GetRedLightWithLongestWaitingObject();
 		
+		// TODO: finish new method
 		boolean oldMethod = true;
 		if (oldMethod) {
 			// if same signal type and no objects waiting for a green light, return immediately
 			if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && lightWithLongestWaitingObject == null) {
-				//splat("ChangeLightsIfObjectsAreWaiting: return early 1");
 				return;
 			}
 			
@@ -534,7 +578,7 @@ public class TrafficController implements TrafficObserver {
 			// if same signal type and no valid objects waiting for a green light, no change possible, so return immediately
 			if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && (oldestForRedLight == 0 || oldestForGreenLight < TrafficControllerConfig.periodForFixedTimerConfiguration)) {
 				if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && oldestForRedLight > 0)
-					log("ChangeLightsIfObjectsAreWaiting: Light change delayed, oldestForGreenLight = %d seconds", oldestForGreenLight);
+					log(1, "ChangeLightsIfObjectsAreWaiting: Light change delayed, oldestForGreenLight = %d seconds", oldestForGreenLight);
 				return;
 			}
 		} else {
@@ -569,10 +613,12 @@ public class TrafficController implements TrafficObserver {
 		catch (Exception ex) { ex.printStackTrace(); }
 		finally {
 		}
+		log(5, "ChangeLightsIfObjectsAreWaiting LEAVE");
 	}
 	
 	// toggle traffic lights	
 	private void ToggleTrafficLightsForFixedTimerConfig() {
+		log(5, "ToggleTrafficLightsForFixedTimerConfig ENTER");
 		if (prevSignalLogicConfiguration == SignalLogicConfiguration.FixedTimers && SecondsSinceLastSignalChange() < TrafficControllerConfig.periodForFixedTimerConfiguration)
 			return;
 		
@@ -594,11 +640,12 @@ public class TrafficController implements TrafficObserver {
 		finally {
 		}
 		
-		//log("ToggleTrafficLightsForFixedTimerConfig (finish): %s", GetStatusForAllLights());
+		log(5, "ToggleTrafficLightsForFixedTimerConfig LEAVE: %s", GetStatusForAllLights());
 	}
 
 	// turn signals Green for the new travel direction, plus for the opposing direction
 	private void ChangeLightsToGreen(Constants.Direction newDirection) {
+		log(5, "ChangeLightsToGreen ENTER");
 		// wait for all lights to become non-yellow (they're changing to red on their own)
 		WaitForLightsToChangeFromColor(BulbColor.Yellow, TrafficControllerConfig.secondsYellowLightDuration);
 		
@@ -612,10 +659,12 @@ public class TrafficController implements TrafficObserver {
 				});
 			}
 		}
+		log(5, "ChangeLightsToGreen LEAVE");
 	}
 
 	// turn signals Green for the new travel direction, plus for the opposing direction
 	private void ChangeLightsToGreenForOneDirection(Constants.Direction newDirection) {
+		log(5, "ChangeLightsToGreenForOneDirection ENTER");
 		// wait for all lights to become non-yellow (they're changing to red on their own)
 		WaitForLightsToChangeFromColor(BulbColor.Yellow, TrafficControllerConfig.secondsYellowLightDuration);
 		
@@ -629,11 +678,12 @@ public class TrafficController implements TrafficObserver {
 				});
 			}
 		}
+		log(5, "ChangeLightsToGreenForOneDirection LEAVE");
 	}
 
 	// turn all green lights to red (yellow lights are in-process of going red, so ignore them)
 	private void ChangeLightsToRed() {
-		//log("ToggleTrafficLightsForFixedTimerConfig: triggering all green lights to change to red");
+		log(5, "ChangeLightsToRed ENTER");
 		for (TrafficLight light : trafficLights) {
 			if (light.GetColor() == BulbColor.Green) {
 				taskExecutor.submit(() -> {
@@ -647,10 +697,12 @@ public class TrafficController implements TrafficObserver {
 		
 		// wait for all lights to become non-yellow (they're changing to red on their own)
 		WaitForLightsToChangeFromColor(BulbColor.Yellow, TrafficControllerConfig.secondsYellowLightDuration);
+		log(5, "ChangeLightsToRed LEAVE");
 	}
 	
 	// turn all green lights to red (yellow lights are in-process of going red, so ignore them) for a given direction
 	private void ChangeLightsToRed(Constants.Direction newDirection) {
+		log(5, "ChangeLightsToRed ENTER");
 		// change signals in sets, simple version is 2 sets, e.g. North + South lights together
 		ArrayList<TrafficLight> lights = GetTrafficLights(newDirection);
 		lights.addAll(GetTrafficLightsOfOppositeDirection(newDirection));
@@ -661,23 +713,27 @@ public class TrafficController implements TrafficObserver {
 				});
 			}
 		}
+		log(5, "ChangeLightsToRed LEAVE");
 	}
 
 	// turn all green lights to red (yellow lights are in-process of going red, so ignore them) for a given direction
 	private void ChangeLightsToRedExceptDirection(Constants.Direction direction) {
+		log(5, "ChangeLightsToRedExceptDirection ENTER");
 		for (TrafficLight light : this.trafficLights) {
 			// ignore yellow lights as they're already changing to red on their own
 			if (light.GetColor() == BulbColor.Green && light.getTravelDirection() != direction) {
-				log("ChangeLightsToRedExceptDirection: Changing light %d to red", light.getID());
+				log(4, "ChangeLightsToRedExceptDirection: Changing light %d to red", light.getID());
 				taskExecutor.submit(() -> {
 					light.TurnRed();
 				});
 			}
 		}
+		log(5, "ChangeLightsToRedExceptDirection LEAVE");
 	}
 	
 	// wait up to N seconds for any lights of the requested color to change to another color, checking every 1/10th of a second 
 	private void WaitForLightsToChangeFromColor(BulbColor color, long numSeconds) {
+		log(5, "WaitForLightsToChangeFromColor ENTER, color = %s", color);
 		ArrayList<TrafficLight> lights = GetTrafficLightsForColor(color);
 		int numLights = lights.size();
 		if (numLights > 0) {
@@ -692,12 +748,14 @@ public class TrafficController implements TrafficObserver {
 						numLights++;
 			}
 			if (numLights > 0)
-				log("Warning, WaitForLightsToChangeFromColor: wait time for change of %s lights exceeded, possible stuck signals!", color);
+				log(0, "Warning, WaitForLightsToChangeFromColor: wait time for change of %s lights exceeded, possible stuck signals!", color);
 		}
+		log(5, "WaitForLightsToChangeFromColor LEAVE");
 	}
 	
 	// wait up to maxSeconds for all lights of a given travel direction to change to a new color
 	private void WaitForLightsToChangeToNewColor(Direction travelDirection, BulbColor color, long maxSeconds) {
+		log(5, "WaitForLightsToChangeToNewColor ENTER");
 		Direction oppDirection = GetOppositeDirection(travelDirection);
 		ArrayList<TrafficLight> lights = new ArrayList<TrafficLight>();
 		for (TrafficLight light : trafficLights) {
@@ -718,19 +776,19 @@ public class TrafficController implements TrafficObserver {
 					numLightsNotReady++;
 		}
 		if (numLightsNotReady > 0)
-			log("Warning, WaitForLightsToChangeToNewColor: wait time for change of %s lights exceeded, possible stuck signals!", color);
+			log(0, "Warning, WaitForLightsToChangeToNewColor: wait time for change of %s lights exceeded, possible stuck signals!", color);
+		log(5, "WaitForLightsToChangeToNewColor LEAVE");
 	}
-	
-	
 	
 	// function to purge obsolete vehicles from the collection, either because they are out of range of traffic light cameras or they haven't been updated for a long time
 	private void DropOldVehiclesFromCollector() {
-		log("DropOldVehiclesFromCollector: %d vehicles to examine", vehicles.size());
+		log(5, "DropOldVehiclesFromCollector ENTER: %d vehicles to examine", vehicles.size());
 		
 		// nothing to track? exit early.
 		if (vehicles.size() == 0) {
 			// record metric
 			RecordMetric("Vehicles", "0 Tracked", 0);
+			log(5, "DropOldVehiclesFromCollector RETURN");
 			return;
 		}
 		
@@ -746,21 +804,21 @@ public class TrafficController implements TrafficObserver {
 			for (Entry<Integer,Vehicle> entry : vehicles.entrySet()) {
 				Instant lastObserved = entry.getValue().timestampLastObserved;
 				long age = ChronoUnit.SECONDS.between(lastObserved, now);
-				log("vehicle %d age = %ds, lastObserved = %s", entry.getKey(), age, lastObserved.toString());
+				log(2, "vehicle %d age = %ds, lastObserved = %s", entry.getKey(), age, lastObserved.toString());
 				if (age > TrafficControllerConfig.maxSecondsVehicleAgeToTrack) {
 					idsToRemove.add(entry.getKey());
-					log("Removing vehicle %d due to aging", entry.getKey());
+					log(2, "Removing vehicle %d due to aging", entry.getKey());
 					RecordEvent("Stop Tracking Vehicle", String.format("ID: %d, reason: aging", entry.getValue().id).toString());
 				}
 				else if (!IsInRangeOfCamera(entry.getValue().vehicle)) {
 					idsToRemove.add(entry.getKey());
-					log("Removing vehicle %d due to out-of-range condition", entry.getKey());
+					log(2, "Removing vehicle %d due to out-of-range condition", entry.getKey());
 					RecordEvent("Stop Tracking Vehicle", String.format("ID: %d, reason: out-of-range", entry.getValue().id).toString());
 				}
 			}
 			if (!idsToRemove.isEmpty()) {
 				idsToRemove.forEach(id -> vehicles.remove(id));
-				log("DropOldVehiclesFromCollector: %d vehicles remain in collection", vehicles.size());
+				log(2, "DropOldVehiclesFromCollector: %d vehicles remain in collection", vehicles.size());
 			}
 		}
 		catch (Exception ex) { ex.printStackTrace(); }
@@ -771,36 +829,46 @@ public class TrafficController implements TrafficObserver {
 		
 		// record metric
 		RecordMetric("Vehicles", "Currently Tracked", vehicles.size());
+		
+		log(5, "DropOldVehiclesFromCollector LEAVE");
 	}
 	
 	// return True is a vehicle is an emergency vehicle
+	//NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	private boolean IsEmergencyVehicleWithActiveStrobe(MotorVehicle vehicle) {
 		return GetObservableObjectValue(vehicle.getTrack().lastDetect.classId) == ObservableObject.EmergencyVehicle;
 	}
 	
 	// usage: emergency vehicles needing all lights to go red except theirs (optionally)
 	private void SetEmergencyVehicleControlled(Direction exceptForTravelDirection) {
+		log(5, "SetEmergencyVehicleControlled ENTER");
 		if (this.isEmergencyVehicleControlled) {
-			log("SetEmergencyVehicleControlled, Warning: Emergency Vehicle mode already activated");
+			log(0, "SetEmergencyVehicleControlled, Warning: Emergency Vehicle mode already activated");
+			log(5, "SetEmergencyVehicleControlled RETURN");
 			return;
 		}
 		
 		this.isEmergencyVehicleControlled = true;
 		this.timestampEmergencyVehicleDetected = Instant.now();
 		this.directionOfEmergencyVehicle = exceptForTravelDirection;
-		log("SetEmergencyVehicleControlled: turning all signals red (exception: %s)", exceptForTravelDirection == null ? "none" : exceptForTravelDirection.toString());
+		log(0, "SetEmergencyVehicleControlled: turning all signals red (exception: %s)", exceptForTravelDirection == null ? "none" : exceptForTravelDirection.toString());
 		ChangeLightsToRedExceptDirection(exceptForTravelDirection);
 		ChangeLightsToGreenForOneDirection(exceptForTravelDirection);
+		log(5, "SetEmergencyVehicleControlled");
 	}
 	
 	// usage: after emergency vehicles have passed through the intersection, restart regular light logic
 	private void ResetFromEmergencyVehicleControlled() {
+		log(5, "ResetFromEmergencyVehicleControlled ENTER");
 		Direction oppDirection = GetOppositeDirection(this.directionOfEmergencyVehicle);
-		log("ResetFromEmergencyVehicleControlled: resetting signals to Green for direction %s", oppDirection);
+		log(1, "ResetFromEmergencyVehicleControlled: resetting signals to Green for direction %s", oppDirection);
 		ChangeLightsToGreenForOneDirection(oppDirection);
 		this.isEmergencyVehicleControlled = false;
+		log(5, "ResetFromEmergencyVehicleControlled LEAVE");
 	}
 	
+	// return the opposite direction of that requested, default is North
+	//NOTE: no Level 5 function logging because this method needs to execute as fast as possible
 	private Direction GetOppositeDirection(Direction direction) {
 		return direction == Direction.NORTH ? Direction.SOUTH
 			: direction == Direction.EAST ? Direction.WEST
@@ -810,21 +878,24 @@ public class TrafficController implements TrafficObserver {
 	
 	// record an event to the database in text format
 	private void RecordEvent(String name, String value) {
+		log(5, "RecordEvent ENTER");
 		if (TrafficControllerConfig.doMetricsLogging ) {
 			try {
 				Instant now = Instant.now();
 				String text = String.format("insert into Events (timestamp, name, value) values ('%s','%s','%s')", now.toString(), name, value).toString();
 				int result = sql.executeUpdate(text);
 				if (result < 1) {
-					log("RecordEvent: Failed to store data in database");
+					log(0, "RecordEvent: Warning, Failed to store data in database");
 				}
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
 		}
+		log(5, "RecordEvent LEAVE");
 	}
 	
 	// record a metric (as an Object) to the database 
 	private void RecordMetric(String name, String description, Object value) {
+		log(5, "RecordMetric ENTER");
 		if (TrafficControllerConfig.doMetricsLogging ) {
 			try {
 				Instant now = Instant.now();
@@ -834,37 +905,40 @@ public class TrafficController implements TrafficObserver {
 				
 				String text = String.format("insert into Metrics (timestamp, name, description, valueType, value) values ('%s','%s','%s','%s', %s)",
 					now.toString(), name, description, value.getClass().getName(), valueAsText).toString();
-				log("RecordMetric: SQL = %s", text);
+				log(6, "RecordMetric: SQL = %s", text);
 				int result = sql.executeUpdate(text);
 				if (result < 1) {
-					log("RecordMetric: Failed to store data in database");
+					log(0, "RecordMetric: Warning, Failed to store data in database");
 				}
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
 		}
+		log(5, "RecordMetric LEAVE");
 	}
 	
 	// record a metric (as an Object) to the database 
-		private void RecordTraffic(String direction) {
-			if (TrafficControllerConfig.doMetricsLogging ) {
-				try {
-					Instant now = Instant.now();
-					
-					// value needs SQL quotes?
-					String text = String.format("insert into Traffic (timestamp, direction) values ('%s', '%s')",
-						now.toString(), direction).toString();
-					log("RecordTraffic: SQL = %s", text);
-					int result = sql.executeUpdate(text);
-					if (result < 1) {
-						log("RecordTraffic: Failed to store data in database");
-					}
+	private void RecordTraffic(String direction) {
+		log(5, "RecordTraffic ENTER");
+		if (TrafficControllerConfig.doMetricsLogging ) {
+			try {
+				Instant now = Instant.now();
+				
+				// value needs SQL quotes?
+				String text = String.format("insert into Traffic (timestamp, direction) values ('%s', '%s')",
+					now.toString(), direction).toString();
+				log(6, "RecordTraffic: SQL = %s", text);
+				int result = sql.executeUpdate(text);
+				if (result < 1) {
+					log(0, "RecordTraffic: Warning, Failed to store data in database");
 				}
-				catch (Exception ex) { ex.printStackTrace(); }
 			}
+			catch (Exception ex) { ex.printStackTrace(); }
 		}
+		log(5, "RecordTraffic LEAVE");
+	}
 	
-	private void log(String format, Object ... args) {
-		if (TrafficControllerConfig.doTrafficControllerLogging) {
+	private void log(int eventImportance, String format, Object ... args) {
+		if (eventImportance <= TrafficControllerConfig.loggingLevel) {
 			System.out.println(String.format("%s %s %s", "TrafficController:", Instant.now().toString(), String.format(format, args)));
 		}
 	}

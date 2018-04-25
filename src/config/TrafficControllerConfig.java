@@ -6,8 +6,8 @@ public class TrafficControllerConfig {
 	// TrafficController settings
 	public static boolean useSqlDatabase = true;						// true: use SQLite database; false: do not use database
 	public static double pixelsCameraRange = 360;						// max range vehicles will be tracked for its facing cameras
-	public static boolean doTrafficControllerLogging = false;			// if true, console text logging is enabled
-	public static boolean doTrafficControllerTrackEventLogging = false;	// if true, observer events are logged to console
+	public static int loggingLevel = 0;									// higher the number, the more detailed the TrafficController logging spew is created, below 0 is OFF
+	public static boolean doTrafficControllerTrackEventLogging = true;	// if true, observer events are logged to console
 	public static boolean doMetricsLogging = true;						// set to true to record runtime metrics to persistent storage
 	public static int secondsMaxGreenLightDuration = 30;				// max duration a light may stay green if any are waiting on a green
 	public static long periodForFixedTimerConfiguration = 10;			// green light duration, normally this would be 30s - 120s in real life
