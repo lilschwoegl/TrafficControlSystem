@@ -51,32 +51,38 @@ public class TrafficLight implements TrafficLightObservable {
 			: Direction.EAST;
 		
 		//create simulator light
-		log("Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
+		log(0, "Light %04d created for travel direction %s, color %s", this.id, forTravelDirection.toString(), this.color.toString());
 	}
 	
 	/* observeable methods */
 	public void addObserver(TrafficLightObserver o) {
 		observers.add(o);
-		log("Light %04d added observer %s", this.id, o.toString());
+		log(0, "Light %04d added observer %s", this.id, o.toString());
 	}
 	
 	public void removeObserver(TrafficLightObserver o) {
 		observers.remove(o);
-		log("Light %04d removed observer %s", this.id, o.toString());
+		log(0, "Light %04d removed observer %s", this.id, o.toString());
 	}
 	
 	public void notifyObservers() {
+		log(5, "notifyObservers ENTER");
 		for (TrafficLightObserver observer : observers) {
 			try {
 				observer.update(this);
 			}
 			catch (Exception ex) { ex.printStackTrace(); }
 		}
+		log(5, "notifyObservers LEAVE");
 	}
 	/* end of observable methods */
 	
 	// change the light to green only if it's red
 	public void TurnGreen() {
+		log(5, "TurnGreen ENTER");
+		if (this.color == BulbColor.Yellow) {
+			WaitUntilColor(BulbColor.Red, TrafficControllerConfig.secondsYellowLightDuration);
+		}
 		if (this.color == BulbColor.Red) {
 			try {
 				rwLock.writeLock().lock();
@@ -90,12 +96,14 @@ public class TrafficLight implements TrafficLightObservable {
 			}
 			notifyObservers();
 		}
+		log(5, "TurnGreen LEAVE");
 	}
 	
 	// cycle the light from green to yellow, pause, then change to red
 	/*TODO (DONE): downgrade writelock to readlock to allow clients to query yellow status. Because you can't upgrade a lock from read to write, would
 	 * need to release read lock grab new write lock, change to red, then unlock.*/
 	public void TurnRed() {
+		log(5, "TurnRed ENTER");
 		if (this.color == BulbColor.Green) {
 			try {
 				// grab writelock for light change
@@ -124,6 +132,19 @@ public class TrafficLight implements TrafficLightObservable {
 			}
 			notifyObservers();
 		}
+		log(5, "TurnRed LEAVE");
+	}
+	
+	// if light is not not requested color, wait up to N seconds for it to become that color, then return
+	private void WaitUntilColor(BulbColor color, long maxSeconds) {
+		log(5, "WaitUntilColor ENTER");
+		Instant loopStart = Instant.now();
+		while (this.color != color && ChronoUnit.SECONDS.between(loopStart, Instant.now()) <= maxSeconds) {
+			try {
+				TimeUnit.MILLISECONDS.sleep((long)100);
+			} catch (InterruptedException e) { e.printStackTrace(); }
+		}
+		log(5, "WaitUntilColor LEAVE");
 	}
 	
 	// return true if this light's color has remained unchanged (i.e. owned) for its min duration
@@ -138,11 +159,11 @@ public class TrafficLight implements TrafficLightObservable {
 	
 	// log the current state of the traffic light  
 	public void logColorState() {
-		log("Light %04d: travel direction %s, is %s", this.id, this.forTravelDirection.toString(), this.color.toString());
+		log(0, "Light %04d: travel direction %s, is %s", this.id, this.forTravelDirection.toString(), this.color.toString());
 	}
 	
-	private void log(String format, Object ... args) {
-		if (TrafficControllerConfig.doTrafficLightLogging) {
+	private void log(int eventImportance, String format, Object ... args) {
+		if (eventImportance <= TrafficControllerConfig.loggingLevel) {
 			System.out.println(String.format("%s %04d: %s %s", "TrafficLight", this.id, Instant.now().toString(), String.format(format, args)));
 		}
 	}

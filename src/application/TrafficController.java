@@ -424,17 +424,6 @@ public class TrafficController implements TrafficObserver {
 		log(5, "CheckSignalStatusForChange LEAVE");
 	}
 	
-	// return True if there are any emergency vehicles in range of any intersection traffic cameras
-	private boolean IsEmergencyVehicleAtIntersection() {
-		log(5, "IsEmergencyVehicleAtIntersection ENTER");
-		for (Vehicle vehicle : this.vehicles.values()) {
-			if (vehicle.IsEmergencyVehicle)
-				return true;
-		}
-		log(5, "IsEmergencyVehicleAtIntersection LEAVE");
-		return false;
-	}
-	
 	// compute max number of seconds an object has been waiting at any red light
 	private long GetSecondsForOldestObjectAtLight(BulbColor color) {
 		log(5, "GetSecondsForOldestObjectAtLight ENTER");
@@ -566,10 +555,12 @@ public class TrafficController implements TrafficObserver {
 		if (oldMethod) {
 			// if same signal type and no objects waiting for a green light, return immediately
 			if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && lightWithLongestWaitingObject == null) {
+				log(5, "ChangeLightsIfObjectsAreWaiting RETURN 1");
 				return;
 			}
 			
 			if (lightWithLongestWaitingObject == null) {
+				log(5, "ChangeLightsIfObjectsAreWaiting RETURN 2");
 				return;
 			}
 			
@@ -579,12 +570,14 @@ public class TrafficController implements TrafficObserver {
 			if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && (oldestForRedLight == 0 || oldestForGreenLight < TrafficControllerConfig.periodForFixedTimerConfiguration)) {
 				if (prevSignalLogicConfiguration == SignalLogicConfiguration.OnDemand && oldestForRedLight > 0)
 					log(1, "ChangeLightsIfObjectsAreWaiting: Light change delayed, oldestForGreenLight = %d seconds", oldestForGreenLight);
+				log(5, "ChangeLightsIfObjectsAreWaiting RETURN 3");
 				return;
 			}
 		} else {
 			int countVehiclesAtGreenLights = CountVehiclesAtGreenLights();
 			
 			if (lightWithLongestWaitingObject == null) {
+				log(5, "ChangeLightsIfObjectsAreWaiting RETURN 1");
 				return;
 			}
 			Direction dirOfLongestWait = lightWithLongestWaitingObject.getTravelDirection();
@@ -645,7 +638,7 @@ public class TrafficController implements TrafficObserver {
 
 	// turn signals Green for the new travel direction, plus for the opposing direction
 	private void ChangeLightsToGreen(Constants.Direction newDirection) {
-		log(5, "ChangeLightsToGreen ENTER");
+		log(5, "ChangeLightsToGreen ENTER, direction = %s", newDirection);
 		// wait for all lights to become non-yellow (they're changing to red on their own)
 		WaitForLightsToChangeFromColor(BulbColor.Yellow, TrafficControllerConfig.secondsYellowLightDuration);
 		
@@ -664,7 +657,7 @@ public class TrafficController implements TrafficObserver {
 
 	// turn signals Green for the new travel direction, plus for the opposing direction
 	private void ChangeLightsToGreenForOneDirection(Constants.Direction newDirection) {
-		log(5, "ChangeLightsToGreenForOneDirection ENTER");
+		log(5, "ChangeLightsToGreenForOneDirection ENTER, direction = %s", newDirection);
 		// wait for all lights to become non-yellow (they're changing to red on their own)
 		WaitForLightsToChangeFromColor(BulbColor.Yellow, TrafficControllerConfig.secondsYellowLightDuration);
 		
@@ -702,7 +695,7 @@ public class TrafficController implements TrafficObserver {
 	
 	// turn all green lights to red (yellow lights are in-process of going red, so ignore them) for a given direction
 	private void ChangeLightsToRed(Constants.Direction newDirection) {
-		log(5, "ChangeLightsToRed ENTER");
+		log(5, "ChangeLightsToRed ENTER, direction = %s", newDirection);
 		// change signals in sets, simple version is 2 sets, e.g. North + South lights together
 		ArrayList<TrafficLight> lights = GetTrafficLights(newDirection);
 		lights.addAll(GetTrafficLightsOfOppositeDirection(newDirection));
@@ -718,7 +711,7 @@ public class TrafficController implements TrafficObserver {
 
 	// turn all green lights to red (yellow lights are in-process of going red, so ignore them) for a given direction
 	private void ChangeLightsToRedExceptDirection(Constants.Direction direction) {
-		log(5, "ChangeLightsToRedExceptDirection ENTER");
+		log(5, "ChangeLightsToRedExceptDirection ENTER, direction = %s", direction);
 		for (TrafficLight light : this.trafficLights) {
 			// ignore yellow lights as they're already changing to red on their own
 			if (light.GetColor() == BulbColor.Green && light.getTravelDirection() != direction) {
@@ -755,7 +748,7 @@ public class TrafficController implements TrafficObserver {
 	
 	// wait up to maxSeconds for all lights of a given travel direction to change to a new color
 	private void WaitForLightsToChangeToNewColor(Direction travelDirection, BulbColor color, long maxSeconds) {
-		log(5, "WaitForLightsToChangeToNewColor ENTER");
+		log(5, "WaitForLightsToChangeToNewColor ENTER, direction = %s", travelDirection);
 		Direction oppDirection = GetOppositeDirection(travelDirection);
 		ArrayList<TrafficLight> lights = new ArrayList<TrafficLight>();
 		for (TrafficLight light : trafficLights) {
@@ -839,9 +832,36 @@ public class TrafficController implements TrafficObserver {
 		return GetObservableObjectValue(vehicle.getTrack().lastDetect.classId) == ObservableObject.EmergencyVehicle;
 	}
 	
+	// return True if there are any emergency vehicles in range of any intersection traffic cameras
+	// TODO: doesn't return correct value if 2+ emergency vehicles are at intersection at same time but in different directions, need to change logic
+	private boolean IsEmergencyVehicleAtIntersection() {
+		log(5, "IsEmergencyVehicleAtIntersection ENTER");
+		ArrayList<TrafficLight> greenLights = GetTrafficLightsForColor(BulbColor.Green);
+		for (Vehicle vehicle : this.vehicles.values()) {
+			if (vehicle.IsEmergencyVehicle) {
+				log(1, "IsEmergencyVehicleAtIntersection: Vehicle %d, IsEmergencyVehicle = true", vehicle.id);
+				double distToCamera = GetDistanceToCamera(vehicle.vehicle);
+				log(1, "IsEmergencyVehicleAtIntersection: distToCamera = %f", distToCamera);
+				if (distToCamera > 0.0 ) {
+					log(1, "IsEmergencyVehicleAtIntersection RETURN, result = true");
+					return true;
+//					for (TrafficLight greenLight : greenLights) {
+//						log(1, "IsEmergencyVehicleAtIntersection: vehicle direction = %s, light direction = %s", vehicle.direction, greenLight.getTravelDirection());
+//						if (vehicle.direction == greenLight.getTravelDirection()) {
+//							log(1, "IsEmergencyVehicleAtIntersection RETURN, result = true");
+//							return true;
+//						}
+//					}
+				}
+			}
+		}
+		log(5, "IsEmergencyVehicleAtIntersection LEAVE, result = false");
+		return false;
+	}
+	
 	// usage: emergency vehicles needing all lights to go red except theirs (optionally)
 	private void SetEmergencyVehicleControlled(Direction exceptForTravelDirection) {
-		log(5, "SetEmergencyVehicleControlled ENTER");
+		log(5, "SetEmergencyVehicleControlled ENTER, direction = %s", exceptForTravelDirection);
 		if (this.isEmergencyVehicleControlled) {
 			log(0, "SetEmergencyVehicleControlled, Warning: Emergency Vehicle mode already activated");
 			log(5, "SetEmergencyVehicleControlled RETURN");
@@ -854,7 +874,7 @@ public class TrafficController implements TrafficObserver {
 		log(0, "SetEmergencyVehicleControlled: turning all signals red (exception: %s)", exceptForTravelDirection == null ? "none" : exceptForTravelDirection.toString());
 		ChangeLightsToRedExceptDirection(exceptForTravelDirection);
 		ChangeLightsToGreenForOneDirection(exceptForTravelDirection);
-		log(5, "SetEmergencyVehicleControlled");
+		log(5, "SetEmergencyVehicleControlled LEAVE");
 	}
 	
 	// usage: after emergency vehicles have passed through the intersection, restart regular light logic
