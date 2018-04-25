@@ -8,7 +8,7 @@ public class SimConfig {
 
 	public static boolean runSimulator = true;
 	public static boolean startSimulatedMotors = true;
-	public static SignalLogicConfiguration defaultTrafficControllerLogicConfiguration = SignalLogicConfiguration.OnDemand;
+	public static SignalLogicConfiguration defaultTrafficControllerLogicConfiguration = SignalLogicConfiguration.FixedTimers;
 	
 	public static float speed = .2f;
 	

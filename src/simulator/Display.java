@@ -7,11 +7,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.opencv.core.Point;
 
+import application.TrafficController;
 import config.SimConfig;
 import simulator.Constants.Direction;
 import tracking.SimulatedTrack;
@@ -27,6 +29,7 @@ public class Display implements ActionListener{
 	public static JLabel nLabel, sLabel, eLabel, wLabel;
 	public static JButton addN1Car, addN2Car, addS1Car, addS2Car, addE1Car, addE2Car, addW1Car, addW2Car,
 	addN1Fire, addN2Fire, addS1Fire, addS2Fire, addE1Fire, addE2Fire, addW1Fire, addW2Fire;
+	public static JCheckBox setOnDemand;
 	
 	
 	public Display (String title, int width, int height) {
@@ -52,6 +55,8 @@ public class Display implements ActionListener{
 		
 		nLabel = new JLabel("<html><font size=4><b>NORTHBOUND</b></html>");
 		nLabel.setBounds(450, 450, 125, 50);
+		setOnDemand = new JCheckBox("Use On Demand Logic", false);
+		setOnDemand.setBounds(435, 420, 200, 50);
 		addN1Car = new JButton("add N1 Car");
 		addN1Car.setBounds(400, 500, 100, 50);
 		addN2Car = new JButton("add N2 Car");
@@ -103,6 +108,7 @@ public class Display implements ActionListener{
 		addW2Fire.setForeground(Color.red);
 		addW2Fire.setBounds(500, 50, 100, 50);
 
+		setOnDemand.addActionListener(this);
 		
 		addN1Car.addActionListener(this);
 		addN2Car.addActionListener(this);
@@ -124,6 +130,7 @@ public class Display implements ActionListener{
 		addW1Fire.addActionListener(this);
 		addW2Fire.addActionListener(this);
 		
+		frame.add(setOnDemand);
 		frame.add(nLabel);
 		frame.add(addN1Car);
 		frame.add(addN2Car);
@@ -329,6 +336,19 @@ public class Display implements ActionListener{
 							SimConfig.speed,
 							3),
 					true);
+		} else if (e.getSource() == setOnDemand)
+		{
+			if (setOnDemand.isSelected())
+			{
+				SimulatorManager.trafficController.ChangeSignalLogicConfiguration(TrafficController.SignalLogicConfiguration.OnDemand);
+				System.out.println("Setting controller logic to: OnDemand");
+			}
+			else
+			{
+				SimulatorManager.trafficController.ChangeSignalLogicConfiguration(TrafficController.SignalLogicConfiguration.FixedTimers);
+				System.out.println("Setting controller logic to: FixedTimers");
+			}
 		}
+		
 	}
 }

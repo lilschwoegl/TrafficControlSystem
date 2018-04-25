@@ -229,7 +229,6 @@ public class SimulatorManager implements TrafficLightObserver {
 	//comment out if you do not want to updatecar location from video feed
 	public synchronized void updateCar(Track track)
 	{
-		
 		motors.get(track.track_id).updateTrack(track);
 		
 		// notify observers of update

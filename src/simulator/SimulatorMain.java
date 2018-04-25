@@ -72,7 +72,7 @@ public class SimulatorMain implements Runnable{
 	
 	public void run(){
 		init();
-		int fps = 50;
+		int fps = 100;
 		double timePerTick = 1000000000/fps;
 		double delta = 0;
 		long current = System.nanoTime();

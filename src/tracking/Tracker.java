@@ -255,6 +255,12 @@ public class Tracker extends JTracker {
 				if (mag < TrackerConfig._min_dist_change) 
 				{
 					tracks.get(i).direction = MOVEMENT_TYPE.STATIONARY;
+					
+					// already sent, so sitting at the light most likely
+					if (tracks.get(i).sentToSim)
+					{
+						TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i), oncomingHeading);
+					}
 				}
 				else if (tracks.get(i).trace.get(tracks.get(i).trace.size() - 1).y > 
 					tracks.get(i).trace.get(0).y)
@@ -279,7 +285,7 @@ public class Tracker extends JTracker {
 				tracks.get(i).direction = MOVEMENT_TYPE.UNCERTAIN;
 			}
 			
-			TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i), oncomingHeading);
+			// TrackUpdateObservable.getInstance().trackUpdated(tracks.get(i), oncomingHeading);
 		}
 	}
 }

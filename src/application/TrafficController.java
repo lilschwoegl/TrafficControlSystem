@@ -385,6 +385,7 @@ public class TrafficController implements TrafficObserver {
 				break;
 			}
 			prevSignalLogicConfiguration = newConfiguration;
+			signalLogicConfiguration = newConfiguration;
 		} else {
 			log(0, "Warning, ChangeSignalLogicConfiguration: old and new signal configuration are the same (so no change made): %s", prevSignalLogicConfiguration);
 		}

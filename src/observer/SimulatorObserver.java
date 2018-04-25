@@ -34,17 +34,16 @@ public class SimulatorObserver implements TrackObserver{
 		
 		SimulatedTrack strack;
 		
+		strack = new SimulatedTrack(  
+				new Point(0,0),
+				//simulatedCarsCounter++,
+				track.track_id,
+				heading,
+				.05);
 		
 		switch (updateType)
 		{
 			case ADDED:
-				
-				strack = new SimulatedTrack(  
-						new Point(0,0),
-						//simulatedCarsCounter++,
-						track.track_id,
-						heading,
-						.05);
 				
 				simulator.addCar(
 						track.lane, 
