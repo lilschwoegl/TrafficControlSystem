@@ -17,6 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -40,6 +41,10 @@ public class SystemUIController {
 	@FXML
 	private Label trackLbl1, trackLbl2, trackLbl3, trackLbl4;
 	public static ObjectProperty<String> trackLblProp1, trackLblProp2, trackLblProp3, trackLblProp4;
+	@FXML
+	private CheckBox showDetectInfoCbx, extrapTracksCbx, showTraceCbx;
+	
+	private boolean showDetectInfo = false;
 	
 	private CameraFeedDisplay[] cameraFeeds = new CameraFeedDisplay[4];
 	//boolean useVocYolo = true;
@@ -56,7 +61,7 @@ public class SystemUIController {
 	private UITrackObserver trafficObserver;
 	
 	private boolean drawTrace = false;
-	private boolean extrapDetects = true;
+	private boolean extrapDetects = false;
 
 	private VideoWriter vwriter = new VideoWriter();
 	private boolean recordVideo = false;
@@ -318,7 +323,7 @@ public class SystemUIController {
 			track.lane = roadLines.isInLane(tracker.tracks.get(i).getBestPositionCenter());
 
 			// draw the detect on the frame
-			track.drawDetect(imag, false, true, drawTrace);
+			track.drawDetect(imag, extrapDetects, showDetectInfo, drawTrace);
 		}
 		
 		// draw the lane lines on the frame
@@ -445,6 +450,24 @@ public class SystemUIController {
 					break;
 			}
 		}
+	}
+	
+	@FXML
+	private void debugCheckboxChanged(ActionEvent event)
+	{
+		if (event.getSource() == showDetectInfoCbx)
+		{
+			showDetectInfo = showDetectInfoCbx.isSelected();
+		}
+		else if (event.getSource() == extrapTracksCbx)
+		{
+			extrapDetects = extrapTracksCbx.isSelected();
+		}
+		else if (event.getSource() == showTraceCbx)
+		{
+			drawTrace = showTraceCbx.isSelected();
+		}
+			
 	}
 	
 }

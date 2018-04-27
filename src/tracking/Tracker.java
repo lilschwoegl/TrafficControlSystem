@@ -186,11 +186,13 @@ public class Tracker extends JTracker {
 
 		for (int i = 0; i < tracks.size(); i++) {
 			if (tracks.get(i).isTrackStale()) {	
-				
-				TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i), oncomingHeading);
+					
+				int trkId = -1;
 				
 				try
 				{
+					trkId = tracks.get(i).track_id;
+					TrackUpdateObservable.getInstance().trackRemoved(tracks.get(i), oncomingHeading);
 					tracks.remove(i);
 					assignment.remove(i);
 					track_removed++;
@@ -198,7 +200,7 @@ public class Tracker extends JTracker {
 				}
 				catch (Exception e)
 				{
-					e.printStackTrace();
+					System.err.printf("Error deleting stale tracks: VecSize=%d, DelTrk=%d\n", tracks.size(), trkId);
 				}
 				
 			}

@@ -130,7 +130,7 @@ public class Display implements ActionListener{
 		addW1Fire.addActionListener(this);
 		addW2Fire.addActionListener(this);
 		
-		frame.add(setOnDemand);
+		//frame.add(setOnDemand);
 		frame.add(nLabel);
 		frame.add(addN1Car);
 		frame.add(addN2Car);

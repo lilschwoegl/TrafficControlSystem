@@ -1,13 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="703.0" prefWidth="980.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.SystemUIController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="724.0" prefWidth="980.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="application.SystemUIController">
+  <bottom>
+    <HBox alignment="CENTER" prefHeight="27.0" prefWidth="980.0">
+      <children>
+        <CheckBox fx:id="showDetectInfoCbx" mnemonicParsing="false" onAction="#debugCheckboxChanged" text="Show Detection Info">
+          <HBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" fx:id="x1" />
+          </HBox.margin>
+        </CheckBox>
+        <CheckBox fx:id="extrapTracksCbx" mnemonicParsing="false" onAction="#debugCheckboxChanged" text="Extrap Tracks" HBox.margin="$x1" />
+        <CheckBox fx:id="showTraceCbx" mnemonicParsing="false" onAction="#debugCheckboxChanged" text="Show Trace" HBox.margin="$x1" />
+      </children>
+    </HBox>
+  </bottom>
   <center>
     <GridPane>
       <children>
