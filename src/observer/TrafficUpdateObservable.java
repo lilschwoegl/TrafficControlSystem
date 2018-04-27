@@ -56,4 +56,9 @@ public class TrafficUpdateObservable implements TrafficObservable {
 		notifyObserver(motor);
 	}
 	
+	public int getObserverCount()
+	{
+		return observers.size();
+	}
+	
 }

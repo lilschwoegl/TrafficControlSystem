@@ -24,11 +24,19 @@ import application.TrafficController.SignalLogicConfiguration;
 import clientserver.QueryMessage;
 import clientserver.ServerClient;
 import clientserver.ServerManager;
+import config.SimConfig;
+import config.TrackerConfig;
 import config.TrafficControllerConfig;
+import observer.SimulatorObserver;
+import observer.TrackUpdateObservable;
+import observer.TrafficObserver;
+import observer.TrafficUpdateObservable;
 import application.TrafficLight;
 import application.VideoInput;
 import application.YoloDetector;
 import simulator.Constants.Direction;
+import simulator.SimulatorManager;
+import tracking.Tracker;
 
 public class Initial_Main_Test {
 	
@@ -101,6 +109,8 @@ public class Initial_Main_Test {
 						return;
 					}
 				}
+				
+				count++;
 				
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -284,5 +294,84 @@ public class Initial_Main_Test {
 		QueryMessage qm = sc.queryServer("TRAFFIC");
 		
 		assertTrue("Client received data", qm.getRows().length > 0);
+	}
+	
+	@Test
+	public void trackerTest()
+	{
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+		Tracker t = new Tracker((float)TrackerConfig._dt,
+				(float)TrackerConfig._Accel_noise_mag,
+				TrackerConfig._dist_thres,
+				TrackerConfig._maximum_allowed_skipped_frames,
+				TrackerConfig._max_trace_length,
+				TrackerConfig._max_sec_before_stale,
+				Direction.NORTH);
+		
+		VideoInput vi = new VideoInput();
+		YoloDetector yolo = null;
+		try {
+			yolo = new YoloDetector("yolo/cfg/yolov2-custom.cfg",
+					"yolo/weights/yolov2-tiny-obj_10500.weights",
+					"yolo/classes/custom-training.names");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			fail("YOLO network not created");
+		}
+		vi.selectCameraFeed("Recorded 1");
+		
+		if (!vi.isOpened())
+			fail("Video feed not opened");
+		
+		Mat m = new Mat();
+		int maxCount = 25, count = 0;
+		Vector<DetectedObject> detects = new Vector<DetectedObject>();
+		
+		while (count < maxCount)
+		{
+		
+			try {
+				vi.grabFrame().copyTo(m);
+				detects = yolo.detectObjectYolo(m);
+				
+				// try to update the tracker
+				if (detects.size() > 0)
+				{
+					t.update(detects, m);
+				}
+				else
+				{
+					t.updateKalman(m, detects);
+					t.checkForStaleTracks();
+				}
+				
+				count++;
+				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		assertTrue("Tracker created at least 1 new track", t.nextTrackID > 0);
+	}
+	
+	@Test
+	public void testObservers()
+	{
+		int count = TrackUpdateObservable.getInstance().getObserverCount();
+		SimulatorObserver so = new SimulatorObserver(new SimulatorManager());
+		TrackUpdateObservable.getInstance().addObserver(so);
+		
+		
+		assertTrue("Simulator observer created and added", TrackUpdateObservable.getInstance().getObserverCount() > count);
+		
+		count = TrafficUpdateObservable.getInstance().getObserverCount();
+		TrafficUpdateObservable.getInstance().addObserver(new TrafficController(SimConfig.defaultTrafficControllerLogicConfiguration, 3, 60, 3, 60));
+		
+		assertTrue("Traffic Update observer created and added", TrafficUpdateObservable.getInstance().getObserverCount() > count);
 	}
 }

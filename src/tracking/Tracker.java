@@ -26,7 +26,7 @@ import tracking.Track.MOVEMENT_TYPE;
  */
 
 public class Tracker extends JTracker {
-	static int nextTrackID = 0;
+	public static int nextTrackID = 0;
 	Vector<Integer> assignment = new Vector<>();
 	private Direction oncomingHeading;
 
