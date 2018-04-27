@@ -33,14 +33,21 @@ import simulator.Constants.Direction;
 public class Initial_Main_Test {
 	
 	@Test
+	/***
+	 * Test to see if a video feed can be connected to and processed. 
+	 */
 	public void getvideoFeedTest () {
+		// needed for openCV
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
 		VideoInput vi = new VideoInput();
 		vi.selectCameraFeed("Recorded 1");
 		
+		// fail if feed is not connected
 		if (!vi.isOpened())
 			fail("Video feed not opened");
 		
+		// attempt to read a frame from the video feed
 		Mat m = new Mat();
 		try {
 			vi.grabFrame().copyTo(m);
@@ -53,6 +60,10 @@ public class Initial_Main_Test {
 	}
 	
 	@Test
+	/***
+	 * Test to see if a vehicle can be detected in the 
+	 * video feed by the system.
+	 */
 	public void incomingVehicleTest () {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		VideoInput vi = new VideoInput();
@@ -101,10 +112,13 @@ public class Initial_Main_Test {
 	}
 	
 	@Test
+	/***
+	 * Test to see if a database can be created.
+	 */
 	public void testDatabaseCreation() {
 		String now = Instant.now().toString();
 		System.out.println("testDatabaseCreation: now = " + now);
-		//String nowShort = now.toString().substring(0, now.toString().length() - 5); //strip off milliseconds
+
 		int numResults = 0;
 		
 		TrafficController tc = new TrafficController(SignalLogicConfiguration.FailSafe, 1, 60, 1, 60);
@@ -127,6 +141,9 @@ public class Initial_Main_Test {
 	}
 	
 	@Test
+	/***
+	 * Test to see if the database can be written to.
+	 */
 	public void testDatabaseWrite() {
 		Instant now = Instant.now();
 		System.out.println("testDatabaseWrite: now = " + now);
@@ -145,6 +162,9 @@ public class Initial_Main_Test {
 	}
 
 	@Test
+	/***
+	 * Test to see if the database can be read from. 
+	 */
 	public void testDatabaseRead() {
 		Instant now = Instant.now();
 		System.out.println("testDatabaseRead: now = " + now);
@@ -185,6 +205,9 @@ public class Initial_Main_Test {
 	}
 	
 	@Test
+	/***
+	 * Test to see if the traffic lights are created. 
+	 */
 	public void testControllerCreatesLights() {
 		TrafficController tc = new TrafficController(SignalLogicConfiguration.FailSafe, 3, 60, 3, 60); // sample settings from simulator
 		int numLights = tc.GetTrafficLights().size();
@@ -192,6 +215,9 @@ public class Initial_Main_Test {
 	}
 	
 	@Test
+	/***
+	 * Test to see if the traffic lights are created. 
+	 */
 	public void getLightCreationTest () {
 	    TrafficLight light = new TrafficLight(Direction.NORTH);
 	    assertEquals(light.getTravelDirection(), Direction.NORTH);
@@ -211,8 +237,6 @@ public class Initial_Main_Test {
 	    TrafficLight light = new TrafficLight(Direction.NORTH);
 	    assertEquals(light.GetColor(), BulbColor.Red);
 	    light.TurnGreen();
-//	    try { Thread.sleep(1000); }
-//    	catch (InterruptedException e) { e.printStackTrace(); }
 	    assertEquals(light.GetColor(), BulbColor.Green);
 	}
 	 
@@ -221,12 +245,8 @@ public class Initial_Main_Test {
 	    TrafficLight light = new TrafficLight(Direction.NORTH);
 	    assertEquals(light.GetColor(), BulbColor.Red);
 	    light.TurnGreen();
-//	    try { Thread.sleep(1000); }
-//	    catch (InterruptedException e) { e.printStackTrace(); }
 	    assertEquals(light.GetColor(), BulbColor.Green);
 	    light.TurnRed();
-//	    try { Thread.sleep(6000); }
-//    	catch (InterruptedException e) { e.printStackTrace(); }
 	    assertEquals(light.GetColor(), BulbColor.Red);
 	}
 	
