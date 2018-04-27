@@ -47,9 +47,6 @@ public class SystemUIController {
 	private boolean showDetectInfo = false;
 	
 	private CameraFeedDisplay[] cameraFeeds = new CameraFeedDisplay[4];
-	//boolean useVocYolo = true;
-
-	//static Net yolo;
 
 	private Tracker tracker[] = new Tracker[4];
 	private Mat imag;

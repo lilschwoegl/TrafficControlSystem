@@ -7,10 +7,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class Lane {
 
-	Line line;
-	Point centerPoint;
-	
-	double xTake = 0.005;
+	private Line line;
 	
 	public Lane(Point p1, Point p2)
 	{

@@ -16,7 +16,11 @@ import simulator.Constants.Direction;
 import tracking.Track.MOVEMENT_TYPE;
 
 /**
- * Tracker.java TODO:
+ * Tracker.java
+ * 
+ * https://github.com/son-oh-yeah/Moving-Target-Tracking-with-OpenCV
+ * 
+ * Derived from internet and modified to fit with existing system.
  * 
  * @author Kim Dinh Son Email:sonkdbk@gmail.com
  */

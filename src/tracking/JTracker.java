@@ -7,7 +7,9 @@ import org.opencv.core.Mat;
 import application.DetectedObject;
 
 /**
- * JTracker.java TODO:
+ * JTracker.java
+ * 
+ * https://github.com/son-oh-yeah/Moving-Target-Tracking-with-OpenCV
  * 
  * @author Kim Dinh Son Email:sonkdbk@gmail.com
  */

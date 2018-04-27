@@ -17,9 +17,13 @@ import config.TrackerConfig;
 import simulator.Constants.Direction;
 
 /**
- * Track.java TODO:
+ * Track.java
+ * 
+ * https://github.com/son-oh-yeah/Moving-Target-Tracking-with-OpenCV
  * 
  * @author Kim Dinh Son Email:sonkdbk@gmail.com
+ * 
+ * Derived from internet and modified to fit with existing system.
  */
 
 public class Track {

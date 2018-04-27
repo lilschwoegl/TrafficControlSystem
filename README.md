@@ -5,7 +5,6 @@ You need to install the following plugin for Eclipse:
 
 https://www.eclipse.org/efxclipse/install.html
 
-
 Once you pull the project for the first time please make sure to review your project's Build Paths.
 
 Source:
@@ -21,3 +20,12 @@ Order and Export: (check all)
 - res
 - opencv-340.jar
 
+# There are different runnables in the project
+- src/application/SystemUIController.java
+- src/clientserver/ClientGUI.java
+- src/clientserver/ServerManager.java
+- src/simulator/SimulatorMain.java
+
+# Dependencies
+An existing Java based movement tracking system was used
+- https://github.com/son-oh-yeah/Moving-Target-Tracking-with-OpenCV

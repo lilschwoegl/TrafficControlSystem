@@ -47,6 +47,8 @@ public class DetectedObject {
 		{
 			classes.add(line);
 		}
+		
+		br.close();
 	}
 	
 	/**

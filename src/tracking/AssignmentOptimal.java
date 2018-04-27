@@ -5,7 +5,8 @@ import java.util.Vector;
 
 /**
  * AssignmentOptimal.java
- * TODO: 
+ * 
+ * https://github.com/son-oh-yeah/Moving-Target-Tracking-with-OpenCV
  *
  * @author Kim Dinh Son
  * Email:sonkdbk@gmail.com

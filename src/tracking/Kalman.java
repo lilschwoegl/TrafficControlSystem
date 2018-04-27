@@ -8,7 +8,9 @@ import org.opencv.core.Scalar;
 import org.opencv.video.KalmanFilter;
 
 /**
- * Kalman.java TODO:
+ * Kalman.java
+ * 
+ * https://github.com/son-oh-yeah/Moving-Target-Tracking-with-OpenCV
  * 
  * @author Kim Dinh Son Email:sonkdbk@gmail.com
  */
