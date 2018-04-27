@@ -10,6 +10,7 @@ public class ServerManager {
 	static final int port = 4444;
 	ServerSocket serverSocket;
 	Socket socket;
+	boolean running = false;
 	
 	private static ServerManager instance;
 	
@@ -34,6 +35,9 @@ public class ServerManager {
 	
 	public void run()
 	{
+		
+		running = true;
+		
 		while (true)
 		{
 			try {
@@ -45,6 +49,11 @@ public class ServerManager {
 			}
 			
 		}
+	}
+	
+	public boolean isRunning()
+	{
+		return running;
 	}
 	
 	public static void main(String[] args)

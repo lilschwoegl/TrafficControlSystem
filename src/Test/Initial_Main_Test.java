@@ -21,6 +21,9 @@ import application.DetectedObject;
 import application.SQLite;
 import application.TrafficController;
 import application.TrafficController.SignalLogicConfiguration;
+import clientserver.QueryMessage;
+import clientserver.ServerClient;
+import clientserver.ServerManager;
 import config.TrafficControllerConfig;
 import application.TrafficLight;
 import application.VideoInput;
@@ -225,5 +228,41 @@ public class Initial_Main_Test {
 //	    try { Thread.sleep(6000); }
 //    	catch (InterruptedException e) { e.printStackTrace(); }
 	    assertEquals(light.GetColor(), BulbColor.Red);
+	}
+	
+	@Test 
+	public void serverStartTest()
+	{
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				ServerManager.getInstance().run();
+			}
+		};
+		
+		t.start();
+		
+		assertTrue("Server is running", ServerManager.getInstance().isRunning());
+	}
+	
+	@Test
+	public void clientConnectToServer()
+	{
+		TrafficController tc = new TrafficController(SignalLogicConfiguration.FailSafe, 3, 60, 3, 60); // sample settings from simulator
+		Thread t = new Thread()
+		{
+			public void run()
+			{
+				ServerManager.getInstance().run();
+			}
+		};
+		
+		t.start();
+		ServerClient sc = new ServerClient();
+		
+		QueryMessage qm = sc.queryServer("TRAFFIC");
+		
+		assertTrue("Client received data", qm.getRows().length > 0);
 	}
 }
